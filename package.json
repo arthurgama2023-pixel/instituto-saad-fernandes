@@ -1,0 +1,34 @@
+{
+  "name": "smart-doctor",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3080",
+    "build": "node scripts/setup-db.mjs && prisma generate && next build",
+    "build:render": "node scripts/setup-db.mjs && prisma generate && next build && prisma db push --accept-data-loss",
+    "start": "next start -p 3080",
+    "db:push": "node scripts/setup-db.mjs && prisma db push",
+    "db:generate": "node scripts/setup-db.mjs && prisma generate"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
+    "@prisma/adapter-better-sqlite3": "^7.8.0",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "better-sqlite3": "^12.11.1",
+    "next": "^16.2.10",
+    "pg": "^8.22.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^26.1.0",
+    "@types/pg": "^8.20.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "prisma": "^7.8.0",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// SQLite não suporta enums nativos → String + validação na aplicação.
+// Roles: PATIENT | DOCTOR | ADMIN
+model User {
+  id            String         @id @default(cuid())
+  phone         String?        @unique // E.164 sem "+", ex.: 5521980828309
+  name          String
+  role          String         @default("PATIENT")
+  createdAt     DateTime       @default(now())
+  conversations Conversation[]
+  appointments  Appointment[]  @relation("PatientAppointments")
+  doctor        Doctor?
+}
+
+model Specialty {
+  id       String   @id @default(cuid())
+  slug     String   @unique
+  name     String
+  icon     String
+  keywords String // JSON array de termos p/ triagem ("ansiedade","pânico"...)
+  doctors  Doctor[]
+}
+
+model Doctor {
+  id           String             @id @default(cuid())
+  userId       String             @unique
+  user         User               @relation(fields: [userId], references: [id])
+  crm          String
+  bio          String
+  yearsExp     Int
+  rating       Float              @default(4.8)
+  priceCents   Int
+  durationMin  Int                @default(30)
+  mode         String             @default("VIDEO") // VIDEO | IN_PERSON | BOTH
+  status       String             @default("ACTIVE") // PENDING | ACTIVE | SUSPENDED
+  specialtyId  String
+  specialty    Specialty          @relation(fields: [specialtyId], references: [id])
+  availability AvailabilityRule[]
+  appointments Appointment[]
+}
+
+// Disponibilidade é REGRA, não tabela de slots (Etapa 6 §4):
+// slots livres são calculados = regras − consultas ocupadas.
+model AvailabilityRule {
+  id       String @id @default(cuid())
+  doctorId String
+  doctor   Doctor @relation(fields: [doctorId], references: [id])
+  weekday  Int // 0=domingo ... 6=sábado
+  startMin Int // minutos desde 00:00 (ex.: 480 = 08:00)
+  endMin   Int
+}
+
+// Máquina de estados (Etapa 3 §6.4):
+// AGUARDANDO_PAGAMENTO (hold TTL 15min) | CONFIRMADA | CONCLUIDA |
+// CANCELADA | EXPIRADA | NO_SHOW
+// NOTA prod/Postgres: índice UNIQUE parcial (doctorId,startsAt) via migration SQL.
+// No MVP/SQLite a exclusividade é garantida na aplicação (transação).
+model Appointment {
+  id          String    @id @default(cuid())
+  patientId   String
+  patient     User      @relation("PatientAppointments", fields: [patientId], references: [id])
+  doctorId    String
+  doctor      Doctor    @relation(fields: [doctorId], references: [id])
+  startsAt    DateTime
+  durationMin Int
+  mode        String    @default("VIDEO")
+  status      String
+  priceCents  Int
+  holdUntil   DateTime?
+  payment     Payment?
+  createdAt   DateTime  @default(now())
+
+  @@index([doctorId, startsAt])
+  @@index([patientId, status])
+}
+
+model Payment {
+  id            String      @id @default(cuid())
+  appointmentId String      @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  amountCents   Int
+  feeCents      Int // take da plataforma (15%)
+  method        String      @default("PIX")
+  status        String      @default("PENDING") // PENDING | CONFIRMED | REFUNDED
+  pixCode       String
+  createdAt     DateTime    @default(now())
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  channel   String    @default("web") // web | whatsapp
+  state     String    @default("{}") // JSON: máquina de estados do parser local
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  role           String // user | clara | system
+  content        String
+  payload        String? // JSON: uiEvents (cards), quickReplies
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model UrgencyEvent {
+  id             String   @id @default(cuid())
+  conversationId String
+  trigger        String // termo/frase que disparou
+  level          Int // 1 = dicionário determinístico | 2 = sinalizado pelo modelo
+  createdAt      DateTime @default(now())
+}
