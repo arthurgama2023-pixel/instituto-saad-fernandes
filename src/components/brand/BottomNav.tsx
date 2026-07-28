@@ -7,7 +7,7 @@ import { Icon } from "./Icon";
 const ITEMS = [
   { href: "/paciente", icon: "home", label: "Início" },
   { href: "/paciente/consultas", icon: "calendar_month", label: "Consultas" },
-  { href: "/paciente/mensagens", icon: "chat_bubble", label: "Mensagens" },
+  { href: "/paciente/urgencia", icon: "bolt", label: "Urgência" },
   { href: "/paciente/exames", icon: "description", label: "Exames" },
   { href: "/paciente/perfil", icon: "person", label: "Perfil" },
 ];

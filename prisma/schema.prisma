@@ -10,23 +10,25 @@ datasource db {
 // SQLite não suporta enums nativos → String + validação na aplicação.
 // Roles: PATIENT | DOCTOR | ADMIN
 model User {
-  id            String         @id @default(cuid())
-  phone         String?        @unique // E.164 sem "+", ex.: 5521980828309
+  id            String           @id @default(cuid())
+  phone         String?          @unique // E.164 sem "+", ex.: 5521980828309
   name          String
-  role          String         @default("PATIENT")
-  createdAt     DateTime       @default(now())
+  role          String           @default("PATIENT")
+  createdAt     DateTime         @default(now())
   conversations Conversation[]
-  appointments  Appointment[]  @relation("PatientAppointments")
+  appointments  Appointment[]    @relation("PatientAppointments")
+  urgencies     UrgencyRequest[] @relation("PatientUrgencies")
   doctor        Doctor?
 }
 
 model Specialty {
-  id       String   @id @default(cuid())
-  slug     String   @unique
-  name     String
-  icon     String
-  keywords String // JSON array de termos p/ triagem ("ansiedade","pânico"...)
-  doctors  Doctor[]
+  id        String           @id @default(cuid())
+  slug      String           @unique
+  name      String
+  icon      String
+  keywords  String // JSON array de termos p/ triagem ("ansiedade","pânico"...)
+  doctors   Doctor[]
+  urgencies UrgencyRequest[]
 }
 
 model Doctor {
@@ -45,6 +47,7 @@ model Doctor {
   specialty    Specialty          @relation(fields: [specialtyId], references: [id])
   availability AvailabilityRule[]
   appointments Appointment[]
+  urgencies    UrgencyRequest[]
 }
 
 // Disponibilidade é REGRA, não tabela de slots (Etapa 6 §4):
@@ -76,10 +79,35 @@ model Appointment {
   priceCents  Int
   holdUntil   DateTime?
   payment     Payment?
+  urgency     UrgencyRequest?
   createdAt   DateTime  @default(now())
 
   @@index([doctorId, startsAt])
   @@index([patientId, status])
+}
+
+// Chamado de urgência: o paciente abre, todos os médicos ativos da especialidade
+// veem, e o PRIMEIRO que aceitar fica com ele (a corrida é resolvida na transação
+// de aceite). Só depois do aceite existe consulta e cobrança.
+model UrgencyRequest {
+  id            String       @id @default(cuid())
+  patientId     String
+  patient       User         @relation("PatientUrgencies", fields: [patientId], references: [id])
+  specialtyId   String
+  specialty     Specialty    @relation(fields: [specialtyId], references: [id])
+  description   String
+  mode          String       @default("VIDEO")
+  status        String       @default("BUSCANDO") // BUSCANDO | ACEITA | PAGA | CANCELADA | EXPIRADA
+  expiresAt     DateTime
+  doctorId      String?
+  doctor        Doctor?      @relation(fields: [doctorId], references: [id])
+  acceptedAt    DateTime?
+  appointmentId String?      @unique
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  createdAt     DateTime     @default(now())
+
+  @@index([status, specialtyId])
+  @@index([patientId, createdAt])
 }
 
 model Payment {

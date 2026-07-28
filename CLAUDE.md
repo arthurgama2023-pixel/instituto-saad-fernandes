@@ -44,6 +44,28 @@ watcher e derruba o Turbopack com `FATAL: Next.js package not found` — o sinto
 a página recarregando sozinha sem parar. Conserto: parar o dev, `rm -rf .next`,
 subir de novo.
 
+## Urgência (fluxo estilo Uber)
+
+`/paciente/urgencia` (aba da bottom nav) abre um `UrgencyRequest`; todos os médicos
+ativos da especialidade veem na caixa do `/medico` e o **primeiro que aceitar** fica
+com ele. Só no aceite nascem a consulta e a cobrança — o paciente paga depois.
+
+A corrida entre médicos é resolvida por `updateMany` condicionado a
+`status: "BUSCANDO"`: quem atualiza 1 linha ganhou, os outros recebem 409. Não use
+`findUnique` + `update` no lugar disso — abre janela para aceite duplo.
+
+Os dois lados usam **polling de 3s** (sem websocket). O lado do paciente só faz
+polling enquanto o chamado está `BUSCANDO`, para não bater no servidor à toa.
+
+Chamado expira em 10 min sem aceite; o hold da consulta segue o TTL de 15 min do
+agendamento normal. Ambas as expirações são lazy, sem worker.
+
+## Clara
+
+O chat da Clara **saiu do app do paciente** (a aba Mensagens virou Urgência). O
+componente, as rotas `/api/chat` e o módulo `modules/ai` continuam no repo porque o
+painel admin ainda mede o funil da Clara. A tela antiga foi para `_archive/mensagens/`.
+
 ## Sessão
 
 `lib/session.ts` cria o paciente demo por cookie e **escreve o cookie**, o que só é

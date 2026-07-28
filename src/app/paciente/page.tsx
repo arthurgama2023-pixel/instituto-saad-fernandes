@@ -46,11 +46,11 @@ export default function InicioPage() {
           </div>
         </div>
         <Link
-          href="/paciente/mensagens"
-          aria-label="Mensagens"
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors"
+          href="/paciente/urgencia"
+          aria-label="Atendimento de urgência"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-error-container hover:opacity-90 transition-opacity"
         >
-          <Icon name="notifications" className="text-on-surface" />
+          <Icon name="bolt" filled className="text-error" />
         </Link>
       </header>
 

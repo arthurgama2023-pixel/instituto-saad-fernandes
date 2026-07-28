@@ -4,6 +4,7 @@ import { doctorPanel, listDoctors, getDefaultDoctorId } from "@/modules/doctor/s
 import { DoctorSwitcher } from "@/components/PanelSwitcher";
 import { SPulse } from "@/components/SPulse";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UrgencyInbox } from "@/components/UrgencyInbox";
 
 const money = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const timeLabel = (iso: string) => new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
@@ -63,7 +64,12 @@ export default async function MedicoPanel({
           <ThemeToggle />
         </div>
 
-        {tab === "dashboard" && <Dashboard data={data} />}
+        {tab === "dashboard" && (
+          <>
+            <UrgencyInbox doctorId={doctorId} />
+            <Dashboard data={data} />
+          </>
+        )}
         {tab === "agenda" && <AgendaView data={data} />}
         {tab === "pacientes" && <Pacientes data={data} />}
         {tab === "financeiro" && <Financeiro data={data} />}
