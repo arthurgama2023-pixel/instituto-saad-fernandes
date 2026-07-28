@@ -46,7 +46,7 @@ function rich(text: string) {
   return <span dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-export function ClaraChat() {
+export function ClaraChat({ initialMessage }: { initialMessage?: string } = {}) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -103,6 +103,15 @@ export function ClaraChat() {
     },
     [loading, scrollDown],
   );
+
+  // Entrada vinda de outra tela (ex.: "Agendar" escolheu a especialidade): dispara
+  // a primeira mensagem por conta do paciente assim que a conversa carrega.
+  const didHandoff = useRef(false);
+  useEffect(() => {
+    if (!booted || !initialMessage || didHandoff.current) return;
+    didHandoff.current = true;
+    send(initialMessage);
+  }, [booted, initialMessage, send]);
 
   const doReset = useCallback(async () => {
     setConfirmReset(false);

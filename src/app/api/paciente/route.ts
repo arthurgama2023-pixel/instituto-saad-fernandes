@@ -32,6 +32,7 @@ export async function GET() {
 
   return NextResponse.json({
     name: user.name,
+    phone: user.phone,
     next: upcoming[0] ?? null,
     upcoming,
     past,
@@ -51,14 +52,19 @@ function serialize(a: {
   status: string;
   priceCents: number;
   mode: string;
-  doctor: { user: { name: string }; specialty: { name: string; icon: string } };
+  durationMin: number;
+  doctor: { crm: string; bio: string; user: { name: string }; specialty: { slug: string; name: string; icon: string } };
 }) {
   return {
     id: a.id,
     medico: a.doctor.user.name,
+    medicoCrm: a.doctor.crm,
+    medicoBio: a.doctor.bio,
     especialidade: a.doctor.specialty.name,
+    especialidadeSlug: a.doctor.specialty.slug,
     icon: a.doctor.specialty.icon,
     startsAt: a.startsAt.toISOString(),
+    durationMin: a.durationMin,
     status: a.status,
     mode: a.mode,
     priceCents: a.priceCents,

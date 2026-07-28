@@ -10,7 +10,7 @@ export default function Portal() {
       </div>
       <div className="portal-hero">
         <div className="portal-mark"><SPulse /></div>
-        <h1>Smart Doctor</h1>
+        <h1>Instituto Saad Fernandes</h1>
         <p className="slogan">Inteligência que cuida.</p>
         <p className="note">Demo navegável · escolha um perfil para explorar</p>
       </div>

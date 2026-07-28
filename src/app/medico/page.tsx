@@ -38,7 +38,7 @@ export default async function MedicoPanel({
       <aside className="sidebar">
         <Link href="/" className="brand">
           <div className="m"><SPulse /></div>
-          <div className="t">Smart Doctor<small>Painel do médico</small></div>
+          <div className="t">Instituto Saad Fernandes<small>Painel do médico</small></div>
         </Link>
         {NAV.map(([id, ic, label]) => (
           <Link key={id} href={qs(id)} className={`nav-link ${tab === id ? "active" : ""}`}>

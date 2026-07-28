@@ -1,366 +1,158 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ClaraChat } from "@/components/ClaraChat";
-import { SPulse } from "@/components/SPulse";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { Avatar } from "@/components/brand/Avatar";
+import { Icon } from "@/components/brand/Icon";
+import { ErrorState, Loading, StatusPill } from "@/components/brand/ui";
+import {
+  dayNum,
+  monthShort,
+  specialtyIcon,
+  timeLabel,
+  usePatient,
+  weekdayLabel,
+  type Appt,
+} from "@/lib/patient-data";
 
-type Appt = {
-  id: string;
-  medico: string;
-  especialidade: string;
-  icon: string;
-  startsAt: string;
-  status: string;
-  mode: string;
-  priceCents: number;
-};
-type PatientData = {
-  name: string;
-  next: Appt | null;
-  upcoming: Appt[];
-  past: Appt[];
-  specialties: { slug: string; name: string; icon: string }[];
-  healthSummary: string;
+const SPECIALTY_BLURB: Record<string, string> = {
+  tricologia: "Diagnóstico e tratamento para saúde capilar avançada.",
+  dermatologia: "Cuidado especializado para a saúde e estética da sua pele.",
+  "clinica-geral": "Avaliação e acompanhamento da sua saúde global.",
 };
 
-type Tab = "inicio" | "agenda" | "clara" | "saude" | "perfil";
+const QUICK_ACTIONS = [
+  { href: "/paciente/exames", icon: "description", label: "Meus\nExames", className: "bg-primary-container text-on-primary-container", iconClass: "text-primary-fixed-dim" },
+  { href: "/paciente/exames", icon: "prescriptions", label: "Receitas\nMédicas", className: "bg-surface-container-high text-primary", iconClass: "text-secondary" },
+  { href: "/paciente/perfil", icon: "payments", label: "Financeiro\n& Notas", className: "bg-surface-container-lowest border border-outline-variant/50 brand-shadow text-primary", iconClass: "text-on-tertiary-container" },
+  { href: "/paciente/consultas", icon: "history_edu", label: "Histórico\nClínico", className: "bg-secondary-container/30 text-primary", iconClass: "text-secondary" },
+];
 
-const money = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-const dayNum = (iso: string) => new Date(iso).getDate().toString().padStart(2, "0");
-const monthShort = (iso: string) => new Date(iso).toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
-const timeLabel = (iso: string) => new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-const dayLabel = (iso: string) => {
-  const d = new Date(iso);
-  const today = new Date();
-  const t2 = new Date(today); t2.setDate(today.getDate() + 1);
-  const same = (a: Date, b: Date) => a.toDateString() === b.toDateString();
-  if (same(d, today)) return "Hoje";
-  if (same(d, t2)) return "Amanhã";
-  return d.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "2-digit" });
-};
+export default function InicioPage() {
+  const { data, error, reload } = usePatient();
 
-function StatusPill({ s }: { s: string }) {
-  if (s === "CONFIRMADA") return <span className="pill ok">✓ Confirmada</span>;
-  if (s === "AGUARDANDO_PAGAMENTO") return <span className="pill wait">⏱ Aguardando</span>;
-  if (s === "CONCLUIDA") return <span className="pill done">Concluída</span>;
-  return <span className="pill done">{s.toLowerCase()}</span>;
-}
+  if (error && !data) return <ErrorState onRetry={reload} />;
+  if (!data) return <Loading />;
 
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
-
-export default function PacienteApp() {
-  const [tab, setTab] = useState<Tab>("inicio");
-  const [data, setData] = useState<PatientData | null>(null);
-  const [error, setError] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [standalone, setStandalone] = useState(false);
-  const [showInstall, setShowInstall] = useState(false);
-
-  const load = useCallback(() => {
-    setError(false);
-    fetch("/api/paciente")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then(setData)
-      .catch(() => setError(true));
-  }, []);
-
-  useEffect(() => { load(); }, [load]);
-
-  // PWA: captura o prompt de instalação e detecta se já está rodando como app
-  useEffect(() => {
-    const onBIP = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
-    const isStandalone =
-      window.matchMedia?.("(display-mode: standalone)").matches ||
-      (navigator as unknown as { standalone?: boolean }).standalone === true;
-    setStandalone(!!isStandalone);
-    const onInstalled = () => { setStandalone(true); setDeferredPrompt(null); };
-    window.addEventListener("beforeinstallprompt", onBIP);
-    window.addEventListener("appinstalled", onInstalled);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", onBIP);
-      window.removeEventListener("appinstalled", onInstalled);
-    };
-  }, []);
-
-  const install = useCallback(async () => {
-    if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      try { await deferredPrompt.userChoice; } catch { /* ignore */ }
-      setDeferredPrompt(null);
-    } else {
-      setShowInstall(true); // sem prompt nativo → mostra instruções (iOS, etc.)
-    }
-  }, [deferredPrompt]);
-
-  const titles: Record<Tab, string> = {
-    inicio: "Início", agenda: "Agenda", clara: "Clara", saude: "Saúde", perfil: "Perfil",
-  };
+  const firstName = data.name.split(" ")[0];
 
   return (
-    <div className="phone">
-      {tab !== "clara" && (
-        <header className="phone-head">
-          <Link href="/" className="back" aria-label="Voltar ao portal">‹</Link>
-          <span className="title">{titles[tab]}</span>
-          <div className="phone-head-actions">
-            <ThemeToggle />
-            <span className="bell" aria-hidden>🔔</span>
+    <>
+      <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md flex justify-between items-center w-full px-5 py-4">
+        <div className="flex items-center gap-3">
+          <Avatar name={data.name} />
+          <div className="flex flex-col">
+            <h1 className="text-headline-sm font-headline-sm text-primary">Olá, {firstName} 👋</h1>
+            <p className="text-label-md font-label-md text-on-surface-variant">Como podemos ajudar você hoje?</p>
           </div>
-        </header>
-      )}
+        </div>
+        <Link
+          href="/paciente/mensagens"
+          aria-label="Mensagens"
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors"
+        >
+          <Icon name="notifications" className="text-on-surface" />
+        </Link>
+      </header>
 
-      <div className={tab === "clara" ? "phone-body no-pad" : "phone-body"}>
-        {tab === "clara" ? (
-          <ClaraChat />
-        ) : error && !data ? (
-          <div className="empty">
-            <span className="em">📡</span>
-            Não consegui carregar seus dados.<br />Verifique a conexão.
-            <div style={{ marginTop: 16 }}>
-              <button className="btn btn-aurora" onClick={load}>Tentar de novo</button>
+      <main className="max-w-[1200px] mx-auto px-5 pt-4 space-y-8">
+        <section className="relative overflow-hidden rounded-xl bg-secondary-container p-6 flex flex-col md:flex-row items-center justify-between brand-shadow border border-secondary-fixed/30">
+          <div className="z-10 flex-1 space-y-4">
+            <h2 className="text-headline-md font-headline-md text-on-secondary-container">Agende sua consulta</h2>
+            <p className="text-body-md font-body-md text-on-secondary-container/80 max-w-xs">
+              Escolha a especialidade e o melhor horário para seu atendimento exclusivo.
+            </p>
+            <Link
+              href="/paciente/agendar"
+              className="inline-block bg-primary text-on-primary px-8 py-3 rounded-full text-label-lg font-label-lg hover:opacity-90 active:scale-95 transition-all shadow-md"
+            >
+              AGENDAR
+            </Link>
+          </div>
+          <div className="hidden md:block relative w-48 h-48">
+            <Icon name="calendar_month" className="text-primary/10 absolute -right-8 -bottom-8" size={160} />
+          </div>
+          <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
+        </section>
+
+        <section className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-headline-sm font-headline-sm text-primary">Especialidades</h3>
+            <Link href="/paciente/agendar" className="text-label-lg font-label-lg text-secondary flex items-center gap-1">
+              Ver todas <Icon name="chevron_right" size={18} />
+            </Link>
+          </div>
+          <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+            {data.specialties.map((s) => (
+              <Link
+                key={s.slug}
+                href={`/paciente/agendar?especialidade=${s.slug}`}
+                className="min-w-[160px] flex-1 bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/50 brand-shadow hover:border-secondary transition-all group"
+              >
+                <div className="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center mb-4 group-hover:bg-secondary-container transition-colors">
+                  <Icon name={specialtyIcon(s.slug)} className="text-primary group-hover:text-secondary transition-colors" />
+                </div>
+                <h4 className="text-label-lg font-label-lg text-primary mb-1">{s.name}</h4>
+                <p className="text-[11px] leading-tight text-on-surface-variant font-label-md">
+                  {SPECIALTY_BLURB[s.slug] ?? "Atendimento especializado com a equipe do Instituto."}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-4">
+          <h3 className="text-headline-sm font-headline-sm text-primary">Próximas consultas</h3>
+          {data.upcoming.length > 0 ? (
+            <div className="space-y-3">
+              {data.upcoming.slice(0, 3).map((a) => (
+                <NextApptCard key={a.id} appt={a} />
+              ))}
             </div>
-          </div>
-        ) : tab === "inicio" ? (
-          <Inicio data={data} go={setTab} />
-        ) : tab === "agenda" ? (
-          <Agenda data={data} go={setTab} />
-        ) : tab === "saude" ? (
-          <Saude data={data} />
-        ) : (
-          <Perfil data={data} onInstall={install} installed={standalone} />
-        )}
-      </div>
-
-      {showInstall && <InstallSheet onClose={() => setShowInstall(false)} />}
-
-      <nav className="bottomnav">
-        <button className={`navitem ${tab === "inicio" ? "active" : ""}`} onClick={() => setTab("inicio")}>
-          <span className="ic">⌂</span>Início
-        </button>
-        <button className={`navitem ${tab === "agenda" ? "active" : ""}`} onClick={() => setTab("agenda")}>
-          <span className="ic">📅</span>Agenda
-        </button>
-        <button className="navitem fab" onClick={() => setTab("clara")} aria-label="Falar com a Clara">
-          <span className="ic"><SPulse /></span>Clara
-        </button>
-        <button className={`navitem ${tab === "saude" ? "active" : ""}`} onClick={() => setTab("saude")}>
-          <span className="ic">♥</span>Saúde
-        </button>
-        <button className={`navitem ${tab === "perfil" ? "active" : ""}`} onClick={() => setTab("perfil")}>
-          <span className="ic">👤</span>Perfil
-        </button>
-      </nav>
-    </div>
-  );
-}
-
-function Inicio({ data, go }: { data: PatientData | null; go: (t: Tab) => void }) {
-  if (!data) return <div className="empty">Carregando…</div>;
-  const first = data.name.split(" ")[0];
-  return (
-    <>
-      <p style={{ fontSize: 20, fontWeight: 800, fontFamily: "Plus Jakarta Sans, inherit", margin: "2px 4px 16px" }}>
-        Olá, {first} 👋
-      </p>
-
-      {data.next ? (
-        <div className="p-card hero">
-          <div className="lbl">✦ PRÓXIMA CONSULTA</div>
-          <div className="doc">{data.next.medico}</div>
-          <div className="when">
-            {dayLabel(data.next.startsAt)} · {timeLabel(data.next.startsAt)} · {data.next.mode === "VIDEO" ? "📹 vídeo" : "🏥 presencial"}
-          </div>
-          <div className="btn-row">
-            <button className="btn" style={{ background: "rgba(255,255,255,.2)", color: "#fff" }} onClick={() => go("agenda")}>Ver detalhes</button>
-          </div>
-        </div>
-      ) : (
-        <div className="p-card hero">
-          <div className="lbl">✦ CUIDE-SE</div>
-          <div className="doc">Nenhuma consulta agendada</div>
-          <div className="when">Me conta o que você está sentindo que eu encontro o especialista.</div>
-        </div>
-      )}
-
-      <div className="p-card clara-cta" onClick={() => go("clara")}>
-        <div className="mini"><SPulse /></div>
-        <div className="txt">Como você está hoje? Me conta que eu cuido do resto. <strong>Falar com a Clara →</strong></div>
-      </div>
-
-      <div className="p-sec-title">Especialidades</div>
-      <div className="spec-row">
-        {data.specialties.map((s) => (
-          <button key={s.slug} className="spec-chip" onClick={() => go("clara")}>{s.icon} {s.name}</button>
-        ))}
-      </div>
-    </>
-  );
-}
-
-function Agenda({ data, go }: { data: PatientData | null; go: (t: Tab) => void }) {
-  if (!data) return <div className="empty">Carregando…</div>;
-  if (data.upcoming.length === 0 && data.past.length === 0) {
-    return (
-      <div className="empty">
-        <span className="em">📅</span>
-        Nenhuma consulta por aqui.<br />Que tal cuidar de você?
-        <div style={{ marginTop: 16 }}>
-          <button className="btn btn-aurora" onClick={() => go("clara")}>✦ Falar com a Clara</button>
-        </div>
-      </div>
-    );
-  }
-  return (
-    <>
-      {data.upcoming.length > 0 && <div className="p-sec-title">Próximas</div>}
-      {data.upcoming.map((a) => <ApptItem key={a.id} a={a} />)}
-      {data.past.length > 0 && <div className="p-sec-title">Passadas</div>}
-      {data.past.map((a) => <ApptItem key={a.id} a={a} />)}
-    </>
-  );
-}
-
-function ApptItem({ a }: { a: Appt }) {
-  return (
-    <div className="appt-item">
-      <div className="date-badge">
-        <div className="d">{dayNum(a.startsAt)}</div>
-        <div className="m">{monthShort(a.startsAt)}</div>
-      </div>
-      <div className="info">
-        <div className="n">{a.medico}</div>
-        <div className="s">{a.icon} {a.especialidade} · {timeLabel(a.startsAt)} · {money(a.priceCents)}</div>
-      </div>
-      <StatusPill s={a.status} />
-    </div>
-  );
-}
-
-function Saude({ data }: { data: PatientData | null }) {
-  if (!data) return <div className="empty">Carregando…</div>;
-  return (
-    <>
-      <div className="clara-summary">
-        <div className="tag"><span className="dot" /> Gerado pela Clara</div>
-        <div style={{ fontSize: 14 }}>{data.healthSummary}</div>
-      </div>
-
-      <div className="p-sec-title">Receitas</div>
-      {data.past.length > 0 ? (
-        data.past.map((a) => (
-          <div className="appt-item" key={a.id}>
-            <div className="date-badge" style={{ width: 40 }}><div style={{ fontSize: 22 }}>💊</div></div>
-            <div className="info">
-              <div className="n">Receita — {a.especialidade}</div>
-              <div className="s">{a.medico} · {new Date(a.startsAt).toLocaleDateString("pt-BR")}</div>
+          ) : (
+            <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/50 brand-shadow text-center space-y-3">
+              <Icon name="event_available" className="text-on-tertiary-container mx-auto" size={32} />
+              <p className="text-body-md font-body-md text-on-surface-variant">Você não tem consultas agendadas.</p>
+              <Link href="/paciente/agendar" className="inline-block text-label-lg font-label-lg text-secondary">
+                Agendar agora →
+              </Link>
             </div>
-            <span className="pill info">PDF</span>
-          </div>
-        ))
-      ) : (
-        <div className="empty"><span className="em">💊</span>Suas receitas aparecem aqui após cada consulta.</div>
-      )}
+          )}
+        </section>
 
-      <div className="p-sec-title">Exames</div>
-      <div className="empty" style={{ padding: "24px 20px" }}><span className="em">🧪</span>Nenhum exame ainda.</div>
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {QUICK_ACTIONS.map((a) => (
+            <Link key={a.label} href={a.href} className={`p-5 rounded-xl flex flex-col justify-between aspect-square ${a.className}`}>
+              <Icon name={a.icon} className={a.iconClass} size={32} />
+              <span className="text-label-lg font-label-lg whitespace-pre-line">{a.label}</span>
+            </Link>
+          ))}
+        </section>
+      </main>
     </>
   );
 }
 
-function Perfil({ data, onInstall, installed }: { data: PatientData | null; onInstall: () => void; installed: boolean }) {
-  if (!data) return <div className="empty">Carregando…</div>;
+function NextApptCard({ appt }: { appt: Appt }) {
   return (
-    <>
-      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
-        <div style={{ width: 60, height: 60, borderRadius: 999, background: "var(--aurora-soft)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 20, color: "var(--primary)" }}>
-          {data.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
+    <Link
+      href={`/paciente/consultas/${appt.id}`}
+      className="flex items-center gap-4 bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/50 brand-shadow"
+    >
+      <div className="flex flex-col items-center justify-center w-16 h-16 bg-surface-container rounded-lg border border-outline-variant/30 shrink-0">
+        <span className="text-headline-sm font-headline-sm text-primary">{dayNum(appt.startsAt)}</span>
+        <span className="text-label-md font-label-md text-on-surface-variant tracking-widest">{monthShort(appt.startsAt)}</span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <h4 className="text-label-lg font-label-lg text-primary truncate">Consulta de {appt.especialidade}</h4>
+        <div className="flex items-center gap-1 text-on-surface-variant text-body-sm font-body-sm">
+          <Icon name="schedule" size={16} />
+          <span className="capitalize truncate">
+            {weekdayLabel(appt.startsAt)} • {timeLabel(appt.startsAt)}
+          </span>
         </div>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 17, fontFamily: "Plus Jakarta Sans, inherit" }}>{data.name}</div>
-          <div style={{ fontSize: 13, color: "var(--text-3)" }}>Paciente · Smart Doctor</div>
-        </div>
+        <p className="text-body-sm font-body-sm text-on-surface-variant truncate">{appt.medico}</p>
       </div>
-
-      <div className="install-card">
-        <div className="mini"><SPulse /></div>
-        <div className="tx">
-          <div className="n">Smart Doctor como app</div>
-          <div className="s">{installed ? "App instalado neste dispositivo ✓" : "Adicione à tela inicial e abra em tela cheia."}</div>
-        </div>
-        {installed ? (
-          <span className="pill ok" style={{ padding: "6px 12px" }}>Instalado</span>
-        ) : (
-          <button className="btn btn-aurora" onClick={onInstall}>📲 Instalar</button>
-        )}
-      </div>
-
-      <div className="p-card">
-        <div className="field-row"><span className="k">Nome</span><span className="v">{data.name}</span></div>
-        <div className="field-row"><span className="k">WhatsApp</span><span className="v">(21) 98082-8309</span></div>
-        <div className="field-row"><span className="k">Convênio</span><span className="v">Particular</span></div>
-        <div className="field-row"><span className="k">Dependentes</span><span className="v">Nenhum</span></div>
-      </div>
-
-      <div className="p-sec-title">Privacidade e dados (LGPD)</div>
-      <div className="p-card">
-        <div className="field-row"><span className="k">📥 Baixar meus dados</span><span className="v" style={{ color: "var(--primary)" }}>Solicitar</span></div>
-        <div className="field-row"><span className="k">🔔 Notificações</span><span className="v">WhatsApp</span></div>
-        <div className="field-row"><span className="k">🗑 Excluir minha conta</span><span className="v" style={{ color: "var(--danger)" }}>Excluir</span></div>
-      </div>
-      <div className="privacy-note">
-        Seus dados de saúde são sensíveis e protegidos pela LGPD. O prontuário é guardado por 20 anos por exigência do CFM, mesmo após a exclusão da conta.
-      </div>
-    </>
-  );
-}
-
-function InstallSheet({ onClose }: { onClose: () => void }) {
-  const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
-  const isIOS = /iphone|ipad|ipod/i.test(ua);
-  const isAndroid = /android/i.test(ua);
-
-  const steps = isIOS
-    ? [
-        <>Toque no botão <strong>Compartilhar</strong> <span aria-hidden>⬆️</span> na barra do Safari.</>,
-        <>Escolha <strong>“Adicionar à Tela de Início”</strong>.</>,
-        <>Toque em <strong>Adicionar</strong> — pronto, o Smart Doctor vira um app 🎉</>,
-      ]
-    : isAndroid
-      ? [
-          <>Toque no menu <strong>⋮</strong> do navegador.</>,
-          <>Escolha <strong>“Instalar app”</strong> ou <strong>“Adicionar à tela inicial”</strong>.</>,
-          <>Confirme — o ícone aparece junto dos seus apps 🎉</>,
-        ]
-      : [
-          <>No Chrome/Edge, clique no ícone <strong>Instalar</strong> <span aria-hidden>⊕</span> na barra de endereço.</>,
-          <>Ou abra o menu <strong>⋮</strong> → <strong>“Instalar Smart Doctor”</strong>.</>,
-        ];
-
-  return (
-    <div className="sheet-overlay" onClick={onClose}>
-      <div className="sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="grip" />
-        <h4>📲 Instalar o Smart Doctor</h4>
-        <p>Tenha o app na tela inicial, abrindo em tela cheia como um aplicativo nativo.</p>
-        {steps.map((s, i) => (
-          <div className="step" key={i}>
-            <span className="n">{i + 1}</span>
-            <span>{s}</span>
-          </div>
-        ))}
-        <button className="btn btn-aurora sheet-close" onClick={onClose}>Entendi</button>
-      </div>
-    </div>
+      <StatusPill status={appt.status} />
+    </Link>
   );
 }

@@ -1,0 +1,196 @@
+/* Identidade Instituto Saad Fernandes — tokens Material Design 3 + tipografia editorial.
+   Preflight do Tailwind fica de fora de propósito: os painéis /medico e /admin ainda
+   usam o CSS Pulse em globals.css e seriam quebrados pelo reset global. */
+/* A camada `pulse` guarda o CSS legado dos painéis médico/admin. Ela vem antes de
+   `utilities` de propósito: nomes genéricos do Pulse (.block, .info, .title…)
+   colidem com utilitários do Tailwind, e a camada resolve quem vence. */
+@layer theme, base, components, pulse, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@source "../";
+
+@theme {
+  --color-primary: #000000;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #0c1c31;
+  --color-on-primary-container: #76859e;
+  --color-primary-fixed: #d5e3ff;
+  --color-primary-fixed-dim: #b8c7e3;
+  --color-on-primary-fixed: #0c1c31;
+  --color-on-primary-fixed-variant: #39475f;
+  --color-inverse-primary: #b8c7e3;
+
+  --color-secondary: #775a19;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #fed488;
+  --color-on-secondary-container: #785a1a;
+  --color-secondary-fixed: #ffdea5;
+  --color-secondary-fixed-dim: #e9c176;
+  --color-on-secondary-fixed: #261900;
+  --color-on-secondary-fixed-variant: #5d4201;
+
+  --color-tertiary: #000000;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #191c1d;
+  --color-on-tertiary-container: #828485;
+  --color-tertiary-fixed: #e1e3e4;
+  --color-tertiary-fixed-dim: #c5c7c8;
+  --color-on-tertiary-fixed: #191c1d;
+  --color-on-tertiary-fixed-variant: #454748;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  --color-background: #f9f9ff;
+  --color-on-background: #111c2c;
+  --color-surface: #f9f9ff;
+  --color-on-surface: #111c2c;
+  --color-surface-bright: #f9f9ff;
+  --color-surface-dim: #cfdaf1;
+  --color-surface-variant: #d8e3fa;
+  --color-on-surface-variant: #44474d;
+  --color-surface-tint: #505f77;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f0f3ff;
+  --color-surface-container: #e7eeff;
+  --color-surface-container-high: #dee8ff;
+  --color-surface-container-highest: #d8e3fa;
+  --color-inverse-surface: #263142;
+  --color-inverse-on-surface: #ebf1ff;
+
+  --color-outline: #75777d;
+  --color-outline-variant: #c5c6cd;
+
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-body-lg: "Manrope", sans-serif;
+  --font-body-md: "Manrope", sans-serif;
+  --font-body-sm: "Manrope", sans-serif;
+  --font-label-lg: "Manrope", sans-serif;
+  --font-label-md: "Manrope", sans-serif;
+  --font-headline-lg: "Noto Serif", serif;
+  --font-headline-md: "Noto Serif", serif;
+  --font-headline-sm: "Noto Serif", serif;
+
+  --text-label-md: 12px;
+  --text-label-md--line-height: 16px;
+  --text-label-md--letter-spacing: 0.05em;
+  --text-label-md--font-weight: 600;
+
+  --text-label-lg: 14px;
+  --text-label-lg--line-height: 20px;
+  --text-label-lg--letter-spacing: 0.05em;
+  --text-label-lg--font-weight: 600;
+
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 20px;
+  --text-body-sm--font-weight: 400;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 24px;
+  --text-body-md--font-weight: 400;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+  --text-body-lg--font-weight: 400;
+
+  --text-headline-sm: 20px;
+  --text-headline-sm--line-height: 28px;
+  --text-headline-sm--font-weight: 600;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--font-weight: 600;
+
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+  --text-headline-lg--font-weight: 700;
+
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+}
+
+/* Reset escopado (substitui o preflight) — vale só dentro do app do paciente. */
+@layer base {
+  .brand-app {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--color-on-background);
+    background: var(--color-background);
+    -webkit-font-smoothing: antialiased;
+  }
+  .brand-app :is(h1, h2, h3, h4, h5, h6, p, ul, ol, figure) {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+  }
+  .brand-app :is(ul, ol) {
+    padding: 0;
+    list-style: none;
+  }
+  .brand-app :is(button, input, select, textarea) {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+  .brand-app button {
+    cursor: pointer;
+  }
+  .brand-app :is(img, svg) {
+    display: block;
+    max-width: 100%;
+  }
+  .brand-app a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .brand-app *,
+  .brand-app *::before,
+  .brand-app *::after {
+    box-sizing: border-box;
+    border: 0 solid var(--color-outline-variant);
+  }
+}
+
+/* A identidade Saad Fernandes é clara. Fica FORA de @layer de propósito: o CSS
+   Pulse em globals.css não usa camadas, e regra sem camada vence regra em camada. */
+body:has(.brand-app) {
+  background: var(--color-background);
+  color: var(--color-on-background);
+}
+
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+.material-symbols-outlined.filled {
+  font-variation-settings: "FILL" 1;
+}
+
+.brand-shadow {
+  box-shadow: 0 4px 20px -2px rgba(17, 28, 44, 0.05);
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

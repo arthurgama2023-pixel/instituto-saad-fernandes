@@ -28,29 +28,29 @@ const DEMO_PATIENTS = [
 
 // [médico(nome), paciente(nome), dayOffset, hh, mm, status]
 const DEMO_APPTS: [string, string, number, number, number, string][] = [
-  // Dra. Camila Reis (psiquiatria) — a "logada" no painel do médico
-  ["Dra. Camila Reis", "João Almeida", 0, 9, 0, "CONCLUIDA"],
-  ["Dra. Camila Reis", "Beatriz Nunes", 0, 9, 30, "CONCLUIDA"],
-  ["Dra. Camila Reis", "Carla Mendes", 0, 14, 0, "CONFIRMADA"],
-  ["Dra. Camila Reis", "Rafael Dias", 0, 16, 0, "CONFIRMADA"],
-  ["Dra. Camila Reis", "Sofia Ramos", 1, 14, 0, "CONFIRMADA"],
-  ["Dra. Camila Reis", "João Almeida", -2, 10, 0, "CONCLUIDA"],
-  ["Dra. Camila Reis", "Sofia Ramos", -5, 15, 0, "CONCLUIDA"],
-  ["Dra. Camila Reis", "Beatriz Nunes", -7, 9, 0, "NO_SHOW"],
+  // Dr. Saad Fernandes (tricologia) — o "logado" no painel do médico
+  ["Dr. Saad Fernandes", "João Almeida", 0, 9, 0, "CONCLUIDA"],
+  ["Dr. Saad Fernandes", "Beatriz Nunes", 0, 9, 30, "CONCLUIDA"],
+  ["Dr. Saad Fernandes", "Carla Mendes", 0, 14, 0, "CONFIRMADA"],
+  ["Dr. Saad Fernandes", "Rafael Dias", 0, 16, 0, "CONFIRMADA"],
+  ["Dr. Saad Fernandes", "Sofia Ramos", 1, 14, 0, "CONFIRMADA"],
+  ["Dr. Saad Fernandes", "João Almeida", -2, 10, 0, "CONCLUIDA"],
+  ["Dr. Saad Fernandes", "Sofia Ramos", -5, 15, 0, "CONCLUIDA"],
+  ["Dr. Saad Fernandes", "Beatriz Nunes", -7, 9, 0, "NO_SHOW"],
   // Outros médicos
-  ["Dr. Rafael Monteiro", "Carla Mendes", 0, 8, 30, "CONFIRMADA"],
-  ["Dr. Rafael Monteiro", "Sofia Ramos", -1, 14, 0, "CONCLUIDA"],
-  ["Dra. Ana Lopes", "João Almeida", 1, 8, 30, "CONFIRMADA"],
-  ["Dra. Ana Lopes", "Beatriz Nunes", -3, 9, 0, "CONCLUIDA"],
-  ["Dra. Ana Lopes", "Rafael Dias", -1, 10, 0, "CONCLUIDA"],
+  ["Dra. Helena Prado", "Carla Mendes", 0, 8, 30, "CONFIRMADA"],
+  ["Dra. Helena Prado", "Sofia Ramos", -1, 14, 0, "CONCLUIDA"],
+  ["Dra. Helena Prado", "João Almeida", 1, 8, 30, "CONFIRMADA"],
+  ["Dra. Paula Freitas", "Beatriz Nunes", -3, 9, 0, "CONCLUIDA"],
+  ["Dra. Paula Freitas", "Rafael Dias", -1, 10, 0, "CONCLUIDA"],
   ["Dra. Paula Freitas", "Carla Mendes", 1, 9, 30, "CONFIRMADA"],
   ["Dr. Diego Santoro", "Rafael Dias", -1, 15, 0, "CONCLUIDA"],
 ];
 
 // Médicos aguardando aprovação (fila do admin) — [nome, especialidade slug, crm]
 const PENDING_DOCTORS: [string, string, string][] = [
-  ["Dr. Henrique Salles", "psiquiatria", "CRM 52-78901"],
-  ["Dra. Lívia Rocha", "dermatologia", "CRM 52-89012"],
+  ["Dr. Henrique Salles", "tricologia", "CRM 567.890-SP"],
+  ["Dra. Lívia Rocha", "dermatologia", "CRM 678.901-SP"],
 ];
 
 let demoSeeded = false;
@@ -158,32 +158,32 @@ export async function ensurePatientDemo(userId: string): Promise<void> {
   });
   if (active > 0) return;
 
-  const ana = await db.doctor.findFirst({
-    where: { specialty: { slug: "psicologia" }, status: "ACTIVE" },
-  });
-  const camila = await db.doctor.findFirst({
-    where: { specialty: { slug: "psiquiatria" }, status: "ACTIVE" },
+  const tricologista = await db.doctor.findFirst({
+    where: { specialty: { slug: "tricologia" }, status: "ACTIVE" },
     orderBy: { rating: "desc" },
   });
-  if (!ana || !camila) return;
+  const dermato = await db.doctor.findFirst({
+    where: { specialty: { slug: "dermatologia" }, status: "ACTIVE" },
+  });
+  if (!tricologista || !dermato) return;
 
   // próxima consulta confirmada
   const up = await db.appointment.create({
     data: {
       patientId: userId,
-      doctorId: ana.id,
+      doctorId: tricologista.id,
       startsAt: at(3, 9, 0),
-      durationMin: ana.durationMin,
-      mode: ana.mode,
+      durationMin: tricologista.durationMin,
+      mode: tricologista.mode,
       status: "CONFIRMADA",
-      priceCents: ana.priceCents,
+      priceCents: tricologista.priceCents,
     },
   });
   await db.payment.create({
     data: {
       appointmentId: up.id,
-      amountCents: ana.priceCents,
-      feeCents: Math.round((ana.priceCents * TAKE_RATE_BPS) / 10000),
+      amountCents: tricologista.priceCents,
+      feeCents: Math.round((tricologista.priceCents * TAKE_RATE_BPS) / 10000),
       pixCode: `demo-${up.id.slice(-8)}`,
       status: "CONFIRMED",
     },
@@ -192,19 +192,19 @@ export async function ensurePatientDemo(userId: string): Promise<void> {
   const past = await db.appointment.create({
     data: {
       patientId: userId,
-      doctorId: camila.id,
+      doctorId: dermato.id,
       startsAt: at(-9, 15, 0),
-      durationMin: camila.durationMin,
-      mode: camila.mode,
+      durationMin: dermato.durationMin,
+      mode: dermato.mode,
       status: "CONCLUIDA",
-      priceCents: camila.priceCents,
+      priceCents: dermato.priceCents,
     },
   });
   await db.payment.create({
     data: {
       appointmentId: past.id,
-      amountCents: camila.priceCents,
-      feeCents: Math.round((camila.priceCents * TAKE_RATE_BPS) / 10000),
+      amountCents: dermato.priceCents,
+      feeCents: Math.round((dermato.priceCents * TAKE_RATE_BPS) / 10000),
       pixCode: `demo-${past.id.slice(-8)}`,
       status: "CONFIRMED",
     },

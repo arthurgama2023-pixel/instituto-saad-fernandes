@@ -50,11 +50,11 @@ const saysYes = (t: string) => /^(1|sim|s|confirmo|confirmar|pode|isso|ok|quero)
 const saysNo = (t: string) => /^(2|nao|não|n|outro)\b/.test(norm(t));
 
 const WELCOME =
-  "Oi! 👋 Sou a *Clara*, assistente inteligente do Smart Doctor.\n" +
+  "Oi! 👋 Sou a *Clara*, assistente inteligente do Instituto Saad Fernandes.\n" +
   "Posso marcar consultas, mostrar sua agenda e cuidar de tudo por aqui.\n\n" +
   "Me conta: *o que você está sentindo* ou o que precisa?";
 
-const WELCOME_CHIPS = ["Estou ansioso", "Quero terapia", "Problema de pele", "Minhas consultas"];
+const WELCOME_CHIPS = ["Meu cabelo está caindo", "Problema de pele", "Check-up de rotina", "Minhas consultas"];
 
 export async function runLocalAgent(
   userId: string,
@@ -266,7 +266,7 @@ export async function runLocalAgent(
     .join("\n");
   return {
     text:
-      `Sinto muito que esteja passando por isso 💙 Isso é área da *${specialty.name}* ${specialty.icon}\n\n` +
+      `Entendi 💙 Isso é assunto para a *${specialty.name}* ${specialty.icon}\n\n` +
       `Encontrei ${doctors.length} especialistas com horário próximo:\n${list}\n\n` +
       `Qual você prefere? (responda o número)`,
     uiEvents,

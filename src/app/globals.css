@@ -1,3 +1,7 @@
+@import "./brand.css";
+
+@layer pulse {
+
 /* Design System Pulse — tokens (Etapa 2 §1.1) */
 :root {
   --bg: #f1f4f9;
@@ -626,4 +630,5 @@ body {
 /* app do paciente: em telas largas centraliza como celular; em mobile ocupa tudo */
 @media (max-width: 480px) {
   .phone { border-left: 0; border-right: 0; max-width: 100%; }
+}
 }

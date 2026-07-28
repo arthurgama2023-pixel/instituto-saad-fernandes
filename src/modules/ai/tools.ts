@@ -33,11 +33,11 @@ export const TOOLS: ToolDef[] = [
   {
     name: "buscar_medicos",
     description:
-      "Busca médicos ativos por especialidade, com avaliação, preço e próximos horários livres. Chame quando o paciente descrever a necessidade ou pedir um especialista. Especialidades: psiquiatria, psicologia, dermatologia, clinica-geral.",
+      "Busca médicos ativos por especialidade, com avaliação, preço e próximos horários livres. Chame quando o paciente descrever a necessidade ou pedir um especialista. Especialidades: tricologia, dermatologia, clinica-geral.",
     input_schema: {
       type: "object",
       properties: {
-        especialidade: { type: "string", description: "slug da especialidade, ex.: psiquiatria" },
+        especialidade: { type: "string", description: "slug da especialidade, ex.: tricologia" },
         preco_max_reais: { type: "number", description: "filtro opcional de preço máximo em reais" },
       },
       required: ["especialidade"],
