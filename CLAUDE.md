@@ -28,8 +28,21 @@ Seed lazy e idempotente na primeira request: `modules/catalog/seed.ts`
 Dr. Saad Fernandes como responsável técnico) e `modules/demo/seed-demo.ts`
 (pacientes e consultas para os painéis).
 
-Para re-semear depois de mexer no seed: arquive `prisma/dev.db` e rode
-`npm run db:push` — `ensureSeeded` só popula quando a tabela está vazia.
+Para re-semear depois de mexer no seed: arquive o `.db` e rode `npm run db:push`
+— `ensureSeeded` só popula quando a tabela está vazia.
+
+**O banco de dev mora em `node_modules/.smart-doctor/dev.db`** (caminho em
+`lib/dev-db-path.ts`), não em `prisma/`. Motivo: o watcher do Next observa a árvore
+do projeto e *toda* request escreve no SQLite (`expireStaleHolds`), então cada
+request disparava um rebuild do Turbopack → remontagem → nova request → **refresh
+infinito**. `watchOptions` do Next 16 só aceita `pollIntervalMs`, não tem `ignored`;
+`node_modules` é a pasta que o watcher ignora de forma confiável.
+
+**Nunca rode `npm run build` com o `npm run dev` no ar.** O build regenera
+`src/generated/prisma/**`, `next-env.d.ts` e `prisma/schema.prisma` debaixo do
+watcher e derruba o Turbopack com `FATAL: Next.js package not found` — o sintoma é
+a página recarregando sozinha sem parar. Conserto: parar o dev, `rm -rf .next`,
+subir de novo.
 
 ## Sessão
 
