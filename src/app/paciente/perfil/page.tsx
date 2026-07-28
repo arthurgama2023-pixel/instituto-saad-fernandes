@@ -2,6 +2,7 @@
 
 import { Icon } from "@/components/brand/Icon";
 import { Avatar } from "@/components/brand/Avatar";
+import { InstallApp } from "@/components/brand/InstallApp";
 import { ErrorState, Loading } from "@/components/brand/ui";
 import { usePatient } from "@/lib/patient-data";
 
@@ -34,6 +35,8 @@ export default function PerfilPage() {
           <p className="text-body-sm font-body-sm text-on-surface-variant">{data.phone ?? "Telefone não informado"}</p>
           <p className="text-body-sm font-body-sm text-on-surface-variant">Paciente · Instituto Saad Fernandes</p>
         </section>
+
+        <InstallApp />
 
         <nav className="bg-surface-container-lowest rounded-xl brand-shadow overflow-hidden border border-outline-variant/30 flex flex-col">
           {MENU.map((item, i) => (
