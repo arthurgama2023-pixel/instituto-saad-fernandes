@@ -11,7 +11,7 @@ export async function createCharge(appointmentId: string) {
   const existing = await db.payment.findUnique({ where: { appointmentId } });
   if (existing) return existing; // idempotente
 
-  const pixCode = `00020126580014BR.GOV.BCB.PIX0136smartdoctor-${appointmentId.slice(-8)}5204000053039865802BR5911SMARTDOCTOR6009RIO`;
+  const pixCode = `00020126580014BR.GOV.BCB.PIX0136saadfernandes-${appointmentId.slice(-8)}5204000053039865802BR5915INST SAAD FERN6009SAO PAULO`;
   return db.payment.create({
     data: {
       appointmentId,

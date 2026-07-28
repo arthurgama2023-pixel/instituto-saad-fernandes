@@ -11,19 +11,18 @@ export async function expireStaleHolds(): Promise<void> {
   });
 }
 
-/** Slots livres = regras de disponibilidade − consultas ocupadas, próximos `days` dias. */
-export async function getNextSlots(doctorId: string, limit = 3, days = 10): Promise<string[]> {
-  await expireStaleHolds();
-  const doctor = await db.doctor.findUnique({
-    where: { id: doctorId },
-    include: { availability: true },
-  });
-  if (!doctor) return [];
+type SlottableDoctor = {
+  id: string;
+  durationMin: number;
+  availability: { weekday: number; startMin: number; endMin: number }[];
+};
 
+/** Slots livres de um médico = regras de disponibilidade − consultas ocupadas. */
+async function freeSlots(doctor: SlottableDoctor, limit: number, days: number): Promise<string[]> {
   const now = new Date();
   const horizon = new Date(now.getTime() + days * 86400000);
   const busy = await db.appointment.findMany({
-    where: { doctorId, status: { in: OCCUPYING }, startsAt: { gte: now, lte: horizon } },
+    where: { doctorId: doctor.id, status: { in: OCCUPYING }, startsAt: { gte: now, lte: horizon } },
     select: { startsAt: true },
   });
   const busySet = new Set(busy.map((b) => b.startsAt.getTime()));
@@ -46,6 +45,105 @@ export async function getNextSlots(doctorId: string, limit = 3, days = 10): Prom
     }
   }
   return slots;
+}
+
+/** Slots livres = regras de disponibilidade − consultas ocupadas, próximos `days` dias. */
+export async function getNextSlots(doctorId: string, limit = 3, days = 10): Promise<string[]> {
+  await expireStaleHolds();
+  const doctor = await db.doctor.findUnique({
+    where: { id: doctorId },
+    include: { availability: true },
+  });
+  if (!doctor) return [];
+  return freeSlots(doctor, limit, days);
+}
+
+export type SpecialtyAvailability = {
+  especialidade: { slug: string; name: string };
+  medicos: {
+    id: string;
+    nome: string;
+    crm: string;
+    bio: string;
+    yearsExp: number;
+    rating: number;
+    priceCents: number;
+    durationMin: number;
+    mode: string;
+  }[];
+  /** Dias com pelo menos um horário livre, em ordem crescente. */
+  dias: {
+    data: string; // YYYY-MM-DD
+    horarios: { iso: string; hora: string; medicoIds: string[] }[];
+  }[];
+};
+
+const isoDate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const isoTime = (d: Date) =>
+  `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+
+/**
+ * Agenda da especialidade inteira: para cada dia, os horários com vaga e quais
+ * médicos atendem em cada um. É o que sustenta o fluxo "escolho quando posso,
+ * depois vejo quem me atende" — o inverso do fluxo guiado pela Clara.
+ */
+export async function availabilityBySpecialty(
+  slug: string,
+  days = 14,
+): Promise<SpecialtyAvailability | null> {
+  await expireStaleHolds();
+  const specialty = await db.specialty.findUnique({ where: { slug } });
+  if (!specialty) return null;
+
+  const doctors = await db.doctor.findMany({
+    where: { status: "ACTIVE", specialtyId: specialty.id },
+    include: { user: true, availability: true },
+    orderBy: { rating: "desc" },
+  });
+
+  // Uma agenda de 14 dias por médico cabe folgado; o teto evita explodir a
+  // resposta se algum dia alguém cadastrar disponibilidade 24/7.
+  const byIso = new Map<string, string[]>();
+  for (const doctor of doctors) {
+    for (const iso of await freeSlots(doctor, 500, days)) {
+      const list = byIso.get(iso);
+      if (list) list.push(doctor.id);
+      else byIso.set(iso, [doctor.id]);
+    }
+  }
+
+  const byDate = new Map<string, { iso: string; hora: string; medicoIds: string[] }[]>();
+  for (const [iso, medicoIds] of byIso) {
+    const when = new Date(iso);
+    const date = isoDate(when);
+    const list = byDate.get(date) ?? [];
+    list.push({ iso, hora: isoTime(when), medicoIds });
+    byDate.set(date, list);
+  }
+
+  const dias = [...byDate.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([data, horarios]) => ({
+      data,
+      horarios: horarios.sort((a, b) => a.iso.localeCompare(b.iso)),
+    }));
+
+  return {
+    especialidade: { slug: specialty.slug, name: specialty.name },
+    medicos: doctors.map((d) => ({
+      id: d.id,
+      nome: d.user.name,
+      crm: d.crm,
+      bio: d.bio,
+      yearsExp: d.yearsExp,
+      rating: d.rating,
+      priceCents: d.priceCents,
+      durationMin: d.durationMin,
+      mode: d.mode,
+    })),
+    dias,
+  };
 }
 
 export type HoldResult =

@@ -3,13 +3,22 @@
 import { useRouter } from "next/navigation";
 import { Icon } from "./Icon";
 
-export function PageHeader({ title, action }: { title: string; action?: React.ReactNode }) {
+export function PageHeader({
+  title,
+  action,
+  onBack,
+}: {
+  title: string;
+  action?: React.ReactNode;
+  /** Fluxos com passos internos voltam um passo em vez de sair da tela. */
+  onBack?: () => void;
+}) {
   const router = useRouter();
   return (
     <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md w-full flex items-center gap-2 px-5 py-4">
       <button
         aria-label="Voltar"
-        onClick={() => router.back()}
+        onClick={onBack ?? (() => router.back())}
         className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors"
       >
         <Icon name="arrow_back" className="text-primary" />
