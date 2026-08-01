@@ -5,10 +5,11 @@ import { DEV_DB_URL, ensureDevDbDir } from "@/lib/dev-db-path";
 
 const globalForDb = globalThis as unknown as { __db?: PrismaClient };
 
-// Postgres em produção (Render), SQLite no dev local.
+// Postgres em produção (Render via DATABASE_URL, Netlify via NETLIFY_DB_URL
+// injetada pelo @netlify/database no deploy), SQLite no dev local.
 // O provider do schema é ajustado por scripts/setup-db.mjs no build.
 function createClient(): PrismaClient {
-  const url = process.env.DATABASE_URL;
+  const url = process.env.DATABASE_URL ?? process.env.NETLIFY_DB_URL;
   if (url && /^postgres(ql)?:\/\//i.test(url)) {
     return new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
   }

@@ -6,3 +6,6 @@ src/generated/
 .env
 *.tsbuildinfo
 _archive/
+
+# Local Netlify folder
+.netlify
