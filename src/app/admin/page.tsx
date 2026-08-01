@@ -26,7 +26,7 @@ export default async function AdminPanel({ searchParams }: { searchParams: Promi
       <aside className="sidebar">
         <Link href="/" className="brand">
           <div className="m"><SPulse /></div>
-          <div className="t">Instituto Saad Fernandes<small>Administração</small></div>
+          <div className="t">Smart Doctor<small>Administração</small></div>
         </Link>
         {NAV.map(([id, ic, label]) => (
           <Link key={id} href={`/admin?tab=${id}`} className={`nav-link ${tab === id ? "active" : ""}`}>
@@ -47,7 +47,7 @@ export default async function AdminPanel({ searchParams }: { searchParams: Promi
         <div className="main-head">
           <div>
             <h1>{tabTitle(tab)}</h1>
-            <span className="sub">Instituto Saad Fernandes · operação</span>
+            <span className="sub">Smart Doctor · operação</span>
           </div>
           <div className="spacer" />
           <ThemeToggle />

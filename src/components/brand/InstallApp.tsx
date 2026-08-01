@@ -57,7 +57,7 @@ export function InstallApp() {
           <Icon name="install_mobile" className="text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-label-lg font-label-lg text-primary">O Instituto como app</p>
+          <p className="text-label-lg font-label-lg text-primary">Smart Doctor como app</p>
           <p className="text-body-sm font-body-sm text-on-surface-variant">
             {standalone
               ? "Instalado neste dispositivo."
@@ -110,7 +110,7 @@ function InstallSheet({ onClose }: { onClose: () => void }) {
         ]
       : [
           { icon: "install_desktop", text: <>No Chrome ou Edge, clique no ícone <strong>Instalar</strong> na barra de endereço.</> },
-          { icon: "more_vert", text: <>Ou abra o menu <strong>⋮</strong> → <strong>“Instalar Instituto Saad Fernandes”</strong>.</> },
+          { icon: "more_vert", text: <>Ou abra o menu <strong>⋮</strong> → <strong>“Instalar Smart Doctor”</strong>.</> },
         ];
 
   return (
@@ -133,7 +133,7 @@ function InstallSheet({ onClose }: { onClose: () => void }) {
           Instalar o app
         </h2>
         <p className="text-body-sm font-body-sm text-on-surface-variant mb-6">
-          Tenha o Instituto na tela inicial, abrindo em tela cheia como um aplicativo.
+          Tenha o Smart Doctor na tela inicial, abrindo em tela cheia como um aplicativo.
         </p>
 
         <ol className="space-y-4 mb-8">

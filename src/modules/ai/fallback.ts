@@ -50,7 +50,7 @@ const saysYes = (t: string) => /^(1|sim|s|confirmo|confirmar|pode|isso|ok|quero)
 const saysNo = (t: string) => /^(2|nao|não|n|outro)\b/.test(norm(t));
 
 const WELCOME =
-  "Oi! 👋 Sou a *Clara*, assistente inteligente do Instituto Saad Fernandes.\n" +
+  "Oi! 👋 Sou a *Clara*, assistente inteligente do Smart Doctor.\n" +
   "Posso marcar consultas, mostrar sua agenda e cuidar de tudo por aqui.\n\n" +
   "Me conta: *o que você está sentindo* ou o que precisa?";
 

@@ -63,7 +63,7 @@ export default function InicioPage() {
             </p>
             <Link
               href="/paciente/agendar"
-              className="inline-block bg-primary text-on-primary px-8 py-3 rounded-full text-label-lg font-label-lg hover:opacity-90 active:scale-95 transition-all shadow-md"
+              className="sd-aurora inline-block px-8 py-3 rounded-full text-label-lg font-label-lg hover:opacity-90 active:scale-95 transition-all shadow-md"
             >
               AGENDAR
             </Link>

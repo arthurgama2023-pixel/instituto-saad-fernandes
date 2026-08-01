@@ -1,5 +1,5 @@
 export const WELCOME =
-  "Oi! 👋 Sou a *Clara*, assistente inteligente do Instituto Saad Fernandes.\n" +
+  "Oi! 👋 Sou a *Clara*, assistente inteligente do Smart Doctor.\n" +
   "Posso marcar consultas, mostrar sua agenda e cuidar de tudo por aqui.\n\n" +
   "Me conta: *o que você está sentindo* ou o que precisa?";
 

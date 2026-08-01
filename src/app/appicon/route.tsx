@@ -1,15 +1,17 @@
 import { ImageResponse } from "next/og";
 
 // Ícone do app gerado como PNG (usado no manifest e como apple-touch-icon):
-// S-Pulse branco sobre o gradiente Aurora, full-bleed para funcionar como maskable.
+// a logo "A Consulta" — balão de conversa com o pulso — em verde vivo sobre o
+// marinho, exatamente como a marca escolhida. Full-bleed / maskable.
 export const contentType = "image/png";
 export const size = { width: 512, height: 512 };
 
-const SPULSE = `data:image/svg+xml,${encodeURIComponent(
-  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='8.5 -8 120 120' width='300' height='300'>" +
-    "<path d='M 88 30 C 86 14 60 10 45 18 C 28 27 30 44 48 50 L 54 52 L 60 38 L 68 64 L 74 52 L 80 54 C 94 60 96 80 80 92 C 62 102 38 98 32 84' fill='none' stroke='white' stroke-width='11' stroke-linecap='round' stroke-linejoin='round'/>" +
-    "<circle cx='98' cy='20' r='7' fill='white'/>" +
-    "</svg>",
+const BUBBLE = `data:image/svg+xml,${encodeURIComponent(
+  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' width='330' height='330'>" +
+    "<g fill='none' stroke='#3fce3c' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'>" +
+    "<path d='M30,18 H70 a14,14 0 0 1 14,14 V56 a14,14 0 0 1 -14,14 H46 l-10,13 -2,-13 h-4 a14,14 0 0 1 -14,-14 V32 a14,14 0 0 1 14,-14 Z'/>" +
+    "<path d='M26,45 H40 L45,34 L54,59 L60,41 L64,45 H74'/>" +
+    "</g></svg>",
 )}`;
 
 export function GET() {
@@ -22,11 +24,11 @@ export function GET() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #0B6EF5 0%, #00C9A7 100%)",
+          background: "#0a1420",
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={SPULSE} width={300} height={300} alt="" />
+        <img src={BUBBLE} width={340} height={340} alt="" />
       </div>
     ),
     size,

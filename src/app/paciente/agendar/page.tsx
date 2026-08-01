@@ -259,7 +259,7 @@ function BarraAcao({
       <button
         onClick={onClick}
         disabled={desabilitado}
-        className="w-full max-w-[390px] h-14 bg-primary-container text-white text-label-lg font-label-lg rounded-xl hover:bg-primary transition-all active:scale-95 disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2 shadow-lg"
+        className="sd-aurora w-full max-w-[390px] h-14 text-label-lg font-label-lg rounded-xl hover:opacity-90 transition-all active:scale-95 disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2 shadow-lg"
       >
         {rotulo}
         <Icon name="arrow_forward" />
@@ -494,7 +494,7 @@ function PassoMedico({
             <button
               onClick={() => onAgendar(m)}
               disabled={enviando}
-              className="w-full h-12 bg-primary text-on-primary rounded-xl text-label-lg font-label-lg active:scale-95 transition-transform disabled:opacity-50"
+              className="sd-aurora w-full h-12 rounded-xl text-label-lg font-label-lg active:scale-95 transition-transform disabled:opacity-50"
             >
               {enviando ? "RESERVANDO…" : `AGENDAR ÀS ${horario.hora}`}
             </button>

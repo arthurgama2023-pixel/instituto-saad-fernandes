@@ -21,14 +21,19 @@
   --color-on-primary-fixed-variant: #39475f;
   --color-inverse-primary: #b8c7e3;
 
-  --color-secondary: #775a19;
+  /* Identidade Smart Doctor (verde). A família "secondary" carrega os acentos —
+     banner Agendar, links, estados ativos, bordas de hover. Sobre fundo claro o
+     verde vivo (#3fce3c) perde contraste, então o token de acento é o Verde
+     Profundo (#0aa46e), legível; o verde vivo fica para fills/logo/gradiente.
+     A navy structure de primary-container permanece. */
+  --color-secondary: #0aa46e;
   --color-on-secondary: #ffffff;
-  --color-secondary-container: #fed488;
-  --color-on-secondary-container: #785a1a;
-  --color-secondary-fixed: #ffdea5;
-  --color-secondary-fixed-dim: #e9c176;
-  --color-on-secondary-fixed: #261900;
-  --color-on-secondary-fixed-variant: #5d4201;
+  --color-secondary-container: #cdeede;
+  --color-on-secondary-container: #073b28;
+  --color-secondary-fixed: #cdeede;
+  --color-secondary-fixed-dim: #86dcb4;
+  --color-on-secondary-fixed: #00210f;
+  --color-on-secondary-fixed-variant: #0a5a3a;
 
   --color-tertiary: #000000;
   --color-on-tertiary: #ffffff;
@@ -70,9 +75,11 @@
   --font-body-sm: "Manrope", sans-serif;
   --font-label-lg: "Manrope", sans-serif;
   --font-label-md: "Manrope", sans-serif;
-  --font-headline-lg: "Noto Serif", serif;
-  --font-headline-md: "Noto Serif", serif;
-  --font-headline-sm: "Noto Serif", serif;
+  /* Smart Doctor: títulos em Plus Jakarta Sans (a mesma dos logos) — nada de
+     serifa, que era a herança do instituto. */
+  --font-headline-lg: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-headline-md: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-headline-sm: "Plus Jakarta Sans", system-ui, sans-serif;
 
   --text-label-md: 12px;
   --text-label-md--line-height: 16px;
@@ -194,6 +201,19 @@ body:has(.brand-app) {
 
 .brand-shadow {
   box-shadow: 0 4px 20px -2px rgba(17, 28, 44, 0.05);
+}
+
+/* Gradiente da marca Smart Doctor — Verde Vivo → Verde Vital, a mesma cor da
+   logo. Reservado para a ação principal (CTA), sem espalhar. */
+.sd-aurora {
+  background: linear-gradient(135deg, #3fce3c 0%, #00c9a7 100%);
+  color: #ffffff;
+}
+.sd-aurora-text {
+  background: linear-gradient(135deg, #3fce3c 0%, #00c9a7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 .hide-scrollbar {
   -ms-overflow-style: none;

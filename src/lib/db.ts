@@ -9,13 +9,16 @@ const globalForDb = globalThis as unknown as { __db?: PrismaClient };
 // injetada pelo @netlify/database no deploy), SQLite no dev local.
 // O provider do schema é ajustado por scripts/setup-db.mjs no build.
 function createClient(): PrismaClient {
-  const url = process.env.DATABASE_URL ?? process.env.NETLIFY_DB_URL;
-  if (url && /^postgres(ql)?:\/\//i.test(url)) {
+  // `||` (não `??`) para que DATABASE_URL="" (usado no .env.development.local para
+  // forçar SQLite no dev, mesmo com o .env.local do Postgres presente) caia no ramo
+  // local em vez de tentar o adapter-pg com o client gerado para sqlite.
+  const url = process.env.DATABASE_URL || process.env.NETLIFY_DB_URL || "";
+  if (/^postgres(ql)?:\/\//i.test(url)) {
     return new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
   }
   ensureDevDbDir();
   return new PrismaClient({
-    adapter: new PrismaBetterSqlite3({ url: url ?? DEV_DB_URL }),
+    adapter: new PrismaBetterSqlite3({ url: DEV_DB_URL }),
   });
 }
 

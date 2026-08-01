@@ -33,7 +33,7 @@ export default function PerfilPage() {
           </div>
           <h2 className="text-headline-md font-headline-md text-on-surface mb-1">{data.name}</h2>
           <p className="text-body-sm font-body-sm text-on-surface-variant">{data.phone ?? "Telefone não informado"}</p>
-          <p className="text-body-sm font-body-sm text-on-surface-variant">Paciente · Instituto Saad Fernandes</p>
+          <p className="text-body-sm font-body-sm text-on-surface-variant">Paciente · Smart Doctor</p>
         </section>
 
         <InstallApp />
