@@ -9,3 +9,6 @@ _archive/
 
 # Local Netlify folder
 .netlify
+
+.vercel
+.env*

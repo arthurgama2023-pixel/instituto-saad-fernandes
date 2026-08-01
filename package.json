@@ -7,6 +7,7 @@
     "build": "node scripts/setup-db.mjs && prisma generate && next build",
     "build:render": "node scripts/setup-db.mjs && prisma generate && next build && prisma db push --accept-data-loss",
     "build:netlify": "node scripts/setup-db.mjs && prisma generate && next build && prisma db push --accept-data-loss",
+    "build:vercel": "node scripts/setup-db.mjs && prisma generate && prisma db push --accept-data-loss && next build",
     "start": "next start -p 3080",
     "db:push": "node scripts/setup-db.mjs && prisma db push",
     "db:generate": "node scripts/setup-db.mjs && prisma generate"
