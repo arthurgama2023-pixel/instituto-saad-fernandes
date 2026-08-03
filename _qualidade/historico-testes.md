@@ -8,6 +8,17 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-03 — Portal (/) na linguagem do /paciente
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Verificação em aba nova (console virgem): 3 cards de perfil (Paciente, Médico,
+  Administrador), zero classe Pulse (`.portal-grid`/`.profile-card`), logo no
+  gradiente vivo puro.
+- Regressões: nenhuma
+- Branch: `feat/smart-doctor/cadastro-medico` · commit `e89708d`
+- Estado do rebrand: só a Clara (`ClaraChat`/`ThemeToggle`) segue em Pulse —
+  é a única superfície com tema escuro.
+
+---
 ## 2026-08-03 — /admin na linguagem do /paciente + fix de key
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Verificação: as 4 abas do /admin (visao/medicos/clara/financeiro) sem classe
