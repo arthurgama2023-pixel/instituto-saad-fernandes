@@ -25,11 +25,14 @@ marca, Manrope + Plus Jakarta Sans, Material Symbols). Os painéis `/medico` e
 `@media dark`, `[data-theme=dark]`, `[data-theme=light]`). Trocar a marca exige
 os dois arquivos.
 
-`--primary` do Pulse é usado tanto como **fundo de botão com texto branco** quanto
-como **texto de acento**, então qualquer cor nova precisa passar 4.5:1 nos dois
-papéis. É por isso que o verde do Pulse (`#07845a` claro / `#16a34a` escuro) é mais
-fundo que o Verde Profundo da marca (`#0aa46e`, que dá 3.2:1 com branco em cima).
-O verde vivo `#3fce3c` só entra no gradiente, onde é fill e não texto.
+`--primary` do Pulse tem dois papéis com contraste incompatível, então viraram
+dois tokens: `--primary` é texto/borda fina sobre fundo claro (`#07845a` claro /
+`#16a34a` escuro — o vivo aí dá só 2.08:1, ilegível); `--primary-fill` +
+`--on-primary-fill` são o par de preenchimento (botão, bolha de chat, barra da
+timeline) e usam o **verde vivo puro `#3fce3c`** com texto navy `#0a1420` por
+cima (8.5:1) — o mesmo par de contraste do ícone do app, invertido. `.sd-aurora`
+e `.btn-aurora` (CTAs em gradiente) seguem a mesma regra: texto navy, não branco
+— branco falha nas duas pontas do gradiente vivo→teal.
 
 **Gotcha que custou tempo:** nomes genéricos do Pulse (`.block`, `.info`, `.title`)
 colidem com utilitários do Tailwind. Regra sem camada vence regra em camada, então

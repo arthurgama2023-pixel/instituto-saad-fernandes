@@ -8,6 +8,17 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-03 — Verde vivo puro em botões e CTAs
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Verificação: `.btn-sm.primary` em `/admin` resolve `rgb(63,206,60)` (vivo) com
+  texto `rgb(10,20,32)`, em claro e escuro (forçado via `data-theme`); `.sd-aurora`
+  ("AGENDAR" em `/paciente`) idem.
+- Contraste calculado (WCAG): vivo+navy 8.91:1, teal+navy 8.74:1 (ambos acima do
+  mínimo 4.5:1); antes, branco sobre essas mesmas cores dava 2.08–2.12:1.
+- Regressões: nenhuma
+- Branch: `feat/smart-doctor/cadastro-medico` · commit `f7936b3`
+
+---
 ## 2026-08-03 — A logo de verdade em todo o app
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Verificação: `/medico`, `/admin`, `/` e `/medico/login` servem o traçado do balão
