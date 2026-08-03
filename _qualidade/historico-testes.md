@@ -8,6 +8,23 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-03 — Chamada agendada após o pagamento (CallCard + .ics)
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Verificação end-to-end no navegador: agendei (Tricologia → 04/ago 08:00 → médico)
+  → SIMULAR PAGAMENTO → "Consulta confirmada" **com o CallCard** ("faltam 14h
+  45min", "Adicionar à agenda", "VER DETALHES"). Card também aparece na home e no
+  detalhe da consulta.
+- Gate do "Entrar na sala": estado TRAVADO ("Disponível 10 min antes") verificado
+  ao vivo numa consulta a 2 dias. O estado LIBERADO é por código (não havia
+  consulta a <10min pra disparar sem mexer no banco).
+- .ics: baixado e inspecionado — DTSTART/DTEND corretos, VALARM -PT15M, e a quebra
+  de linha da descrição escapada no padrão iCal (`\n`, não `\\n`). **Bug pego na
+  verificação:** eu tinha escrito `\\n` literal no componente; corrigido para
+  quebra real antes de fechar.
+- Regressões: nenhuma
+- Branch: `feat/smart-doctor/cadastro-medico` · commit `f8f81cb`
+
+---
 ## 2026-08-03 — Portal (/) na linguagem do /paciente
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Verificação em aba nova (console virgem): 3 cards de perfil (Paciente, Médico,
