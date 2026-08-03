@@ -11,13 +11,18 @@
   --text: #101828;
   --text-2: #4a5568;
   --text-3: #8a94a6;
-  --primary: #0b6ef5;
+  /* Verde da marca Smart Doctor. `--primary` é usado como PREENCHIMENTO com texto
+     branco (.btn-primary) e como texto/acento sobre fundo claro, então precisa
+     passar 4.5:1 nos dois papéis: o Verde Profundo da marca (#0aa46e) dá só 3.2:1
+     com branco, daí esta versão mais funda. O verde vivo (#3fce3c) vive no
+     gradiente, onde é fill e não texto. */
+  --primary: #07845a;
   --accent: #00c9a7;
   --success: #12b76a;
   --warning: #f79009;
   --danger: #f04438;
-  --aurora: linear-gradient(135deg, #0b6ef5 0%, #00c9a7 100%);
-  --aurora-soft: linear-gradient(135deg, rgba(11, 110, 245, 0.08), rgba(0, 201, 167, 0.08));
+  --aurora: linear-gradient(135deg, #3fce3c 0%, #00c9a7 100%);
+  --aurora-soft: linear-gradient(135deg, rgba(63, 206, 60, 0.10), rgba(0, 201, 167, 0.10));
   --chat-bg: #fbfcfe;
   --shadow-2: 0 1px 2px rgba(16, 24, 40, 0.05), 0 8px 24px rgba(16, 24, 40, 0.06);
 }
@@ -32,10 +37,14 @@
     --text: #e6ebf4;
     --text-2: #9aa6bc;
     --text-3: #64748b;
-    --primary: #3d8bff;
+    /* No escuro o verde vivo puro é claro demais para levar texto branco por cima
+       (2.1:1). Este tom tem a mesma luminância do azul que ele substitui, então o
+       contraste dos botões fica igual ao de antes — e o verde vivo segue no
+       gradiente, que é onde a marca aparece. */
+    --primary: #16a34a;
     --accent: #1fddbe;
-    --aurora: linear-gradient(135deg, #3d8bff 0%, #1fddbe 100%);
-    --aurora-soft: linear-gradient(135deg, rgba(61, 139, 255, 0.12), rgba(31, 221, 190, 0.12));
+    --aurora: linear-gradient(135deg, #3fce3c 0%, #1fddbe 100%);
+    --aurora-soft: linear-gradient(135deg, rgba(63, 206, 60, 0.14), rgba(31, 221, 190, 0.12));
     --chat-bg: #0b1220;
     --shadow-2: none;
   }
@@ -49,10 +58,10 @@
   --text: #e6ebf4;
   --text-2: #9aa6bc;
   --text-3: #64748b;
-  --primary: #3d8bff;
+  --primary: #16a34a;
   --accent: #1fddbe;
-  --aurora: linear-gradient(135deg, #3d8bff 0%, #1fddbe 100%);
-  --aurora-soft: linear-gradient(135deg, rgba(61, 139, 255, 0.12), rgba(31, 221, 190, 0.12));
+  --aurora: linear-gradient(135deg, #3fce3c 0%, #1fddbe 100%);
+  --aurora-soft: linear-gradient(135deg, rgba(63, 206, 60, 0.14), rgba(31, 221, 190, 0.12));
   --chat-bg: #0b1220;
   --shadow-2: none;
 }
@@ -65,10 +74,10 @@
   --text: #101828;
   --text-2: #4a5568;
   --text-3: #8a94a6;
-  --primary: #0b6ef5;
+  --primary: #07845a;
   --accent: #00c9a7;
-  --aurora: linear-gradient(135deg, #0b6ef5 0%, #00c9a7 100%);
-  --aurora-soft: linear-gradient(135deg, rgba(11, 110, 245, 0.08), rgba(0, 201, 167, 0.08));
+  --aurora: linear-gradient(135deg, #3fce3c 0%, #00c9a7 100%);
+  --aurora-soft: linear-gradient(135deg, rgba(63, 206, 60, 0.10), rgba(0, 201, 167, 0.10));
   --chat-bg: #fbfcfe;
   --shadow-2: 0 1px 2px rgba(16, 24, 40, 0.05), 0 8px 24px rgba(16, 24, 40, 0.06);
 }
@@ -254,10 +263,10 @@ body {
 .qr {
   font-family: inherit; font-size: 12.5px; font-weight: 600;
   color: var(--primary); background: transparent;
-  border: 1.5px solid rgba(11, 110, 245, 0.4); border-radius: 999px;
+  border: 1.5px solid rgba(63, 206, 60, 0.45); border-radius: 999px;
   padding: 7px 14px; cursor: pointer;
 }
-.qr:hover { background: rgba(11, 110, 245, 0.08); }
+.qr:hover { background: rgba(63, 206, 60, 0.10); }
 
 .inputbar {
   display: flex; gap: 10px; padding: 10px 14px 14px;
@@ -270,7 +279,7 @@ body {
   border: 1px solid var(--border); border-radius: 999px;
   padding: 11px 18px; outline: none;
 }
-.inputbar input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(11, 110, 245, 0.15); }
+.inputbar input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(63, 206, 60, 0.20); }
 .send {
   width: 44px; height: 44px; border-radius: 999px; border: 0;
   background: var(--aurora); color: #fff; font-size: 17px; cursor: pointer;
@@ -376,7 +385,7 @@ body {
 .navitem.fab .ic {
   width: 54px; height: 54px; margin-top: -22px; border-radius: 999px;
   background: var(--aurora); display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 6px 18px rgba(11, 110, 245, 0.4);
+  box-shadow: 0 6px 18px rgba(63, 206, 60, 0.40);
 }
 .navitem.fab .ic svg { width: 30px; height: 30px; }
 
@@ -414,7 +423,7 @@ body {
 .pill.ok { background: rgba(18, 183, 106, 0.12); color: var(--success); }
 .pill.wait { background: rgba(247, 144, 9, 0.14); color: var(--warning); }
 .pill.done { background: var(--surface-2); color: var(--text-2); }
-.pill.info { background: rgba(11, 110, 245, 0.1); color: var(--primary); }
+.pill.info { background: rgba(63, 206, 60, 0.14); color: var(--primary); }
 .empty { text-align: center; color: var(--text-3); padding: 40px 20px; font-size: 14px; }
 .empty .em { font-size: 40px; display: block; margin-bottom: 10px; }
 .field-row { display: flex; justify-content: space-between; padding: 12px 2px; border-bottom: 1px solid var(--border); font-size: 14px; }
@@ -480,7 +489,9 @@ body {
   width: 232px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border);
   display: flex; flex-direction: column; padding: 16px 12px; gap: 4px; position: sticky; top: 0; height: 100dvh;
 }
-.sidebar .brand { display: flex; align-items: center; gap: 10px; padding: 6px 8px 16px; }
+/* A marca é um <a> para o topo do painel. Sem isto ela cai no estilo padrão do
+   navegador e aparece roxa e sublinhada depois de visitada. */
+.sidebar .brand { display: flex; align-items: center; gap: 10px; padding: 6px 8px 16px; text-decoration: none; color: inherit; }
 .sidebar .brand .m { width: 34px; height: 34px; border-radius: 10px; background: var(--aurora); display: flex; align-items: center; justify-content: center; }
 .sidebar .brand .m svg { width: 21px; height: 21px; }
 .sidebar .brand .t { font-family: "Plus Jakarta Sans", inherit; font-weight: 700; font-size: 15px; }
