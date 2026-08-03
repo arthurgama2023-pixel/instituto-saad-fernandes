@@ -8,6 +8,18 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-03 — Painel do médico na linguagem do /paciente
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Verificação no navegador (1400px): as 4 abas (agenda/pacientes/financeiro/config)
+  respondem 200, **nenhuma** serve mais classe Pulse (`.block`/`.kpi`/`.btn-sm`),
+  todas servem cards da marca; ícones Material Symbols renderizam como glifo (22px,
+  não texto literal); nav ativo em verde `secondary-container`; CTA "Entrar na
+  sala" em `.sd-aurora` (gradiente verde, texto navy, pílula). Screenshots do
+  Dashboard, Financeiro e Pacientes conferidos.
+- Regressões: nenhuma
+- Branch: `feat/smart-doctor/cadastro-medico` · commit `4313873`
+
+---
 ## 2026-08-03 — Verde vivo puro em botões e CTAs
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Verificação: `.btn-sm.primary` em `/admin` resolve `rgb(63,206,60)` (vivo) com
