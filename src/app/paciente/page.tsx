@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Avatar } from "@/components/brand/Avatar";
 import { Icon } from "@/components/brand/Icon";
+import { CallCard } from "@/components/brand/CallCard";
 import { ErrorState, Loading, StatusPill } from "@/components/brand/ui";
 import {
   dayNum,
@@ -34,6 +35,7 @@ export default function InicioPage() {
   if (!data) return <Loading />;
 
   const firstName = data.name.split(" ")[0];
+  const proximaChamada = data.upcoming.find((a) => a.status === "CONFIRMADA" && a.mode === "VIDEO");
 
   return (
     <>
@@ -55,6 +57,8 @@ export default function InicioPage() {
       </header>
 
       <main className="max-w-[1200px] mx-auto px-5 pt-4 space-y-8">
+        {proximaChamada && <CallCard call={proximaChamada} />}
+
         <section className="relative overflow-hidden rounded-xl bg-secondary-container p-6 flex flex-col md:flex-row items-center justify-between brand-shadow border border-secondary-fixed/30">
           <div className="z-10 flex-1 space-y-4">
             <h2 className="text-headline-md font-headline-md text-on-secondary-container">Agende sua consulta</h2>

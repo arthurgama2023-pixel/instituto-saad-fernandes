@@ -37,6 +37,7 @@ export type Confirmacao = {
   medico: string;
   especialidade: string;
   startsAt: string;
+  durationMin: number;
   mode: string;
 };
 

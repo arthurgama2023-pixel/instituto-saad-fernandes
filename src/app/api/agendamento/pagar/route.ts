@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
     medico: appt.doctor.user.name,
     especialidade: appt.doctor.specialty.name,
     startsAt: appt.startsAt.toISOString(),
+    durationMin: appt.durationMin,
     mode: appt.mode,
   });
 }

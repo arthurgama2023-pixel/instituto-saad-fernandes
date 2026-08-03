@@ -4,6 +4,7 @@ import { use } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/brand/Avatar";
 import { Icon } from "@/components/brand/Icon";
+import { CallCard } from "@/components/brand/CallCard";
 import { ErrorState, Loading, PageHeader, StatusPill } from "@/components/brand/ui";
 import { dayNum, money, monthShort, timeLabel, usePatient, weekdayLabel } from "@/lib/patient-data";
 
@@ -33,14 +34,17 @@ export default function ProntuarioPage({ params }: { params: Promise<{ id: strin
       <PageHeader title="Prontuário" />
 
       <main className="max-w-[1200px] mx-auto px-5 pb-6 space-y-6">
-        {appt.status === "CONFIRMADA" && appt.mode === "VIDEO" && (
-          <Link
-            href={`/sala/${appt.id}`}
-            className="sd-aurora flex items-center justify-center gap-2 w-full h-14 rounded-xl text-label-lg font-label-lg active:scale-95 transition-transform shadow-lg"
-          >
-            <Icon name="videocam" filled />
-            ENTRAR NA SALA
-          </Link>
+        {appt.status === "CONFIRMADA" && (
+          <CallCard
+            call={{
+              id: appt.id,
+              startsAt: appt.startsAt,
+              medico: appt.medico,
+              especialidade: appt.especialidade,
+              mode: appt.mode,
+              durationMin: appt.durationMin,
+            }}
+          />
         )}
 
         <section className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 brand-shadow flex flex-col md:flex-row md:items-center gap-6">

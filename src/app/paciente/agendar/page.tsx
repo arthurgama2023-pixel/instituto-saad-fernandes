@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Avatar } from "@/components/brand/Avatar";
 import { Icon } from "@/components/brand/Icon";
+import { CallCard } from "@/components/brand/CallCard";
 import { ErrorState, Loading, PageHeader } from "@/components/brand/ui";
 import { money, specialtyIcon, timeLabel, usePatient, type Specialty } from "@/lib/patient-data";
 import {
@@ -644,7 +645,20 @@ function Confirmado({ confirmacao }: { confirmacao: Confirmacao }) {
         {confirmacao.mode === "VIDEO" ? "teleconsulta" : "presencial"}
       </p>
 
-      <div className="w-full flex flex-col gap-3 mt-6">
+      <div className="w-full mt-6 text-left">
+        <CallCard
+          call={{
+            id: confirmacao.consultaId,
+            startsAt: confirmacao.startsAt,
+            medico: confirmacao.medico,
+            especialidade: confirmacao.especialidade,
+            mode: confirmacao.mode,
+            durationMin: confirmacao.durationMin,
+          }}
+        />
+      </div>
+
+      <div className="w-full flex flex-col gap-3 mt-4">
         <Link
           href={`/paciente/consultas/${confirmacao.consultaId}`}
           className="h-14 bg-primary-container text-white rounded-xl text-label-lg font-label-lg flex items-center justify-center"
