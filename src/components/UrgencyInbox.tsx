@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Icon } from "@/components/brand/Icon";
 
 type Chamado = {
   id: string;
@@ -18,10 +19,7 @@ const esperando = (criadoEm: string) => {
   return `${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, "0")}`;
 };
 
-/**
- * Fila de chamados de urgência do médico. Vive no painel antigo (Pulse), então
- * usa as classes de lá — o rebrand do painel do médico é uma etapa à parte.
- */
+/** Fila de chamados de urgência do médico, na identidade Smart Doctor (brand-app). */
 export function UrgencyInbox({ doctorId }: { doctorId: string }) {
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [aceitando, setAceitando] = useState<string | null>(null);
@@ -79,45 +77,45 @@ export function UrgencyInbox({ doctorId }: { doctorId: string }) {
   if (chamados.length === 0 && !aviso) return null;
 
   return (
-    <div className="block" style={{ borderColor: "rgba(240, 68, 56, 0.5)" }}>
-      <h3>
-        🚨 Chamados de urgência <span className="count">{chamados.length} aguardando</span>
-      </h3>
+    <section className="rounded-xl border border-error/40 bg-error-container/40 p-5 brand-shadow">
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h3 className="flex items-center gap-2 text-headline-sm font-headline-sm text-primary">
+          <Icon name="emergency" filled className="text-error" size={22} /> Chamados de urgência
+        </h3>
+        {chamados.length > 0 && (
+          <span className="text-body-sm font-body-sm text-on-surface-variant">{chamados.length} aguardando</span>
+        )}
+      </div>
 
       {aviso && (
-        <p style={{ fontSize: 13, color: "var(--text-2)", margin: "0 0 10px" }} role="status">
+        <p className="text-body-sm font-body-sm text-on-surface-variant mb-3" role="status">
           {aviso}
         </p>
       )}
 
-      {chamados.map((c) => (
-        <div
-          key={c.id}
-          style={{
-            display: "flex",
-            gap: 12,
-            alignItems: "flex-start",
-            padding: "12px 0",
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>{c.paciente}</div>
-            <div style={{ fontSize: 12.5, color: "var(--text-2)", margin: "2px 0 4px" }}>
-              {c.especialidade} · esperando há {esperando(c.criadoEm)}
-            </div>
-            <div style={{ fontSize: 13 }}>{c.descricao || "(sem descrição)"}</div>
-          </div>
-          <button
-            className="btn-sm primary"
-            onClick={() => aceitar(c.id)}
-            disabled={aceitando !== null}
-            style={{ flexShrink: 0 }}
+      <div className="space-y-3">
+        {chamados.map((c) => (
+          <div
+            key={c.id}
+            className="flex items-start gap-4 rounded-lg bg-surface-container-lowest border border-outline-variant/40 p-4"
           >
-            {aceitando === c.id ? "Aceitando…" : "Aceitar"}
-          </button>
-        </div>
-      ))}
-    </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-label-lg font-label-lg text-primary">{c.paciente}</div>
+              <div className="text-body-sm font-body-sm text-on-surface-variant mb-1">
+                {c.especialidade} · esperando há {esperando(c.criadoEm)}
+              </div>
+              <div className="text-body-md font-body-md text-on-surface">{c.descricao || "(sem descrição)"}</div>
+            </div>
+            <button
+              className="sd-aurora h-10 px-5 rounded-full text-label-md font-label-md active:scale-95 transition-transform disabled:opacity-40 shrink-0"
+              onClick={() => aceitar(c.id)}
+              disabled={aceitando !== null}
+            >
+              {aceitando === c.id ? "Aceitando…" : "Aceitar"}
+            </button>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
