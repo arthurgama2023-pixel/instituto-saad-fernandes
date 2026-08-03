@@ -4,7 +4,7 @@ import { Icon } from "@/components/brand/Icon";
 
 const PROFILES = [
   {
-    href: "/paciente",
+    href: "/login",
     icon: "person",
     title: "Paciente",
     desc: "Converse com a Clara pelo app, marque consultas, veja sua agenda, saúde e receitas.",
