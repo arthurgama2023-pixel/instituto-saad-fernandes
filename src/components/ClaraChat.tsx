@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SPulse } from "@/components/SPulse";
+import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 type UiEvent =
@@ -148,7 +148,7 @@ export function ClaraChat() {
   return (
     <div className="clara-embed">
       <header className="header">
-        <div className="avatar-clara"><SPulse /></div>
+        <div className="avatar-clara"><Logo /></div>
         <div>
           <div className="t">Clara</div>
           <div className="s">online</div>

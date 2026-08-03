@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ensureDemoData } from "@/modules/demo/seed-demo";
 import { adminOverview, listDoctorsAdmin } from "@/modules/admin/service";
-import { SPulse } from "@/components/SPulse";
+import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const money = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -25,7 +25,7 @@ export default async function AdminPanel({ searchParams }: { searchParams: Promi
     <div className="panel">
       <aside className="sidebar">
         <Link href="/" className="brand">
-          <div className="m"><SPulse /></div>
+          <div className="m"><Logo /></div>
           <div className="t">Smart Doctor<small>Administração</small></div>
         </Link>
         {NAV.map(([id, ic, label]) => (

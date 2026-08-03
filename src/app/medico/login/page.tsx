@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/brand/Icon";
+import { Logo } from "@/components/Logo";
 
 const inputWrap =
   "flex items-center gap-3 h-14 px-4 rounded-2xl border border-outline-variant/60 bg-surface-container-low focus-within:border-secondary focus-within:bg-surface-container-lowest transition-colors";
@@ -37,12 +38,9 @@ export default function LoginMedico() {
 
       <form onSubmit={entrar} className="flex-1 flex flex-col px-6">
         <div className="flex flex-col items-center text-center mt-6 mb-8">
-          <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true" className="mb-8">
-            <g fill="none" stroke="#3fce3c" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M30,18 H70 a14,14 0 0 1 14,14 V56 a14,14 0 0 1 -14,14 H46 l-10,13 -2,-13 h-4 a14,14 0 0 1 -14,-14 V32 a14,14 0 0 1 14,-14 Z" />
-              <path d="M26,45 H40 L45,34 L54,59 L60,41 L64,45 H74" />
-            </g>
-          </svg>
+          <div className="mb-8">
+            <Logo color="#3fce3c" size={72} />
+          </div>
 
           <span className="inline-block bg-primary-container text-white text-label-md font-label-md tracking-widest px-4 py-1.5 rounded-full mb-4">
             ÁREA DO MÉDICO

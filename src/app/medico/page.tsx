@@ -3,7 +3,7 @@ import { ensureDemoData } from "@/modules/demo/seed-demo";
 import { doctorPanel, listDoctors, getDefaultDoctorId } from "@/modules/doctor/service";
 import { getDoctorSession } from "@/lib/doctor-session";
 import { DoctorSwitcher } from "@/components/PanelSwitcher";
-import { SPulse } from "@/components/SPulse";
+import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UrgencyInbox } from "@/components/UrgencyInbox";
 
@@ -40,7 +40,7 @@ export default async function MedicoPanel({
     <div className="panel">
       <aside className="sidebar">
         <Link href="/" className="brand">
-          <div className="m"><SPulse /></div>
+          <div className="m"><Logo /></div>
           <div className="t">Smart Doctor<small>Painel do médico</small></div>
         </Link>
         {NAV.map(([id, ic, label]) => (

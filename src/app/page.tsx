@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SPulse } from "@/components/SPulse";
+import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Portal() {
@@ -9,7 +9,7 @@ export default function Portal() {
         <ThemeToggle />
       </div>
       <div className="portal-hero">
-        <div className="portal-mark"><SPulse /></div>
+        <div className="portal-mark"><Logo /></div>
         <h1>Smart Doctor</h1>
         <p className="slogan">Inteligência que cuida.</p>
         <p className="note">Demo navegável · escolha um perfil para explorar</p>
