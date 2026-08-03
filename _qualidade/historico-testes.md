@@ -8,6 +8,18 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-03 — Verde da marca nos painéis médico e admin
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Verificação no navegador (`/admin` e `/medico`, 1400px, tema claro e escuro):
+  `--primary` e `--aurora` resolvem em verde; **0 elementos** ainda computando o
+  azul antigo; contraste do botão primário medido em **4.71:1** com texto branco
+  (AA exige 4.5:1); marca da sidebar sem sublinhado e herdando a cor do texto.
+- ⚠️ Sem screenshot: o Browser pane estava recolhido (viewport 0px), então a
+  verificação foi por valor computado, não visual.
+- Regressões: nenhuma
+- Branch: `feat/smart-doctor/cadastro-medico` · commit `c15b1c7`
+
+---
 ## 2026-08-03 — Limpeza final do rebrand Smart Doctor
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Verificação no navegador: `/paciente` em `localhost:3080` serve

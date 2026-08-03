@@ -19,6 +19,18 @@ marca, Manrope + Plus Jakarta Sans, Material Symbols). Os painéis `/medico` e
   `.brand-app` (aplicado pelo `src/app/paciente/layout.tsx`).
 - `src/app/globals.css` — CSS Pulse, todo dentro de `@layer pulse`.
 
+**Os dois lados têm tokens de cor separados.** Mexer no verde da marca em
+`brand.css` NÃO alcança `/medico` e `/admin` — o Pulse tem os próprios
+`--primary`/`--aurora` no topo do `globals.css`, repetidos em 4 blocos (`:root`,
+`@media dark`, `[data-theme=dark]`, `[data-theme=light]`). Trocar a marca exige
+os dois arquivos.
+
+`--primary` do Pulse é usado tanto como **fundo de botão com texto branco** quanto
+como **texto de acento**, então qualquer cor nova precisa passar 4.5:1 nos dois
+papéis. É por isso que o verde do Pulse (`#07845a` claro / `#16a34a` escuro) é mais
+fundo que o Verde Profundo da marca (`#0aa46e`, que dá 3.2:1 com branco em cima).
+O verde vivo `#3fce3c` só entra no gradiente, onde é fill e não texto.
+
 **Gotcha que custou tempo:** nomes genéricos do Pulse (`.block`, `.info`, `.title`)
 colidem com utilitários do Tailwind. Regra sem camada vence regra em camada, então
 o CSS Pulse *precisa* ficar em `@layer pulse`, declarada antes de `utilities` na
