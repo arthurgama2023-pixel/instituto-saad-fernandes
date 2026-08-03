@@ -11,12 +11,17 @@
   --text: #101828;
   --text-2: #4a5568;
   --text-3: #8a94a6;
-  /* Verde da marca Smart Doctor. `--primary` é usado como PREENCHIMENTO com texto
-     branco (.btn-primary) e como texto/acento sobre fundo claro, então precisa
-     passar 4.5:1 nos dois papéis: o Verde Profundo da marca (#0aa46e) dá só 3.2:1
-     com branco, daí esta versão mais funda. O verde vivo (#3fce3c) vive no
-     gradiente, onde é fill e não texto. */
+  /* Verde da marca Smart Doctor, em dois papéis que pedem tons diferentes:
+     `--primary` é TEXTO/borda fina sobre fundo claro (valor da consulta, rótulo,
+     ícone da aba ativa) — precisa de 4.5:1, e o vivo puro só dá 2.08:1, quase
+     ilegível. `--primary-fill`/`--on-primary-fill` são o par de PREENCHIMENTO
+     (botão, barra da aba ativa, emblema): aqui sim o verde vivo entra puro,
+     igual ao ícone do app — só que o par de contraste é invertido (lá é traço
+     vivo sobre base escura; aqui é base vivo com texto escuro, 8.5:1). Fixo nos
+     dois temas porque o vivo é a cor da marca, não deveria variar com o tema. */
   --primary: #07845a;
+  --primary-fill: #3fce3c;
+  --on-primary-fill: #0a1420;
   --accent: #00c9a7;
   --success: #12b76a;
   --warning: #f79009;
@@ -37,11 +42,9 @@
     --text: #e6ebf4;
     --text-2: #9aa6bc;
     --text-3: #64748b;
-    /* No escuro o verde vivo puro é claro demais para levar texto branco por cima
-       (2.1:1). Este tom tem a mesma luminância do azul que ele substitui, então o
-       contraste dos botões fica igual ao de antes — e o verde vivo segue no
-       gradiente, que é onde a marca aparece. */
     --primary: #16a34a;
+    --primary-fill: #3fce3c;
+    --on-primary-fill: #0a1420;
     --accent: #1fddbe;
     --aurora: linear-gradient(135deg, #3fce3c 0%, #1fddbe 100%);
     --aurora-soft: linear-gradient(135deg, rgba(63, 206, 60, 0.14), rgba(31, 221, 190, 0.12));
@@ -59,6 +62,8 @@
   --text-2: #9aa6bc;
   --text-3: #64748b;
   --primary: #16a34a;
+  --primary-fill: #3fce3c;
+  --on-primary-fill: #0a1420;
   --accent: #1fddbe;
   --aurora: linear-gradient(135deg, #3fce3c 0%, #1fddbe 100%);
   --aurora-soft: linear-gradient(135deg, rgba(63, 206, 60, 0.14), rgba(31, 221, 190, 0.12));
@@ -75,6 +80,8 @@
   --text-2: #4a5568;
   --text-3: #8a94a6;
   --primary: #07845a;
+  --primary-fill: #3fce3c;
+  --on-primary-fill: #0a1420;
   --accent: #00c9a7;
   --aurora: linear-gradient(135deg, #3fce3c 0%, #00c9a7 100%);
   --aurora-soft: linear-gradient(135deg, rgba(63, 206, 60, 0.10), rgba(0, 201, 167, 0.10));
@@ -183,8 +190,8 @@ body {
 }
 .msg.user {
   align-self: flex-end;
-  background: var(--primary);
-  color: #fff;
+  background: var(--primary-fill);
+  color: var(--on-primary-fill);
   border-bottom-right-radius: 6px;
 }
 .msg.clara {
@@ -236,8 +243,10 @@ body {
 }
 .btn:active { transform: scale(0.97); }
 .btn:disabled { opacity: 0.5; cursor: default; }
-.btn-primary { background: var(--primary); color: #fff; }
-.btn-aurora { background: var(--aurora); color: #fff; }
+.btn-primary { background: var(--primary-fill); color: var(--on-primary-fill); }
+/* Texto branco aqui dava 2.1:1 nas duas pontas do gradiente (vivo e teal) —
+   ilegível. Mesmo par escuro do --primary-fill resolve nas duas. */
+.btn-aurora { background: var(--aurora); color: var(--on-primary-fill); }
 .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
 
 .pay-title { font-weight: 700; font-size: 13.5px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
@@ -553,7 +562,7 @@ body {
 .tl-row { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: center; }
 .tl-row:last-child { border: 0; }
 .tl-row .time { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 13px; width: 46px; color: var(--text-2); }
-.tl-row .bar { width: 4px; align-self: stretch; border-radius: 4px; background: var(--primary); }
+.tl-row .bar { width: 4px; align-self: stretch; border-radius: 4px; background: var(--primary-fill); }
 .tl-row.done .bar { background: var(--text-3); }
 .tl-row .who { flex: 1; }
 .tl-row .who .n { font-weight: 600; font-size: 13.5px; }
@@ -586,7 +595,7 @@ body {
 
 /* botões pequenos painel */
 .btn-sm { font-family: inherit; font-size: 12.5px; font-weight: 600; border-radius: 9px; padding: 7px 13px; cursor: pointer; border: 0; }
-.btn-sm.primary { background: var(--primary); color: #fff; }
+.btn-sm.primary { background: var(--primary-fill); color: var(--on-primary-fill); }
 .btn-sm.ghost { background: var(--surface-2); color: var(--text); }
 .btn-sm.danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
 .approve-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }

@@ -204,10 +204,13 @@ body:has(.brand-app) {
 }
 
 /* Gradiente da marca Smart Doctor — Verde Vivo → Verde Vital, a mesma cor da
-   logo. Reservado para a ação principal (CTA), sem espalhar. */
+   logo. Reservado para a ação principal (CTA), sem espalhar.
+   Texto branco por cima falhava nas duas pontas do gradiente (2.1:1 no vivo,
+   2.1:1 no teal) — quase invisível. Texto escuro (a mesma cor de fundo do ícone
+   do app) dá 8.5:1 no vivo e ainda passa no teal. */
 .sd-aurora {
   background: linear-gradient(135deg, #3fce3c 0%, #00c9a7 100%);
-  color: #ffffff;
+  color: #0a1420;
 }
 .sd-aurora-text {
   background: linear-gradient(135deg, #3fce3c 0%, #00c9a7 100%);
