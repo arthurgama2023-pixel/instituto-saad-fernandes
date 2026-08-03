@@ -8,6 +8,17 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-03 — A logo de verdade em todo o app
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Verificação: `/medico`, `/admin`, `/` e `/medico/login` servem o traçado do balão
+  e **nenhuma** delas serve mais o traçado do "S" antigo; `/appicon` responde
+  200 image/png (14.7 KB).
+- ⚠️ Sem screenshot do app: o Browser pane segue recolhido. A prova visual foi um
+  comparativo renderizado à parte, nos tamanhos reais (21/34/46px).
+- Regressões: nenhuma
+- Branch: `feat/smart-doctor/cadastro-medico` · commit `b6c6e3e`
+
+---
 ## 2026-08-03 — Verde da marca nos painéis médico e admin
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Verificação no navegador (`/admin` e `/medico`, 1400px, tema claro e escuro):
