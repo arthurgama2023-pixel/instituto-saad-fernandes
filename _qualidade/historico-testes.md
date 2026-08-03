@@ -8,6 +8,21 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-03 — /admin na linguagem do /paciente + fix de key
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Verificação: as 4 abas do /admin (visao/medicos/clara/financeiro) sem classe
+  Pulse, todas em cards da marca; "Aprovar" no verde `.sd-aurora`; nav ativo
+  verde; sem ThemeToggle.
+- Bug corrigido de carona: a lista de Pacientes do /medico usava `key={p.name}`
+  e o demo tem 10 pacientes homônimos ("Marina Costa") → chave duplicada no React.
+  O service passou a expor o `patientId` e a lista usa `key={p.id}`. **Prova
+  limpa:** aba nova (buffer de console virgem) carregou /medico?tab=pacientes com
+  **zero** erros de key. (O buffer do MCP na aba antiga não zera com restart do
+  server, o que confundiu a leitura — daí a verificação em aba nova.)
+- Regressões: nenhuma
+- Branch: `feat/smart-doctor/cadastro-medico` · commits `a458c2a`, `28c97ce`
+
+---
 ## 2026-08-03 — Painel do médico na linguagem do /paciente
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Verificação no navegador (1400px): as 4 abas (agenda/pacientes/financeiro/config)

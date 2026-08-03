@@ -5,15 +5,15 @@ Três interfaces: `/paciente` (app do paciente), `/medico`, `/admin`.
 
 ## Duas camadas de estilo convivendo
 
-O app do paciente **e o painel `/medico`** usam a identidade **Smart Doctor**
-(Material Design 3 no verde da marca, Manrope + Plus Jakarta Sans, Material
-Symbols, superfícies `.brand-app`). Só o `/admin` ainda usa o design system
-**Pulse** (CSS artesanal em `globals.css`).
+O app do paciente **e os painéis `/medico` e `/admin`** usam a identidade
+**Smart Doctor** (Material Design 3 no verde da marca, Manrope + Plus Jakarta
+Sans, Material Symbols, superfícies `.brand-app`). O design system **Pulse**
+(CSS artesanal em `globals.css`) sobrou só no **portal `/`** (a tela de escolha
+de perfil) e em componentes soltos (`ClaraChat`, `ThemeToggle`).
 
-O `/medico` é light-only, como o app do paciente: o `.brand-app` não tem tokens
-escuros, então não há botão de tema nesse painel (o `ThemeToggle` segue no
-`/admin` e no portal, que ainda são Pulse). Os controles do cabeçalho do médico
-(`DoctorSwitcher`) continuam com CSS Pulse e funcionam dentro do `.brand-app`
+`/medico` e `/admin` são light-only, como o app do paciente: o `.brand-app` não
+tem tokens escuros, então não há botão de tema nesses painéis. O `DoctorSwitcher`
+do cabeçalho do médico continua com CSS Pulse e funciona dentro do `.brand-app`
 porque a camada `pulse` vence o reset escopado (que está em `@layer base`).
 
 > Histórico: o app já foi rebrandado para "Instituto Saad Fernandes" (identidade
