@@ -52,7 +52,7 @@ export function usePatient() {
 }
 
 // A especialidade guarda um emoji (usado pelos painéis médico/admin); a identidade
-// Saad Fernandes usa Material Symbols, então o mapa traduz slug → ícone.
+// Smart Doctor usa Material Symbols, então o mapa traduz slug → ícone.
 const SPECIALTY_ICONS: Record<string, string> = {
   tricologia: "content_cut",
   dermatologia: "biotech",

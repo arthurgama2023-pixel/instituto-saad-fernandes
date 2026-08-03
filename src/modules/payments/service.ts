@@ -11,7 +11,10 @@ export async function createCharge(appointmentId: string) {
   const existing = await db.payment.findUnique({ where: { appointmentId } });
   if (existing) return existing; // idempotente
 
-  const pixCode = `00020126580014BR.GOV.BCB.PIX0136saadfernandes-${appointmentId.slice(-8)}5204000053039865802BR5915INST SAAD FERN6009SAO PAULO`;
+  // Payload EMV de mentira, só para o app ter o que exibir/copiar. Os prefixos de
+  // tamanho (2642, 0120, 5912) batem com o conteúdo para não parecer lixo se alguém
+  // colar num leitor — mas não tem CRC16 válido no fim, então não é cobrável.
+  const pixCode = `00020126420014BR.GOV.BCB.PIX0120smartdoctor-${appointmentId.slice(-8)}5204000053039865802BR5912SMART DOCTOR6009SAO PAULO`;
   return db.payment.create({
     data: {
       appointmentId,

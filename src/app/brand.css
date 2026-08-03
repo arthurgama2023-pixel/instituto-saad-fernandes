@@ -1,4 +1,4 @@
-/* Identidade Instituto Saad Fernandes — tokens Material Design 3 + tipografia editorial.
+/* Identidade Smart Doctor — tokens Material Design 3 no verde da marca.
    Preflight do Tailwind fica de fora de propósito: os painéis /medico e /admin ainda
    usam o CSS Pulse em globals.css e seriam quebrados pelo reset global. */
 /* A camada `pulse` guarda o CSS legado dos painéis médico/admin. Ela vem antes de
@@ -165,7 +165,7 @@
   }
 }
 
-/* A identidade Saad Fernandes é clara. Fica FORA de @layer de propósito: o CSS
+/* A identidade Smart Doctor é clara. Fica FORA de @layer de propósito: o CSS
    Pulse em globals.css não usa camadas, e regra sem camada vence regra em camada. */
 body:has(.brand-app) {
   background: var(--color-background);

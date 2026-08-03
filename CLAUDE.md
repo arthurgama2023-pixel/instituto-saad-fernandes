@@ -1,13 +1,18 @@
-# Smart Doctor / Instituto Saad Fernandes — notas do projeto
+# Smart Doctor — notas do projeto
 
 App Next 16 + Prisma 7 (SQLite em dev). Porta **3080** (`npm run dev`).
 Três interfaces: `/paciente` (app do paciente), `/medico`, `/admin`.
 
 ## Duas camadas de estilo convivendo
 
-O app do paciente foi rebrandado para a identidade **Instituto Saad Fernandes**
-(Material Design 3, Manrope + Noto Serif, Material Symbols). Os painéis `/medico`
-e `/admin` ainda usam o design system **Pulse** (CSS artesanal).
+O app do paciente usa a identidade **Smart Doctor** (Material Design 3 no verde da
+marca, Manrope + Plus Jakarta Sans, Material Symbols). Os painéis `/medico` e
+`/admin` ainda usam o design system **Pulse** (CSS artesanal).
+
+> Histórico: o app já foi rebrandado para "Instituto Saad Fernandes" (identidade
+> editorial, dourado + serifa) e voltou para Smart Doctor no commit `5f2dd02`.
+> O nome **Saad Fernandes** só sobrevive como *dado* de demonstração (médico
+> responsável no seed), nunca como marca da interface.
 
 - `src/app/brand.css` — Tailwind v4 + tokens da marca em `@theme`. **Sem preflight**:
   o reset global quebraria os painéis Pulse. No lugar dele há um reset escopado em
@@ -25,7 +30,8 @@ do tema escuro do Pulse.
 
 Seed lazy e idempotente na primeira request: `modules/catalog/seed.ts`
 (especialidades tricologia/dermatologia/clinica-geral + 4 médicos, com
-Dr. Saad Fernandes como responsável técnico) e `modules/demo/seed-demo.ts`
+Dr. Saad Fernandes como responsável técnico — dado demo, não marca)
+e `modules/demo/seed-demo.ts`
 (pacientes e consultas para os painéis).
 
 Para re-semear depois de mexer no seed: arquive o `.db` e rode `npm run db:push`

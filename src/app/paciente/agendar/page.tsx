@@ -311,7 +311,7 @@ function PassoEspecialidade({
                 <div className="flex-grow min-w-0">
                   <h3 className="text-body-lg font-bold text-primary mb-1">{s.name}</h3>
                   <p className="text-body-sm font-body-sm text-on-surface-variant">
-                    {BLURB[s.slug] ?? "Atendimento especializado com a equipe do Instituto."}
+                    {BLURB[s.slug] ?? "Atendimento especializado com a equipe Smart Doctor."}
                   </p>
                 </div>
                 <div

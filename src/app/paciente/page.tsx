@@ -93,7 +93,7 @@ export default function InicioPage() {
                 </div>
                 <h4 className="text-label-lg font-label-lg text-primary mb-1">{s.name}</h4>
                 <p className="text-[11px] leading-tight text-on-surface-variant font-label-md">
-                  {SPECIALTY_BLURB[s.slug] ?? "Atendimento especializado com a equipe do Instituto."}
+                  {SPECIALTY_BLURB[s.slug] ?? "Atendimento especializado com a equipe Smart Doctor."}
                 </p>
               </Link>
             ))}

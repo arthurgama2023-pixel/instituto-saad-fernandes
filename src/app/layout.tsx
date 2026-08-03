@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Smart Doctor",
-  description: "Cuidado médico exclusivo em tricologia, dermatologia e clínica geral.",
+  description: "Consulta online com médico de verdade: agende em minutos ou chame atendimento de urgência.",
   manifest: "/manifest.webmanifest",
   applicationName: "Smart Doctor",
   appleWebApp: { capable: true, title: "Smart Doctor", statusBarStyle: "default" },
