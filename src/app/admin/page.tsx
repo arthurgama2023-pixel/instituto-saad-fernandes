@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ensureDemoData } from "@/modules/demo/seed-demo";
 import { adminOverview, listDoctorsAdmin } from "@/modules/admin/service";
-import { Logo } from "@/components/Logo";
+import { LogoMark } from "@/components/LogoMark";
 import { Icon } from "@/components/brand/Icon";
 
 const money = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -27,9 +27,7 @@ export default async function AdminPanel({ searchParams }: { searchParams: Promi
     <div className="brand-app min-h-screen flex bg-background text-on-background">
       <aside className="w-64 shrink-0 border-r border-outline-variant/50 bg-surface-container-lowest flex-col p-4 gap-1 sticky top-0 h-screen hidden md:flex">
         <Link href="/" className="flex items-center gap-3 px-2 py-2 mb-4">
-          <span className="w-10 h-10 rounded-xl sd-aurora flex items-center justify-center shrink-0">
-            <Logo size={26} />
-          </span>
+          <LogoMark size={40} />
           <span className="flex flex-col leading-tight">
             <span className="text-label-lg font-label-lg text-primary">Smart Doctor</span>
             <span className="text-[11px] text-on-surface-variant font-label-md">Administração</span>

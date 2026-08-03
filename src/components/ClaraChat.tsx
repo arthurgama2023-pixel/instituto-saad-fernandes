@@ -148,7 +148,7 @@ export function ClaraChat() {
   return (
     <div className="clara-embed">
       <header className="header">
-        <div className="avatar-clara"><Logo /></div>
+        <div className="avatar-clara"><Logo color="#3fce3c" /></div>
         <div>
           <div className="t">Clara</div>
           <div className="s">online</div>

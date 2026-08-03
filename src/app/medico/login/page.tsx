@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/brand/Icon";
-import { Logo } from "@/components/Logo";
+import { LogoMark } from "@/components/LogoMark";
 
 const inputWrap =
   "flex items-center gap-3 h-14 px-4 rounded-2xl border border-outline-variant/60 bg-surface-container-low focus-within:border-secondary focus-within:bg-surface-container-lowest transition-colors";
@@ -39,7 +39,7 @@ export default function LoginMedico() {
       <form onSubmit={entrar} className="flex-1 flex flex-col px-6">
         <div className="flex flex-col items-center text-center mt-6 mb-8">
           <div className="mb-8">
-            <Logo color="#3fce3c" size={72} />
+            <LogoMark size={72} />
           </div>
 
           <span className="inline-block bg-primary-container text-white text-label-md font-label-md tracking-widest px-4 py-1.5 rounded-full mb-4">

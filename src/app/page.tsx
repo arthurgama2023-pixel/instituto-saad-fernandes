@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Logo } from "@/components/Logo";
+import { LogoMark } from "@/components/LogoMark";
 import { Icon } from "@/components/brand/Icon";
 
 const PROFILES = [
@@ -30,8 +30,8 @@ export default function Portal() {
   return (
     <div className="brand-app min-h-screen bg-background text-on-background flex flex-col">
       <main className="flex-1 flex flex-col items-center px-6 py-14 max-w-[960px] mx-auto w-full">
-        <div className="w-[76px] h-[76px] rounded-[22px] sd-aurora flex items-center justify-center brand-shadow mb-4">
-          <Logo size={46} />
+        <div className="mb-4">
+          <LogoMark size={76} />
         </div>
         <h1 className="text-headline-lg font-headline-lg text-primary text-center">Smart Doctor</h1>
         <p className="text-body-lg font-body-lg text-on-surface-variant mt-2 text-center">Inteligência que cuida.</p>
