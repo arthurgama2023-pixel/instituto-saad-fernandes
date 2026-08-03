@@ -23,7 +23,7 @@ export default function Portal() {
           <span className="go">Entrar como paciente →</span>
         </Link>
 
-        <Link href="/medico" className="profile-card">
+        <Link href="/medico/login" className="profile-card">
           <span className="profile-emoji">🩺</span>
           <h2>Médico</h2>
           <p>Dashboard, agenda do dia com resumo da Clara, pacientes e financeiro com repasses.</p>
@@ -37,6 +37,13 @@ export default function Portal() {
           <span className="go">Entrar como admin →</span>
         </Link>
       </div>
+
+      <p style={{ textAlign: "center", marginTop: 22, fontSize: 14, color: "var(--text-2)" }}>
+        É médico e quer atender pela plataforma?{" "}
+        <Link href="/medico/login" style={{ color: "#0aa46e", fontWeight: 600 }}>
+          Acesse a área do médico →
+        </Link>
+      </p>
     </div>
   );
 }

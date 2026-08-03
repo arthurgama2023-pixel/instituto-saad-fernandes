@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ensureDemoData } from "@/modules/demo/seed-demo";
 import { doctorPanel, listDoctors, getDefaultDoctorId } from "@/modules/doctor/service";
+import { getDoctorSession } from "@/lib/doctor-session";
 import { DoctorSwitcher } from "@/components/PanelSwitcher";
 import { SPulse } from "@/components/SPulse";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -27,7 +28,8 @@ export default async function MedicoPanel({
   await ensureDemoData();
   const sp = await searchParams;
   const doctors = await listDoctors();
-  const doctorId = sp.d || (await getDefaultDoctorId()) || "";
+  // Prioridade: seletor da URL (?d=) → médico logado por OTP (cookie) → padrão demo.
+  const doctorId = sp.d || (await getDoctorSession()) || (await getDefaultDoctorId()) || "";
   const tab = sp.tab || "dashboard";
   const data = await doctorPanel(doctorId);
 

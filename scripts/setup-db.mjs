@@ -7,7 +7,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
 const path = new URL("../prisma/schema.prisma", import.meta.url);
-const url = process.env.DATABASE_URL ?? process.env.NETLIFY_DB_URL ?? "";
+const url = process.env.DATABASE_URL || process.env.NETLIFY_DB_URL || "";
 const provider = /^postgres(ql)?:\/\//i.test(url) ? "postgresql" : "sqlite";
 
 const schema = readFileSync(path, "utf8");

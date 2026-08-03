@@ -152,3 +152,16 @@ model UrgencyEvent {
   level          Int // 1 = dicionário determinístico | 2 = sinalizado pelo modelo
   createdAt      DateTime @default(now())
 }
+
+// Código OTP de login do médico (WhatsApp). No MVP o código é mostrado na tela;
+// quando a API do WhatsApp for conectada, o mesmo código é enviado por mensagem.
+model OtpCode {
+  id        String   @id @default(cuid())
+  phone     String // E.164 sem "+"
+  code      String // 6 dígitos
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([phone, createdAt])
+}

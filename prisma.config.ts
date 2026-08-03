@@ -9,6 +9,6 @@ export default defineConfig({
     // Dev local: SQLite. Em produção vira a connection string do Postgres —
     // DATABASE_URL (Render) ou NETLIFY_DB_URL (Netlify, injetada automaticamente
     // pelo @netlify/database no deploy).
-    url: process.env.DATABASE_URL ?? process.env.NETLIFY_DB_URL ?? DEV_DB_URL,
+    url: process.env.DATABASE_URL || process.env.NETLIFY_DB_URL || DEV_DB_URL,
   },
 });

@@ -28,10 +28,10 @@ const SPECIALTIES = [
 ];
 
 const DOCTORS = [
-  { name: "Dr. Saad Fernandes", specialty: "tricologia", crm: "CRM 123.456-SP", bio: "Tricologista e responsável técnico do Instituto. Diagnóstico por tricoscopia digital e protocolos individualizados para alopecia.", yearsExp: 18, rating: 4.9, priceCents: 45000, rules: [[1, 540, 720], [3, 840, 1140], [5, 540, 720]] },
-  { name: "Dra. Helena Prado", specialty: "tricologia", crm: "CRM 234.567-SP", bio: "Especialista em alopecia feminina e eflúvio telógeno. Acompanhamento fotográfico da evolução.", yearsExp: 11, rating: 4.8, priceCents: 38000, rules: [[2, 480, 720], [4, 840, 1200]] },
-  { name: "Dra. Paula Freitas", specialty: "dermatologia", crm: "CRM 345.678-SP", bio: "Dermatologista clínica e estética. Avaliação de lesões, acne e rejuvenescimento.", yearsExp: 14, rating: 4.8, priceCents: 35000, rules: [[2, 540, 780], [4, 540, 780]] },
-  { name: "Dr. Diego Santoro", specialty: "clinica-geral", crm: "CRM 456.789-SP", bio: "Clínico geral. Primeira avaliação, check-up laboratorial e orientação de exames.", yearsExp: 9, rating: 4.7, priceCents: 28000, rules: [[1, 840, 1140], [2, 840, 1140], [3, 480, 720], [5, 840, 1140]] },
+  { name: "Dr. Saad Fernandes", phone: "5511999990001", specialty: "tricologia", crm: "CRM 123.456-SP", bio: "Tricologista e responsável técnico do Instituto. Diagnóstico por tricoscopia digital e protocolos individualizados para alopecia.", yearsExp: 18, rating: 4.9, priceCents: 45000, rules: [[1, 540, 720], [3, 840, 1140], [5, 540, 720]] },
+  { name: "Dra. Helena Prado", phone: "5511999990002", specialty: "tricologia", crm: "CRM 234.567-SP", bio: "Especialista em alopecia feminina e eflúvio telógeno. Acompanhamento fotográfico da evolução.", yearsExp: 11, rating: 4.8, priceCents: 38000, rules: [[2, 480, 720], [4, 840, 1200]] },
+  { name: "Dra. Paula Freitas", phone: "5511999990003", specialty: "dermatologia", crm: "CRM 345.678-SP", bio: "Dermatologista clínica e estética. Avaliação de lesões, acne e rejuvenescimento.", yearsExp: 14, rating: 4.8, priceCents: 35000, rules: [[2, 540, 780], [4, 540, 780]] },
+  { name: "Dr. Diego Santoro", phone: "5511999990004", specialty: "clinica-geral", crm: "CRM 456.789-SP", bio: "Clínico geral. Primeira avaliação, check-up laboratorial e orientação de exames.", yearsExp: 9, rating: 4.7, priceCents: 28000, rules: [[1, 840, 1140], [2, 840, 1140], [3, 480, 720], [5, 840, 1140]] },
 ];
 
 export async function ensureSeeded(): Promise<void> {
@@ -51,7 +51,7 @@ export async function ensureSeeded(): Promise<void> {
   for (const d of DOCTORS) {
     const specialty = await db.specialty.findUniqueOrThrow({ where: { slug: d.specialty } });
     const user = await db.user.create({
-      data: { name: d.name, role: "DOCTOR" },
+      data: { name: d.name, phone: d.phone, role: "DOCTOR" },
     });
     await db.doctor.create({
       data: {
