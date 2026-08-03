@@ -247,7 +247,7 @@ function Pacientes({ data }: { data: Data }) {
         Meus pacientes <span className="text-body-sm font-body-sm text-on-surface-variant">· {data.patients.length}</span>
       </h3>
       {data.patients.map((p) => (
-        <div key={p.name} className={`${card} flex items-center gap-4 p-4`}>
+        <div key={p.id} className={`${card} flex items-center gap-4 p-4`}>
           <span className="w-11 h-11 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center text-label-md font-label-md shrink-0">
             {initials(p.name)}
           </span>

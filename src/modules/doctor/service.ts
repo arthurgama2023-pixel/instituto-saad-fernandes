@@ -131,7 +131,7 @@ export async function doctorPanel(doctorId: string) {
     })),
     patients: [...patientMap.values()]
       .sort((a, b) => (b.last?.getTime() ?? 0) - (a.last?.getTime() ?? 0))
-      .map((p) => ({ name: p.name, last: p.last?.toISOString() ?? null, total: p.total })),
+      .map((p) => ({ id: p.id, name: p.name, last: p.last?.toISOString() ?? null, total: p.total })),
     payments: payments.map((p) => ({
       id: p.id,
       patient: p.appointment.patient.name,
