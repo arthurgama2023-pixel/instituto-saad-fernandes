@@ -160,7 +160,7 @@ function Dashboard({ data }: { data: Data }) {
             </p>
           </div>
           <Link
-            href={`/sala/${data.proximo.id}?como=medico&peer=${encodeURIComponent(data.proximo.patient)}`}
+            href={`/sala/${data.proximo.id}?como=medico&d=${data.doctor.id}&peer=${encodeURIComponent(data.proximo.patient)}`}
             className="sd-aurora mt-5 inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-label-lg font-label-lg active:scale-95 transition-transform shadow-md"
           >
             <Icon name="videocam" size={20} /> Entrar na sala

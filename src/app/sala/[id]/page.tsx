@@ -1,16 +1,30 @@
 "use client";
 
 import { use, useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@/components/brand/Icon";
-import { initials, timeLabel, usePatient } from "@/lib/patient-data";
+import { initials, usePatient } from "@/lib/patient-data";
 
 type CamState = "ligando" | "on" | "off" | "bloqueada";
 
 export default function SalaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const search = useSearchParams();
   const { data } = usePatient();
+
+  // Perspectiva: por padrão é o paciente (entra pela consulta e vê o médico).
+  // O médico entra pelo painel com ?como=medico&peer=<nome do paciente> e aí a
+  // pessoa do outro lado é o paciente.
+  const comoMedico = search.get("como") === "medico";
+  const peer = search.get("peer");
+  const doctorId = search.get("d");
+
+  // Para onde a pessoa vai ao encerrar. O médico volta ao próprio painel (mesmo
+  // médico do "Ver como", se veio com ?d=); o paciente vai para a tela da consulta.
+  const destinoSaida = comoMedico
+    ? `/medico${doctorId ? `?d=${doctorId}&tab=dashboard` : ""}`
+    : `/paciente/consultas/${id}`;
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -21,8 +35,9 @@ export default function SalaPage({ params }: { params: Promise<{ id: string }> }
   const [chatAberto, setChatAberto] = useState(false);
 
   const appt = data ? [...data.upcoming, ...data.past].find((a) => a.id === id) : undefined;
-  const medico = appt?.medico ?? "Seu médico";
-  const especialidade = appt?.especialidade ?? "Consulta";
+  // Quem aparece na tela grande é a OUTRA pessoa da consulta.
+  const remoto = comoMedico ? (peer ?? "Paciente") : (appt?.medico ?? "Seu médico");
+  const remotoSub = comoMedico ? "Paciente" : (appt?.especialidade ?? "Consulta");
 
   // Câmera local (autovisualização). Não é uma chamada real — é o seu próprio
   // vídeo no navegador. Só funciona em HTTPS ou localhost; no celular por HTTP
@@ -84,13 +99,13 @@ export default function SalaPage({ params }: { params: Promise<{ id: string }> }
         </div>
         <h1 className="text-headline-md font-headline-md text-white">Consulta encerrada</h1>
         <p className="text-body-md font-body-md text-white/60">
-          Duração: {cronometro} · {medico}
+          Duração: {cronometro} · {remoto}
         </p>
         <button
-          onClick={() => router.push(`/paciente/consultas/${id}`)}
+          onClick={() => router.push(destinoSaida)}
           className="mt-4 h-12 px-6 bg-white text-[#0a1420] rounded-xl text-label-lg font-label-lg"
         >
-          VOLTAR À CONSULTA
+          {comoMedico ? "VOLTAR AO PAINEL" : "VOLTAR À CONSULTA"}
         </button>
       </main>
     );
@@ -101,11 +116,11 @@ export default function SalaPage({ params }: { params: Promise<{ id: string }> }
       {/* "Vídeo" do médico ocupando a tela (placeholder — sem chamada real) */}
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
         <div className="w-32 h-32 rounded-full bg-white/10 flex items-center justify-center text-white text-[40px] font-bold">
-          {initials(medico)}
+          {initials(remoto)}
         </div>
         <div className="text-center">
-          <p className="text-white text-headline-sm font-headline-sm">{medico}</p>
-          <p className="text-white/50 text-body-sm font-body-sm">{especialidade}</p>
+          <p className="text-white text-headline-sm font-headline-sm">{remoto}</p>
+          <p className="text-white/50 text-body-sm font-body-sm">{remotoSub}</p>
         </div>
       </div>
 
