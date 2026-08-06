@@ -189,8 +189,8 @@ function Enviado({ nome, especialidade, comDocumento }: { nome: string; especial
         verificação do seu registro no CFM leva até 24h.
       </p>
       <div className="w-full flex flex-col gap-3 mt-6">
-        <Link href="/" className="h-14 bg-primary-container text-white rounded-xl text-label-lg font-label-lg flex items-center justify-center">
-          VOLTAR AO INÍCIO
+        <Link href="/medico/login" className="h-14 bg-primary-container text-white rounded-xl text-label-lg font-label-lg flex items-center justify-center">
+          IR PARA O LOGIN
         </Link>
       </div>
     </main>
