@@ -29,7 +29,7 @@ export default async function AdminPanel({ searchParams }: { searchParams: Promi
         <Link href="/" className="flex items-center gap-3 px-2 py-2 mb-4">
           <LogoMark size={40} />
           <span className="flex flex-col leading-tight">
-            <span className="text-label-lg font-label-lg text-primary">Smart Doctor</span>
+            <span className="text-label-lg font-label-lg text-primary">Dr. Salus</span>
             <span className="text-[11px] text-on-surface-variant font-label-md">Administração</span>
           </span>
         </Link>
@@ -70,7 +70,7 @@ export default async function AdminPanel({ searchParams }: { searchParams: Promi
         <header className="flex items-center gap-3 mb-6 flex-wrap">
           <div className="flex-1 min-w-0">
             <h1 className="text-headline-md font-headline-md text-primary">{tabTitle(tab)}</h1>
-            <p className="text-body-md font-body-md text-on-surface-variant">Smart Doctor · operação</p>
+            <p className="text-body-md font-body-md text-on-surface-variant">Dr. Salus · operação</p>
           </div>
         </header>
 
