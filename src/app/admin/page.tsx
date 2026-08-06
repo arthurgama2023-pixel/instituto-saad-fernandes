@@ -10,7 +10,7 @@ const initials = (n: string) => n.replace(/^(dra?\.?)\s+/i, "").split(" ").map((
 const NAV: [string, string, string][] = [
   ["visao", "dashboard", "Visão geral"],
   ["medicos", "stethoscope", "Médicos"],
-  ["clara", "auto_awesome", "Clara (IA)"],
+  ["clara", "auto_awesome", "Dr. Salus (IA)"],
   ["financeiro", "account_balance_wallet", "Financeiro"],
 ];
 
@@ -84,7 +84,7 @@ export default async function AdminPanel({ searchParams }: { searchParams: Promi
 }
 
 function tabTitle(t: string) {
-  return { visao: "Visão geral", medicos: "Gestão de médicos", clara: "Clara — Inteligência Artificial", financeiro: "Financeiro" }[t] ?? "Admin";
+  return { visao: "Visão geral", medicos: "Gestão de médicos", clara: "Dr. Salus — Inteligência Artificial", financeiro: "Financeiro" }[t] ?? "Admin";
 }
 
 type Overview = Awaited<ReturnType<typeof adminOverview>>;
@@ -179,7 +179,7 @@ function Visao({ overview }: { overview: Overview }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-6">
-          <SectionCard title="Funil da Clara" aside={`conversão ${conv}%`}>
+          <SectionCard title="Funil do Dr. Salus" aside={`conversão ${conv}%`}>
             <Funil funil={funil} />
           </SectionCard>
           <SectionCard title="Consultas por especialidade">
@@ -294,7 +294,7 @@ function ClaraAdmin({ overview }: { overview: Overview }) {
       <div className="rounded-xl border border-secondary-fixed/40 bg-secondary-container/40 p-5 brand-shadow">
         <p className="flex items-start gap-2 text-body-md font-body-md text-on-secondary-container">
           <Icon name="auto_awesome" filled className="text-secondary shrink-0 mt-0.5" size={20} />
-          Painel de configuração da Clara — no MVP, prompts versionados com diff/rollback, parâmetros de modelo e o dicionário de urgência (editável só com aprovação médica). Publicação exige evals verdes + 2ª aprovação.
+          Painel de configuração do Dr. Salus — no MVP, prompts versionados com diff/rollback, parâmetros de modelo e o dicionário de urgência (editável só com aprovação médica). Publicação exige evals verdes + 2ª aprovação.
         </p>
       </div>
 
@@ -306,7 +306,7 @@ function ClaraAdmin({ overview }: { overview: Overview }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SectionCard title="Funil da Clara">
+        <SectionCard title="Funil do Dr. Salus">
           <Funil funil={funil} />
         </SectionCard>
         <SectionCard title="Configuração">
