@@ -53,6 +53,8 @@ function serialize(a: {
   priceCents: number;
   mode: string;
   durationMin: number;
+  resumoClinico: string | null;
+  condutas: string | null;
   doctor: { crm: string; bio: string; user: { name: string }; specialty: { slug: string; name: string; icon: string } };
 }) {
   return {
@@ -68,5 +70,7 @@ function serialize(a: {
     status: a.status,
     mode: a.mode,
     priceCents: a.priceCents,
+    resumoClinico: a.resumoClinico,
+    condutas: a.condutas,
   };
 }

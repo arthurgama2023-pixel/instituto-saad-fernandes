@@ -8,6 +8,23 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-06 — Prontuário eletrônico (versão manual/grátis)
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Migração: 2 campos novos (`resumoClinico`, `condutas`) + `prontuarioEmAt` no
+  model `Appointment`. Servidor parado antes do `prisma db push` (regenera
+  `src/generated/prisma`, dentro da árvore observada pelo Turbopack) e religado
+  depois — evita o loop de refresh já documentado neste arquivo.
+- Verificação end-to-end no navegador: `/medico` → aba Pacientes → link
+  "Prontuário" (antes era um `<button>` morto, sem onClick) → formulário em
+  `/medico/pacientes/[patientId]` → preenchi resumo + condutas → SALVAR →
+  `POST /api/medico/prontuario` 200 → naveguei para
+  `/paciente/consultas/[id]` com a mesma sessão de paciente → **o texto exato
+  escrito pelo médico apareceu na tela do paciente**, substituindo o
+  placeholder.
+- Regressões: nenhuma
+- Branch: `feat/smart-doctor/cadastro-medico`
+
+---
 ## 2026-08-03 — Chamada agendada após o pagamento (CallCard + .ics)
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Verificação end-to-end no navegador: agendei (Tricologia → 04/ago 08:00 → médico)

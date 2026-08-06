@@ -82,6 +82,13 @@ model Appointment {
   urgency     UrgencyRequest?
   createdAt   DateTime  @default(now())
 
+  // Prontuário eletrônico — versão manual/grátis (sem IA, sem certificação
+  // SBIS/CFM): o médico escreve, o paciente lê na tela da consulta. Fica null
+  // até o médico preencher pela primeira vez.
+  resumoClinico  String?
+  condutas       String?
+  prontuarioEmAt DateTime?
+
   @@index([doctorId, startsAt])
   @@index([patientId, status])
 }

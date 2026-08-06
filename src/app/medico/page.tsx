@@ -255,9 +255,12 @@ function Pacientes({ data }: { data: Data }) {
               {p.total} consulta(s) · última {dateLabel(p.last)}
             </div>
           </div>
-          <button className="h-10 px-4 rounded-full bg-surface-container text-primary text-label-md font-label-md hover:bg-surface-container-high transition-colors shrink-0">
+          <Link
+            href={`/medico/pacientes/${p.id}?d=${data.doctor.id}`}
+            className="h-10 px-4 rounded-full bg-surface-container text-primary text-label-md font-label-md hover:bg-surface-container-high transition-colors shrink-0 flex items-center"
+          >
             Prontuário
-          </button>
+          </Link>
         </div>
       ))}
     </section>

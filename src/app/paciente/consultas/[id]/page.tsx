@@ -79,10 +79,11 @@ export default function ProntuarioPage({ params }: { params: Promise<{ id: strin
                 </div>
                 <h3 className="text-headline-sm font-headline-sm text-primary">Resumo clínico</h3>
               </div>
-              <p className="text-body-lg font-body-lg text-on-surface-variant leading-relaxed">
-                {realizada
-                  ? "O médico ainda não registrou o resumo desta consulta. Assim que for preenchido, ele aparece aqui."
-                  : "O resumo clínico fica disponível depois que a consulta for realizada."}
+              <p className="text-body-lg font-body-lg text-on-surface-variant leading-relaxed whitespace-pre-line">
+                {appt.resumoClinico ||
+                  (realizada
+                    ? "O médico ainda não registrou o resumo desta consulta. Assim que for preenchido, ele aparece aqui."
+                    : "O resumo clínico fica disponível depois que a consulta for realizada.")}
               </p>
             </article>
 
@@ -93,8 +94,8 @@ export default function ProntuarioPage({ params }: { params: Promise<{ id: strin
                 </div>
                 <h3 className="text-headline-sm font-headline-sm text-primary">Condutas &amp; recomendações</h3>
               </div>
-              <p className="text-body-md font-body-md text-on-surface-variant">
-                Nenhuma conduta registrada para esta consulta.
+              <p className="text-body-md font-body-md text-on-surface-variant whitespace-pre-line">
+                {appt.condutas || "Nenhuma conduta registrada para esta consulta."}
               </p>
             </article>
           </div>

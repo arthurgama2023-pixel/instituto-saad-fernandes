@@ -15,6 +15,8 @@ export type Appt = {
   status: string;
   mode: string;
   priceCents: number;
+  resumoClinico: string | null;
+  condutas: string | null;
 };
 
 export type Specialty = { slug: string; name: string; icon: string };
