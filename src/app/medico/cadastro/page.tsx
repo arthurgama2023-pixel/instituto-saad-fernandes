@@ -49,9 +49,25 @@ export default function CadastroMedico() {
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const faltando =
-    !form.nome || !form.whatsapp || !form.crmNumero || !form.uf || !form.especialidadeSlug ||
-    !form.anosExperiencia || !form.precoReais || form.bio.trim().length < 20;
+  // Lista legível do que falta, na ordem do formulário — em vez de só desabilitar
+  // o botão sem dizer por quê. O caso mais comum de ficar "travado" sem
+  // explicação é a bio: o mínimo de 20 caracteres só aparecia numa dica
+  // estática, fácil de não notar.
+  const camposFaltando = [
+    !form.nome && "nome completo",
+    !form.whatsapp && "WhatsApp",
+    !form.crmNumero && "número do CRM",
+    !form.uf && "UF",
+    !form.especialidadeSlug && "especialidade",
+    !form.anosExperiencia && "anos de experiência",
+    !form.precoReais && "valor da consulta",
+    form.bio.trim().length < 20 && `apresentação (faltam ${20 - form.bio.trim().length} caracteres)`,
+  ].filter((x): x is string => Boolean(x));
+  const faltando = camposFaltando.length > 0;
+  // Só mostra a lista de pendências depois que a pessoa começou a preencher —
+  // na primeira carga da tela ela ainda não digitou nada, e listar tudo como
+  // "faltando" seria ruído, não ajuda.
+  const tocado = JSON.stringify(form) !== JSON.stringify(EMPTY);
 
   const enviar = async () => {
     setEnviando(true);
@@ -85,7 +101,7 @@ export default function CadastroMedico() {
     }
   };
 
-  if (pronto) return <Enviado nome={pronto.nome} especialidade={pronto.especialidade} />;
+  if (pronto) return <Enviado nome={pronto.nome} especialidade={pronto.especialidade} comDocumento={!!docName} />;
   if (!especialidades) return <Loading />;
 
   return (
@@ -160,7 +176,12 @@ export default function CadastroMedico() {
         </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 w-full bg-surface-container-lowest border-t border-outline-variant px-5 py-6 z-50 flex justify-center shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]">
+      <footer className="fixed bottom-0 left-0 w-full bg-surface-container-lowest border-t border-outline-variant px-5 py-6 z-50 flex flex-col items-center gap-2 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]">
+        {faltando && tocado && (
+          <p className="w-full max-w-[390px] text-body-sm font-body-sm text-on-surface-variant text-center">
+            Falta preencher: {camposFaltando.join(", ")}.
+          </p>
+        )}
         <button
           onClick={enviar}
           disabled={faltando || enviando}
@@ -180,7 +201,7 @@ function primeiroNome(nome: string): string {
   return partes[0] ?? nome;
 }
 
-function Enviado({ nome, especialidade }: { nome: string; especialidade: string }) {
+function Enviado({ nome, especialidade, comDocumento }: { nome: string; especialidade: string; comDocumento: boolean }) {
   return (
     <main className="w-full max-w-[560px] mx-auto px-5 py-16 flex flex-col items-center text-center gap-4">
       <div className="w-20 h-20 rounded-full bg-secondary-container flex items-center justify-center">
@@ -188,8 +209,9 @@ function Enviado({ nome, especialidade }: { nome: string; especialidade: string 
       </div>
       <h1 className="text-headline-md font-headline-md text-primary">Cadastro enviado</h1>
       <p className="text-body-md font-body-md text-on-surface-variant max-w-sm">
-        Obrigado, {primeiroNome(nome)}. Recebemos seu cadastro em {especialidade}. Nosso time confere seu registro no
-        CFM e libera seu perfil em até 24h — você recebe o aviso no WhatsApp.
+        Obrigado, {primeiroNome(nome)}. Recebemos seu cadastro em {especialidade}
+        {comDocumento ? " e seus documentos" : ""}. Em breve nosso time entra em contato pelo WhatsApp — a
+        verificação do seu registro no CFM leva até 24h.
       </p>
       <div className="w-full flex flex-col gap-3 mt-6">
         <Link href="/" className="h-14 bg-primary-container text-white rounded-xl text-label-lg font-label-lg flex items-center justify-center">
