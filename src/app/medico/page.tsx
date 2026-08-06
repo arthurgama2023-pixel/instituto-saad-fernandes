@@ -312,7 +312,6 @@ function Config({ data }: { data: Data }) {
     ["Especialidade", `${data.doctor.specialtyIcon} ${data.doctor.specialty}`],
     ["CRM", data.doctor.crm],
     ["Valor da consulta", money(data.doctor.priceCents)],
-    ["Clara no WhatsApp", <span key="c" className="text-secondary font-semibold">Ativa ✓</span>],
   ];
   return (
     <section className="space-y-3">
