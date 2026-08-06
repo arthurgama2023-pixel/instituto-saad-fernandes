@@ -10,16 +10,18 @@ export async function GET() {
   return NextResponse.json({ especialidades: especialidades.map((s) => ({ slug: s.slug, name: s.name })) });
 }
 
+// Amostra: nenhum campo é obrigatório (pedido do dono). Só limites máximos
+// (sanidade do banco) — sem mínimos, sem regra de formato. Tudo aceita vazio.
 const Body = z.object({
-  nome: z.string().trim().min(3).max(120),
-  whatsapp: z.string().trim().min(8).max(20),
-  crmNumero: z.string().trim().min(3).max(20),
-  uf: z.string().trim().length(2),
-  especialidadeSlug: z.string().min(1),
-  anosExperiencia: z.number().int().min(0).max(70),
-  precoReais: z.number().min(0).max(100000),
-  modalidade: z.enum(["VIDEO", "IN_PERSON", "BOTH"]),
-  bio: z.string().trim().min(20).max(600),
+  nome: z.string().trim().max(120).optional().default(""),
+  whatsapp: z.string().trim().max(20).optional().default(""),
+  crmNumero: z.string().trim().max(20).optional().default(""),
+  uf: z.string().trim().max(2).optional().default(""),
+  especialidadeSlug: z.string().optional().default(""),
+  anosExperiencia: z.number().int().min(0).max(70).optional().default(0),
+  precoReais: z.number().min(0).max(100000).optional().default(0),
+  modalidade: z.enum(["VIDEO", "IN_PERSON", "BOTH"]).optional().default("VIDEO"),
+  bio: z.string().trim().max(600).optional().default(""),
 });
 
 /**
@@ -35,19 +37,26 @@ export async function POST(req: NextRequest) {
   }
   const d = parsed.data;
 
-  const specialty = await db.specialty.findUnique({ where: { slug: d.especialidadeSlug } });
-  if (!specialty) return NextResponse.json({ error: "Especialidade inválida." }, { status: 400 });
+  // Especialidade vazia ou inválida: cai na primeira disponível, pra não
+  // travar um cadastro de amostra por falta de seleção.
+  const specialty =
+    (d.especialidadeSlug && (await db.specialty.findUnique({ where: { slug: d.especialidadeSlug } }))) ||
+    (await db.specialty.findFirst({ orderBy: { name: "asc" } }));
+  if (!specialty) return NextResponse.json({ error: "Nenhuma especialidade cadastrada." }, { status: 500 });
 
-  const crm = `CRM ${d.crmNumero}-${d.uf.toUpperCase()}`;
+  const nome = d.nome.trim() || "Médico(a) sem nome informado";
+  const crmNumero = d.crmNumero.trim() || "—";
+  const uf = (d.uf.trim() || "—").toUpperCase();
+  const crm = `CRM ${crmNumero}-${uf}`;
 
   const user = await db.user.create({
-    data: { name: d.nome.trim(), phone: d.whatsapp.replace(/\D/g, "") || null, role: "DOCTOR" },
+    data: { name: nome, phone: d.whatsapp.replace(/\D/g, "") || null, role: "DOCTOR" },
   });
   await db.doctor.create({
     data: {
       userId: user.id,
       crm,
-      bio: d.bio.trim(),
+      bio: d.bio.trim() || "Sem apresentação informada.",
       yearsExp: d.anosExperiencia,
       priceCents: Math.round(d.precoReais * 100),
       mode: d.modalidade,
@@ -56,5 +65,5 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  return NextResponse.json({ ok: true, nome: d.nome.trim(), especialidade: specialty.name });
+  return NextResponse.json({ ok: true, nome, especialidade: specialty.name });
 }

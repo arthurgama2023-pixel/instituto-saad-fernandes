@@ -49,26 +49,6 @@ export default function CadastroMedico() {
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  // Lista legível do que falta, na ordem do formulário — em vez de só desabilitar
-  // o botão sem dizer por quê. O caso mais comum de ficar "travado" sem
-  // explicação é a bio: o mínimo de 20 caracteres só aparecia numa dica
-  // estática, fácil de não notar.
-  const camposFaltando = [
-    !form.nome && "nome completo",
-    !form.whatsapp && "WhatsApp",
-    !form.crmNumero && "número do CRM",
-    !form.uf && "UF",
-    !form.especialidadeSlug && "especialidade",
-    !form.anosExperiencia && "anos de experiência",
-    !form.precoReais && "valor da consulta",
-    form.bio.trim().length < 20 && `apresentação (faltam ${20 - form.bio.trim().length} caracteres)`,
-  ].filter((x): x is string => Boolean(x));
-  const faltando = camposFaltando.length > 0;
-  // Só mostra a lista de pendências depois que a pessoa começou a preencher —
-  // na primeira carga da tela ela ainda não digitou nada, e listar tudo como
-  // "faltando" seria ruído, não ajuda.
-  const tocado = JSON.stringify(form) !== JSON.stringify(EMPTY);
-
   const enviar = async () => {
     setEnviando(true);
     setErro(null);
@@ -112,7 +92,7 @@ export default function CadastroMedico() {
         <section className="mb-8">
           <h2 className="text-headline-md font-headline-md text-primary mb-2">Faça parte do Smart Doctor</h2>
           <p className="text-body-sm font-body-sm text-on-surface-variant">
-            Preencha seus dados. Nosso time confere seu registro no CFM antes de liberar o seu perfil — leva até 24h.
+            Amostra — nenhum campo é obrigatório. Preencha o que quiser e envie para ver como fica o fluxo.
           </p>
         </section>
 
@@ -123,24 +103,24 @@ export default function CadastroMedico() {
         )}
 
         <div className="space-y-6">
-          <Field label="Nome completo" required htmlFor="nome">
+          <Field label="Nome completo" htmlFor="nome">
             <TextInput id="nome" value={form.nome} onChange={set("nome")} placeholder="Dr(a). Nome Sobrenome" autoComplete="name" />
           </Field>
 
-          <Field label="WhatsApp" required htmlFor="wpp" hint="Usamos para avisar sobre consultas e chamados.">
+          <Field label="WhatsApp" htmlFor="wpp" hint="Usamos para avisar sobre consultas e chamados.">
             <TextInput id="wpp" value={form.whatsapp} onChange={set("whatsapp")} placeholder="(11) 99999-9999" inputMode="tel" />
           </Field>
 
           <div className="grid grid-cols-[1fr_92px] gap-3">
-            <Field label="Número do CRM" required htmlFor="crm">
+            <Field label="Número do CRM" htmlFor="crm">
               <TextInput id="crm" value={form.crmNumero} onChange={set("crmNumero")} placeholder="123456" inputMode="numeric" />
             </Field>
-            <Field label="UF" required htmlFor="uf">
+            <Field label="UF" htmlFor="uf">
               <Select id="uf" placeholder="—" value={form.uf} onChange={set("uf")} options={UFS.map((u) => ({ value: u, label: u }))} />
             </Field>
           </div>
 
-          <Field label="Especialidade" required htmlFor="esp">
+          <Field label="Especialidade" htmlFor="esp">
             <Select
               id="esp"
               placeholder="Selecione a especialidade"
@@ -151,19 +131,19 @@ export default function CadastroMedico() {
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Anos de experiência" required htmlFor="exp">
+            <Field label="Anos de experiência" htmlFor="exp">
               <TextInput id="exp" value={form.anosExperiencia} onChange={set("anosExperiencia")} placeholder="Ex.: 8" inputMode="numeric" />
             </Field>
-            <Field label="Valor da consulta (R$)" required htmlFor="preco">
+            <Field label="Valor da consulta (R$)" htmlFor="preco">
               <TextInput id="preco" value={form.precoReais} onChange={set("precoReais")} placeholder="Ex.: 250" inputMode="decimal" />
             </Field>
           </div>
 
-          <Field label="Modalidade de atendimento" required htmlFor="mod">
+          <Field label="Modalidade de atendimento" htmlFor="mod">
             <Select id="mod" value={form.modalidade} onChange={set("modalidade")} options={MODALIDADES} />
           </Field>
 
-          <Field label="Apresentação" required htmlFor="bio" hint="Como você se apresenta ao paciente. Mínimo de 20 caracteres.">
+          <Field label="Apresentação" htmlFor="bio" hint="Como você se apresenta ao paciente.">
             <TextArea id="bio" value={form.bio} onChange={set("bio")} placeholder="Fale sobre sua formação, abordagem e experiência." maxLength={600} />
           </Field>
 
@@ -177,14 +157,9 @@ export default function CadastroMedico() {
       </main>
 
       <footer className="fixed bottom-0 left-0 w-full bg-surface-container-lowest border-t border-outline-variant px-5 py-6 z-50 flex flex-col items-center gap-2 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]">
-        {faltando && tocado && (
-          <p className="w-full max-w-[390px] text-body-sm font-body-sm text-on-surface-variant text-center">
-            Falta preencher: {camposFaltando.join(", ")}.
-          </p>
-        )}
         <button
           onClick={enviar}
-          disabled={faltando || enviando}
+          disabled={enviando}
           className="sd-aurora w-full max-w-[390px] h-14 text-label-lg font-label-lg rounded-xl hover:opacity-90 transition-all active:scale-95 disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2 shadow-lg"
         >
           {enviando ? "ENVIANDO…" : "ENVIAR CADASTRO"}
