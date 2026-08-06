@@ -8,6 +8,34 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-06 — Assinatura digital ICP-Brasil no receituário especial (SIMULADA)
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Migração: 4 campos novos no model `Appointment` (`receituarioEspecial`,
+  `assinaturaIcpEm`, `assinaturaIcpTitular`, `assinaturaIcpSerial`), todos com
+  default/nullable. Servidor parado antes do `prisma db push` + `prisma generate`
+  e religado depois — mesma disciplina da entrada anterior (o Turbopack observa
+  `src/generated/prisma`; regenerar com o server no ar causa `PrismaClientValidationError`
+  "Unknown argument", que de fato aconteceu na 1ª tentativa e foi resolvido com o restart).
+- Escopo: mock, sem integração real com Clicksign/D4Sign nem AC (ITI/Serasa). A
+  assinatura é gerada no servidor (`src/lib/assinatura-icp.ts`) só para a demo ter
+  metadados plausíveis; todas as telas trazem o aviso "sem validade jurídica".
+- Verificação end-to-end no navegador (dev na 3080):
+  1. `/medico/pacientes/[patientId]` → marquei "Receituário especial" → apareceu o
+     aviso de bloqueio (`lock`) e o botão virou "ASSINAR E SALVAR".
+  2. Assinei → `POST /api/medico/prontuario` 200 → selo renderizou com titular
+     (Dr. Saad Fernandes), nº do certificado e data; campos travados; botão sumiu.
+  3. **Reload** do prontuário → selo e travamento persistiram (gravou no banco);
+     lista lateral trocou "preenchido" por "assinado ICP".
+  4. `/paciente/consultas/[id]` (mesma consulta) → o paciente vê o selo
+     "Receituário especial assinado digitalmente" abaixo das condutas, com
+     assinante+CRM, certificado, data e o aviso de amostra.
+- Guard de imutabilidade: `assinaturaIcpEm != null` → API responde 409 e recusa
+  edição (defesa em profundidade além da UI que esconde o botão).
+- Regressões: nenhuma (fluxo do prontuário simples da entrada anterior segue
+  funcionando; o texto do médico continua aparecendo na tela do paciente).
+- Branch: `feat/smart-doctor/assinatura-icp-receituario`
+
+---
 ## 2026-08-06 — Prontuário eletrônico (versão manual/grátis)
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Migração: 2 campos novos (`resumoClinico`, `condutas`) + `prontuarioEmAt` no

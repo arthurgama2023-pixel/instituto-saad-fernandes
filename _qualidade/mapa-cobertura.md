@@ -1,5 +1,5 @@
 # Mapa de Cobertura — Smart Doctor
-Atualizado: 2026-08-03
+Atualizado: 2026-08-06
 
 **Estado geral: o projeto não tem rede de proteção automatizada.** Não há runner de
 teste instalado. Tudo abaixo é 🔴 por ausência de infraestrutura, não por descuido
@@ -14,6 +14,7 @@ de um módulo específico — instalar um runner é a dívida raiz.
 | modules/catalog/seed.ts · modules/demo/seed-demo.ts | 🔴 sem teste | 0 | — |
 | modules/ai/* (Clara: prompt, tools, fallback) | 🔴 sem teste | 0 | — |
 | lib/session.ts, lib/patient-data.ts | 🔴 sem teste | 0 | — |
+| lib/assinatura-icp.ts (assinatura ICP mock — gera serial/titular) | 🔴 sem teste | 0 | conferência manual no navegador (06/ago) |
 | src/app/** (telas) | 🔴 sem teste | 0 | conferência manual no navegador |
 | src/generated/prisma/** | ⚪ não testável (código gerado) | 0 | — |
 

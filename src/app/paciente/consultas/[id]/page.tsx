@@ -97,6 +97,36 @@ export default function ProntuarioPage({ params }: { params: Promise<{ id: strin
               <p className="text-body-md font-body-md text-on-surface-variant whitespace-pre-line">
                 {appt.condutas || "Nenhuma conduta registrada para esta consulta."}
               </p>
+
+              {/* Receituário especial: o paciente precisa saber que este documento
+                  vale na farmácia — quem assinou, quando, e com qual certificado. */}
+              {appt.assinaturaIcpEm && (
+                <section className="mt-6 rounded-xl border border-outline-variant/40 bg-surface-container p-5">
+                  <h4 className="flex items-center gap-2 text-label-lg font-label-lg text-primary mb-3">
+                    <Icon name="verified" filled size={20} className="text-secondary" />
+                    Receituário especial assinado digitalmente
+                  </h4>
+                  <dl className="text-body-sm font-body-sm text-on-surface-variant space-y-1">
+                    <div className="flex flex-wrap gap-x-2">
+                      <dt className="font-semibold">Assinado por:</dt>
+                      <dd>
+                        {appt.assinaturaIcpTitular ?? appt.medico} · {appt.medicoCrm}
+                      </dd>
+                    </div>
+                    <div className="flex flex-wrap gap-x-2">
+                      <dt className="font-semibold">Certificado ICP-Brasil:</dt>
+                      <dd className="font-mono">{appt.assinaturaIcpSerial ?? "—"}</dd>
+                    </div>
+                    <div className="flex flex-wrap gap-x-2">
+                      <dt className="font-semibold">Data da assinatura:</dt>
+                      <dd>{new Date(appt.assinaturaIcpEm).toLocaleString("pt-BR")}</dd>
+                    </div>
+                  </dl>
+                  <p className="text-[11px] font-body-sm text-on-surface-variant mt-3 pt-3 border-t border-outline-variant/40">
+                    Amostra: assinatura simulada, sem Autoridade Certificadora real e sem validade jurídica.
+                  </p>
+                </section>
+              )}
             </article>
           </div>
 

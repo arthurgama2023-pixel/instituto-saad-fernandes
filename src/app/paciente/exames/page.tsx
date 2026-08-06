@@ -29,14 +29,22 @@ export default function ExamesPage() {
                   <Icon name="prescriptions" className="text-secondary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-label-lg font-label-lg text-primary truncate">Receita — {a.especialidade}</p>
+                  <p className="text-label-lg font-label-lg text-primary truncate">
+                    {a.assinaturaIcpEm ? "Receituário especial" : "Receita"} — {a.especialidade}
+                  </p>
                   <p className="text-body-sm font-body-sm text-on-surface-variant truncate">
                     {a.medico} · {new Date(a.startsAt).toLocaleDateString("pt-BR")}
                   </p>
                 </div>
-                <span className="px-3 py-1 rounded-full border border-outline-variant text-[11px] font-bold text-on-surface-variant">
-                  PDF
-                </span>
+                {a.assinaturaIcpEm ? (
+                  <span className="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold flex items-center gap-1 shrink-0">
+                    <Icon name="verified" filled size={13} /> ASSINADA
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 rounded-full border border-outline-variant text-[11px] font-bold text-on-surface-variant shrink-0">
+                    PDF
+                  </span>
+                )}
               </div>
             ))
           ) : (

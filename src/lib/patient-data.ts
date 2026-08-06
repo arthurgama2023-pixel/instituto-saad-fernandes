@@ -17,6 +17,10 @@ export type Appt = {
   priceCents: number;
   resumoClinico: string | null;
   condutas: string | null;
+  receituarioEspecial: boolean;
+  assinaturaIcpEm: string | null;
+  assinaturaIcpTitular: string | null;
+  assinaturaIcpSerial: string | null;
 };
 
 export type Specialty = { slug: string; name: string; icon: string };

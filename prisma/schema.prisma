@@ -89,6 +89,15 @@ model Appointment {
   condutas       String?
   prontuarioEmAt DateTime?
 
+  // Assinatura digital ICP-Brasil (SIMULADA — sem integração real com
+  // Clicksign/D4Sign). Só se aplica a receituário especial (substância
+  // controlada), onde a receita comum do Memed não é suficiente. Uma vez
+  // assinado, o registro fica travado para edição.
+  receituarioEspecial  Boolean   @default(false)
+  assinaturaIcpEm      DateTime?
+  assinaturaIcpTitular String?
+  assinaturaIcpSerial  String?
+
   @@index([doctorId, startsAt])
   @@index([patientId, status])
 }

@@ -46,6 +46,10 @@ export default async function ProntuarioPaciente({
     resumoClinico: a.resumoClinico,
     condutas: a.condutas,
     prontuarioEmAt: a.prontuarioEmAt?.toISOString() ?? null,
+    receituarioEspecial: a.receituarioEspecial,
+    assinaturaIcpEm: a.assinaturaIcpEm?.toISOString() ?? null,
+    assinaturaIcpTitular: a.assinaturaIcpTitular,
+    assinaturaIcpSerial: a.assinaturaIcpSerial,
   }));
 
   return (
