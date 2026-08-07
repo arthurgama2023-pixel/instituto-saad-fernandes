@@ -8,6 +8,109 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-07 — Correção: login mostrava o paciente demo (Marina) — middleware
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros).
+- BUG relatado pelo dono: logava e a plataforma mostrava "Marina" (paciente
+  demo) em vez do próprio nome. Causa: faltava o middleware de sessão do
+  @supabase/ssr — sem ele o token não é revalidado a cada requisição, então o
+  servidor "perde" a sessão e o `getDemoUser` cai no fallback demo.
+- Correção: `src/middleware.ts` + `src/lib/supabase/middleware.ts`
+  (`updateSession`) — padrão recomendado do @supabase/ssr; refresca/propaga a
+  sessão em toda requisição (matcher pula assets estáticos).
+- Verificação end-to-end (caminho exato do dono, conta nova):
+  - Deslogar → registrar "Pedro Henrique Silva" → "Conta criada!" → login →
+    `/paciente` mostrou **"Olá, Pedro 👋"**. ✅
+  - **Teste crucial do middleware:** naveguei pra /paciente/exames e voltei pra
+    /paciente → continuou "Olá, Pedro" (antes revertia pra Marina). ✅
+  - Servidor sem erros. (Console do browser ainda exibia erros STALE de
+    `emailInternoDoNome` de builds antigos — grep confirma que o import não
+    existe; tsc limpo; log do servidor limpo.)
+- Branch: `feat/smart-doctor/auth-supabase`
+
+---
+## 2026-08-07 — Wiring: app reconhece o paciente logado (fluxo entrar completo)
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros).
+- Fecha o fluxo pedido: registrar → tela "Conta criada!" → login → **entra na
+  plataforma** (`/paciente`) já reconhecido como ELE, não mais o demo Marina.
+- Mudanças:
+  - Registro: após `signUp`, faz `signOut` + mostra tela de sucesso com botão
+    "IR PARA O LOGIN" (a pessoa entra de propósito com o que criou).
+  - Login: redireciona pra `/paciente` (antes ia pra tela de debug /sessao).
+  - `schema.prisma`: +`User.authId` (@unique) — vínculo com o auth.uid.
+  - `lib/session.ts`: `getDemoUser` virou SESSION-AWARE — se há sessão Supabase,
+    acha/cria um User ligado ao auth.uid (nome dos metadados) e retorna ele;
+    senão, cai no demo por cookie (fluxo antigo intacto). Nome mantido pra não
+    tocar nas ~9 rotas que importam (dívida de nome registrada). +`isContaReal`.
+  - `/api/paciente`: não semeia dados demo em conta real (conta nova = vazia).
+- Verificação end-to-end ao vivo:
+  - Registrar "Juliana Martins" (e-mail) → "Conta criada!" → login → `/paciente`
+    mostrou **"Olá, Juliana 👋"** e "Você não tem consultas agendadas" (dados
+    DELA, vazios) — não mais a consulta da Marina. ✅
+  - Sem erros no servidor; reload de `/paciente` mantém "Olá, Juliana". ✅
+  - (Erros `emailInternoDoNome` no console eram STALE do build anterior; grep
+    confirma que não há mais esse import; tsc limpo.)
+- **IMPORTANTE — nível de isolamento AGORA:** este wiring dá isolamento no
+  NÍVEL DO APP (cada rota resolve o usuário logado e consulta por id dele). O
+  RLS no banco (Caminho B, "seguro por padrão") só entra quando os DADOS do app
+  migrarem pro Supabase Postgres — hoje o app roda em SQLite local. Ou seja: a
+  fundação de RLS está provada (rls.sql), mas o app ainda não a exercita.
+- COLIDE com a ICP do amigo (mexe em schema/session/rota) — feito com o "sim"
+  explícito do dono, ciente do merge a reconciliar depois.
+- Branch: `feat/smart-doctor/auth-supabase`
+
+---
+## 2026-08-07 — Telas de login real (Supabase Auth) — rota /entrar
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros).
+- Aditivo, baixa colisão com a ICP do amigo: rota NOVA `/entrar` (não substitui
+  o /login demo ainda). Deps novas: @supabase/supabase-js, @supabase/ssr.
+- Arquivos: `src/lib/supabase/client.ts` (browser) e `server.ts` (SSR via
+  cookies); `/entrar` (telefone→código, 2 etapas), `/entrar/sessao` (server
+  component que lê a sessão), `/entrar/sair` (route handler de logout).
+  `.env.example` ganhou NEXT_PUBLIC_SUPABASE_URL/ANON_KEY (a key real fica só
+  no .env.local gitignored — anon key é pública, mas não vai pro repo).
+- Verificação end-to-end no navegador (número de teste, sem SMS):
+  1. `/entrar` → telefone → "ENVIAR CÓDIGO" → avançou pra etapa de código
+     (Supabase aceitou o OTP).
+  2. código `123456` → verificou → redirect pra `/entrar/sessao`.
+  3. `/entrar/sessao` (SERVIDOR) mostrou **"Sessão ativa"** com telefone
+     5511988887777, auth.uid cd3d62d5-…, papel authenticated — o backend do
+     Next reconheceu o login via cookie. Essa é a identidade que o RLS consome.
+  4. Logout → `/entrar/sessao` volta a "Nenhuma sessão".
+- Gotcha (ambiente, não código): o dev server via Turbopack no browser pane
+  hidrata de forma intermitente (HMR websocket falha), então cliques/digitação
+  às vezes não pegam. Contornei setando o input pelo setter nativo + evento e
+  `form.requestSubmit()`. O código em si está correto (typecheck + fluxo real
+  do Supabase respondendo).
+- **MÉTODO FINAL (evoluiu com o dono, tudo na mesma branch, nada commitado):**
+  o método passou por telefone/OTP → nome+senha → e o **estado final é
+  nome + (e-mail OU telefone) + senha + confirmar senha**. O e-mail/telefone é
+  o identificador de login real; o nome é só exibição. Isso RESOLVE as duas
+  fraquezas da versão "só nome": identificador único de verdade e recuperação
+  de senha possível.
+- `src/lib/auth-identidade.ts`: `parseIdentificador()` detecta e-mail (tem "@")
+  ou telefone (E.164, assume 55 no Brasil). Registro/login usam
+  `signUp`/`signInWithPassword` com email OU phone conforme o caso. No Supabase:
+  `mailer_autoconfirm` e `sms_autoconfirm` ligados (sem confirmação por link/SMS
+  nesta fase — em produção, ligar confirmação exige SMTP/provedor de SMS, e sem
+  ela alguém pode cadastrar e-mail/telefone que não é dele; ressalva registrada).
+- Regras: nome mín. 2 palavras; senha mín. 6 caracteres (sem exigência de
+  maiúscula/número — mínimo do Supabase); confirmação idêntica.
+- Verificação dos fluxos ao vivo:
+  - Registrar com E-MAIL ("Mariana Ferreira", mariana.ferreira@teste.com) →
+    "Sessão ativa" mostrando o e-mail, papel `patient`. ✅
+  - Registrar com TELEFONE ("Roberto Alves", 11966665555) → sessão mostrando o
+    telefone. ✅
+  - Login com telefone + senha → mesma conta (auth.uid 2c07c0dc-… confere). ✅
+  - (versão anterior nome+senha também passou: senha errada recusada, nome
+    duplicado recusado.)
+- Ficaram usuários de teste em auth.users (dos experimentos) — artefatos de
+  dev, limpar depois se quiser (precisa da service_role key).
+- NÃO liga ao resto do app ainda (login/registro não gatilham dado; segue
+  getDemoUser). O wiring nativo (inclusive criar o User no nosso banco a partir
+  dos metadados do auth) espera a ICP do amigo.
+- Branch: `feat/smart-doctor/auth-supabase`
+
+---
 ## 2026-08-07 — Fundação do login (Supabase Auth telefone/OTP) provada
 - Decisão de arquitetura revista com o dono: virar pro **Supabase nativo**
   (Supabase Auth + supabase-js + RLS via auth.uid) em vez de Prisma+withUser —

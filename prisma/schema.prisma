@@ -11,6 +11,7 @@ datasource db {
 // Roles: PATIENT | DOCTOR | ADMIN
 model User {
   id            String           @id @default(cuid())
+  authId        String?          @unique // vínculo com o Supabase Auth (auth.uid); null = usuário demo antigo
   phone         String?          @unique // E.164 sem "+", ex.: 5521980828309
   name          String
   role          String           @default("PATIENT")

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDemoUser } from "@/lib/session";
+import { getDemoUser, isContaReal } from "@/lib/session";
 import { ensureSeeded } from "@/modules/catalog/seed";
 import { ensurePatientDemo } from "@/modules/demo/seed-demo";
 import { listSpecialties } from "@/modules/catalog/service";
@@ -9,7 +9,8 @@ import { db } from "@/lib/db";
 export async function GET() {
   await ensureSeeded();
   const user = await getDemoUser();
-  await ensurePatientDemo(user.id);
+  // Conta real (logada) começa vazia; só o usuário demo recebe dados de amostra.
+  if (!isContaReal(user)) await ensurePatientDemo(user.id);
 
   const appts = await myAppointments(user.id);
   const now = Date.now();
