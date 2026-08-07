@@ -8,6 +8,54 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-06 — Assinatura digital ICP-Brasil no receituário especial (REAL, via Clicksign)
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Substitui a versão simulada (entrada anterior) por integração real com a API
+  v3 do Clicksign. Migração: troca `assinaturaIcpSerial` (mock) por
+  `assinaturaIcpStatus` + `assinaturaIcpEnvelopeId` + `assinaturaIcpDocumentId`
+  + `assinaturaIcpSignerId` no model `Appointment` — fluxo agora é assíncrono
+  (ASSINADO só quando o webhook do Clicksign confirmar).
+- Duas dependências trocadas em runtime: `pdfkit` quebrava em produção porque
+  lê `Helvetica.afm` do disco em tempo de execução e o Turbopack não inclui
+  esse arquivo no bundle do servidor (`ENOENT`) — troquei por `pdf-lib`
+  (puro JS, sem I/O de arquivo externo).
+- Descobertas da API real (não documentadas claramente nos docs públicos,
+  confirmadas testando contra o sandbox):
+  - Auth é `?access_token=` na query string, não `Authorization: Bearer`.
+  - `content_base64` no upload de documento precisa ser um data URI
+    (`data:application/pdf;base64,...`), não base64 puro.
+  - Exigir `auth: icp_brasil` num requirement obriga o signatário a ter
+    `has_documentation: true` + CPF válido — o Clicksign confere o
+    certificado contra o CPF do titular.
+- **Gap de produto registrado**: o cadastro do médico não coleta CPF (só CRM).
+  Usei um CPF de teste de dígito válido só pra provar o fluxo no sandbox —
+  em produção isso precisa vir de um campo real no cadastro. Ver TODO em
+  `src/lib/clicksign.ts`.
+- Verificação end-to-end real (não é mock — validado direto contra o
+  servidor do Clicksign, fora do nosso banco):
+  1. Marquei receituário especial → "ENVIAR PARA ASSINATURA (ICP-BRASIL)".
+  2. Servidor gerou o PDF, criou envelope, subiu documento, criou signatário
+     (Dr. Saad Fernandes, telefone convertido pro formato BR) e os dois
+     requirements (`agree`/`sign` + `provide_evidence`/`icp_brasil`), e
+     ativou o envelope (`status: running`).
+  3. UI mostrou "Aguardando assinatura digital" (âmbar), campos travados.
+  4. Reload persistiu o estado; lista lateral mostrou "aguardando ICP".
+  5. `/paciente/consultas/[id]` mostrou "aguardando assinatura do médico" —
+     não finge que já foi assinado.
+  6. **Confirmação fora do app**: `GET /api/v3/envelopes/{id}` direto na API
+     do Clicksign (curl, com o token real) retornou `"status":"running"` —
+     prova que o envelope existe de verdade no servidor deles, não é só
+     estado no nosso banco.
+- Parado de propósito no link de assinatura: ninguém no time tem certificado
+  ICP-Brasil real pra completar a assinatura e testar o webhook
+  (`/api/webhooks/clicksign`) ponta a ponta. Esse endpoint existe e está
+  pronto, mas não foi disparado de verdade — decisão do dono, registrada na
+  conversa.
+- Regressões: nenhuma (fluxo de prontuário simples segue OK; a mudança de
+  campo do schema não afeta consultas sem receituário especial).
+- Branch: `feat/smart-doctor/assinatura-icp-receituario`
+
+---
 ## 2026-08-06 — Assinatura digital ICP-Brasil no receituário especial (SIMULADA)
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Migração: 4 campos novos no model `Appointment` (`receituarioEspecial`,

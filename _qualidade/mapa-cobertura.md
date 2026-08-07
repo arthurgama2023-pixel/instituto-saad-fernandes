@@ -14,7 +14,9 @@ de um módulo específico — instalar um runner é a dívida raiz.
 | modules/catalog/seed.ts · modules/demo/seed-demo.ts | 🔴 sem teste | 0 | — |
 | modules/ai/* (Clara: prompt, tools, fallback) | 🔴 sem teste | 0 | — |
 | lib/session.ts, lib/patient-data.ts | 🔴 sem teste | 0 | — |
-| lib/assinatura-icp.ts (assinatura ICP mock — gera serial/titular) | 🔴 sem teste | 0 | conferência manual no navegador (06/ago) |
+| lib/clicksign.ts (cliente real da API Clicksign) | 🔴 sem teste | 0 | verificado ao vivo contra sandbox (06/ago) |
+| lib/receituario-pdf.ts (gera PDF via pdf-lib) | 🔴 sem teste | 0 | verificado ao vivo (06/ago) |
+| api/webhooks/clicksign (confirmação de assinatura) | ⚪ não testável sem URL pública | 0 | não disparado — sem certificado ICP real p/ testar |
 | src/app/** (telas) | 🔴 sem teste | 0 | conferência manual no navegador |
 | src/generated/prisma/** | ⚪ não testável (código gerado) | 0 | — |
 

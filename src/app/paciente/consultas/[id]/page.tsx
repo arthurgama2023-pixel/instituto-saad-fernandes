@@ -99,8 +99,10 @@ export default function ProntuarioPage({ params }: { params: Promise<{ id: strin
               </p>
 
               {/* Receituário especial: o paciente precisa saber que este documento
-                  vale na farmácia — quem assinou, quando, e com qual certificado. */}
-              {appt.assinaturaIcpEm && (
+                  vale na farmácia — quem assinou, quando. Enquanto o médico ainda
+                  não completou a assinatura (ICP-Brasil é assíncrona), mostra que
+                  está a caminho em vez de fingir que já valeu. */}
+              {appt.assinaturaIcpStatus === "ASSINADO" && (
                 <section className="mt-6 rounded-xl border border-outline-variant/40 bg-surface-container p-5">
                   <h4 className="flex items-center gap-2 text-label-lg font-label-lg text-primary mb-3">
                     <Icon name="verified" filled size={20} className="text-secondary" />
@@ -114,16 +116,26 @@ export default function ProntuarioPage({ params }: { params: Promise<{ id: strin
                       </dd>
                     </div>
                     <div className="flex flex-wrap gap-x-2">
-                      <dt className="font-semibold">Certificado ICP-Brasil:</dt>
-                      <dd className="font-mono">{appt.assinaturaIcpSerial ?? "—"}</dd>
-                    </div>
-                    <div className="flex flex-wrap gap-x-2">
                       <dt className="font-semibold">Data da assinatura:</dt>
-                      <dd>{new Date(appt.assinaturaIcpEm).toLocaleString("pt-BR")}</dd>
+                      <dd>{appt.assinaturaIcpEm ? new Date(appt.assinaturaIcpEm).toLocaleString("pt-BR") : "—"}</dd>
                     </div>
                   </dl>
                   <p className="text-[11px] font-body-sm text-on-surface-variant mt-3 pt-3 border-t border-outline-variant/40">
-                    Amostra: assinatura simulada, sem Autoridade Certificadora real e sem validade jurídica.
+                    Assinado via Clicksign com certificado digital ICP-Brasil do médico.
+                  </p>
+                </section>
+              )}
+
+              {appt.assinaturaIcpStatus === "AGUARDANDO_ASSINATURA" && (
+                <section className="mt-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-5">
+                  <h4 className="flex items-center gap-2 text-label-lg font-label-lg text-primary mb-2">
+                    <Icon name="hourglass_top" size={20} className="text-amber-600" />
+                    Receituário especial — aguardando assinatura do médico
+                  </h4>
+                  <p className="text-body-sm font-body-sm text-on-surface-variant">
+                    {appt.assinaturaIcpTitular ?? appt.medico} ainda está assinando este documento com
+                    o certificado digital. Assim que concluir, ele aparece aqui pronto para uso na
+                    farmácia.
                   </p>
                 </section>
               )}

@@ -12,9 +12,9 @@ type Registro = {
   condutas: string | null;
   prontuarioEmAt: string | null;
   receituarioEspecial: boolean;
+  assinaturaIcpStatus: string | null;
   assinaturaIcpEm: string | null;
   assinaturaIcpTitular: string | null;
-  assinaturaIcpSerial: string | null;
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -47,9 +47,13 @@ export function ProntuarioEditor({ doctorId, registros }: { doctorId: string; re
           >
             <div className="text-label-md font-label-md">{r.startsAtLabel}</div>
             <div className="text-[11px] font-body-sm">{STATUS_LABEL[r.status] ?? r.status}</div>
-            {r.assinaturaIcpEm ? (
+            {r.assinaturaIcpStatus === "ASSINADO" ? (
               <div className="text-[11px] font-body-sm text-secondary mt-0.5 flex items-center gap-1">
                 <Icon name="verified" filled size={12} /> assinado ICP
+              </div>
+            ) : r.assinaturaIcpStatus === "AGUARDANDO_ASSINATURA" ? (
+              <div className="text-[11px] font-body-sm text-amber-600 mt-0.5 flex items-center gap-1">
+                <Icon name="hourglass_top" size={12} /> aguardando ICP
               </div>
             ) : (
               r.resumoClinico && (
@@ -67,7 +71,7 @@ export function ProntuarioEditor({ doctorId, registros }: { doctorId: string; re
   );
 }
 
-type Assinatura = { em: string; titular: string | null; serial: string | null };
+type Assinatura = { status: string; em: string | null; titular: string | null };
 
 function Formulario({ doctorId, registro }: { doctorId: string; registro: Registro }) {
   const [resumo, setResumo] = useState(registro.resumoClinico ?? "");
@@ -77,14 +81,15 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
   const [salvo, setSalvo] = useState<string | null>(registro.prontuarioEmAt);
   const [erro, setErro] = useState<string | null>(null);
   const [assinatura, setAssinatura] = useState<Assinatura | null>(
-    registro.assinaturaIcpEm
-      ? { em: registro.assinaturaIcpEm, titular: registro.assinaturaIcpTitular, serial: registro.assinaturaIcpSerial }
+    registro.assinaturaIcpStatus
+      ? { status: registro.assinaturaIcpStatus, em: registro.assinaturaIcpEm, titular: registro.assinaturaIcpTitular }
       : null
   );
 
-  // Assinado = documento fechado. Vale para o registro que já chegou assinado do
-  // banco e para o que acabou de ser assinado nesta tela.
-  const assinado = assinatura !== null;
+  // Enviado pro Clicksign (aguardando ou já assinado) = documento travado.
+  // A diferença entre os dois estados é só o selo que aparece.
+  const travado = assinatura !== null;
+  const jaAssinado = assinatura?.status === "ASSINADO";
 
   const salvar = async () => {
     setSalvando(true);
@@ -107,8 +112,8 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
         return;
       }
       setSalvo(d.prontuarioEmAt);
-      if (d.assinaturaIcpEm) {
-        setAssinatura({ em: d.assinaturaIcpEm, titular: d.assinaturaIcpTitular, serial: d.assinaturaIcpSerial });
+      if (d.assinaturaIcpStatus) {
+        setAssinatura({ status: d.assinaturaIcpStatus, em: d.assinaturaIcpEm, titular: d.assinaturaIcpTitular });
       }
     } catch {
       setErro("Não consegui salvar. Verifique a conexão.");
@@ -126,7 +131,7 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
         <h2 className="text-headline-sm font-headline-sm text-primary">
           {registro.especialidade} · {registro.startsAtLabel}
         </h2>
-        {salvo && !assinado && (
+        {salvo && !travado && (
           <span className="text-body-sm font-body-sm text-secondary flex items-center gap-1">
             <Icon name="check_circle" filled size={16} /> salvo em {new Date(salvo).toLocaleString("pt-BR")}
           </span>
@@ -149,7 +154,7 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
           id="resumo"
           value={resumo}
           onChange={(e) => setResumo(e.target.value)}
-          disabled={assinado}
+          disabled={travado}
           placeholder="Queixa, histórico, exame, hipótese diagnóstica…"
           maxLength={4000}
           className={campoClasse}
@@ -164,14 +169,14 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
           id="condutas"
           value={condutas}
           onChange={(e) => setCondutas(e.target.value)}
-          disabled={assinado}
+          disabled={travado}
           placeholder="Prescrição, exames solicitados, orientações, retorno…"
           maxLength={4000}
           className={campoClasse}
         />
       </div>
 
-      {!assinado && (
+      {!travado && (
         <>
           {/* Receituário especial é o único caso em que a assinatura ICP-Brasil
               faz falta: a receita comum já sai assinada pela própria prescrição
@@ -199,8 +204,9 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
             {especial && (
               <p className="flex items-start gap-2 rounded-lg bg-error-container/60 text-on-error-container p-3 text-body-sm font-body-sm">
                 <Icon name="lock" size={18} className="shrink-0 mt-0.5" />
-                Ao salvar, o documento é assinado com seu certificado e fica travado — depois disso
-                não dá mais para editar este registro.
+                Ao salvar, o documento vai pro Clicksign e o registro fica travado — você vai
+                precisar assinar com o SEU certificado ICP-Brasil (link chega por WhatsApp) pra
+                concluir. Depois de enviado, não dá mais para editar este registro.
               </p>
             )}
           </div>
@@ -208,18 +214,20 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
       )}
 
       <p className="text-body-sm font-body-sm text-on-surface-variant">
-        {assinado
+        {jaAssinado
           ? "Documento assinado. O paciente vê o registro e o selo de assinatura na tela desta consulta."
-          : "Isso aparece para o paciente na tela desta consulta assim que você salvar."}
+          : travado
+            ? "Enviado para assinatura. Confira o WhatsApp cadastrado para concluir com seu certificado ICP-Brasil."
+            : "Isso aparece para o paciente na tela desta consulta assim que você salvar."}
       </p>
 
-      {!assinado && (
+      {!travado && (
         <button
           onClick={salvar}
           disabled={salvando}
           className="sd-aurora h-12 px-6 rounded-xl text-label-lg font-label-lg active:scale-95 transition-transform disabled:opacity-50 flex items-center gap-2"
         >
-          {salvando ? (especial ? "ASSINANDO…" : "SALVANDO…") : especial ? "ASSINAR E SALVAR" : "SALVAR PRONTUÁRIO"}
+          {salvando ? (especial ? "ENVIANDO PARA ASSINATURA…" : "SALVANDO…") : especial ? "ENVIAR PARA ASSINATURA (ICP-BRASIL)" : "SALVAR PRONTUÁRIO"}
           {!salvando && <Icon name={especial ? "verified" : "save"} size={18} />}
         </button>
       )}
@@ -228,6 +236,22 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
 }
 
 function SeloAssinatura({ assinatura }: { assinatura: Assinatura }) {
+  if (assinatura.status === "AGUARDANDO_ASSINATURA") {
+    return (
+      <section className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 space-y-2">
+        <h3 className="flex items-center gap-2 text-label-lg font-label-lg text-on-secondary-container">
+          <Icon name="hourglass_top" size={20} className="text-amber-600" />
+          Aguardando assinatura digital
+        </h3>
+        <p className="text-body-sm font-body-sm text-on-surface-variant">
+          Enviado para <b>{assinatura.titular ?? "o médico"}</b> assinar com o certificado ICP-Brasil
+          dele. O Clicksign mandou o link de assinatura por WhatsApp — o registro fica travado até a
+          assinatura ser concluída.
+        </p>
+      </section>
+    );
+  }
+
   return (
     <section className="rounded-xl border border-secondary-fixed/40 bg-secondary-container/30 p-4 space-y-2">
       <h3 className="flex items-center gap-2 text-label-lg font-label-lg text-on-secondary-container">
@@ -240,16 +264,12 @@ function SeloAssinatura({ assinatura }: { assinatura: Assinatura }) {
           <dd>{assinatura.titular ?? "—"}</dd>
         </div>
         <div className="flex flex-wrap gap-x-2">
-          <dt className="font-semibold">Certificado:</dt>
-          <dd className="font-mono">{assinatura.serial ?? "—"}</dd>
-        </div>
-        <div className="flex flex-wrap gap-x-2">
           <dt className="font-semibold">Assinado em:</dt>
-          <dd>{new Date(assinatura.em).toLocaleString("pt-BR")}</dd>
+          <dd>{assinatura.em ? new Date(assinatura.em).toLocaleString("pt-BR") : "—"}</dd>
         </div>
       </dl>
       <p className="text-[11px] font-body-sm text-on-surface-variant pt-1 border-t border-outline-variant/40">
-        Amostra: assinatura simulada, sem Autoridade Certificadora real e sem validade jurídica.
+        Assinado via Clicksign com certificado digital ICP-Brasil do médico.
       </p>
     </section>
   );

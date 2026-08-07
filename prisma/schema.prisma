@@ -89,14 +89,19 @@ model Appointment {
   condutas       String?
   prontuarioEmAt DateTime?
 
-  // Assinatura digital ICP-Brasil (SIMULADA — sem integração real com
-  // Clicksign/D4Sign). Só se aplica a receituário especial (substância
-  // controlada), onde a receita comum do Memed não é suficiente. Uma vez
-  // assinado, o registro fica travado para edição.
-  receituarioEspecial  Boolean   @default(false)
-  assinaturaIcpEm      DateTime?
-  assinaturaIcpTitular String?
-  assinaturaIcpSerial  String?
+  // Assinatura digital ICP-Brasil via Clicksign — integração real. Só se aplica
+  // a receituário especial (substância controlada), onde a receita comum do
+  // Memed não é suficiente. É ASSÍNCRONA: o médico assina fora do app, com o
+  // certificado ICP-Brasil (A1/A3) dele próprio — o Clicksign não emite
+  // certificado, só exige e valida o que o médico já tem. Uma vez enviado pro
+  // Clicksign, o registro fica travado para edição (mesmo antes de assinado).
+  receituarioEspecial     Boolean   @default(false)
+  assinaturaIcpStatus     String? // null | AGUARDANDO_ASSINATURA | ASSINADO
+  assinaturaIcpEnvelopeId String?
+  assinaturaIcpDocumentId String?
+  assinaturaIcpSignerId   String?
+  assinaturaIcpEm         DateTime? // preenchido só quando o webhook confirma a assinatura
+  assinaturaIcpTitular    String? // nome do médico, conhecido desde o envio
 
   @@index([doctorId, startsAt])
   @@index([patientId, status])

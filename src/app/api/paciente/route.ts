@@ -56,9 +56,9 @@ function serialize(a: {
   resumoClinico: string | null;
   condutas: string | null;
   receituarioEspecial: boolean;
+  assinaturaIcpStatus: string | null;
   assinaturaIcpEm: Date | null;
   assinaturaIcpTitular: string | null;
-  assinaturaIcpSerial: string | null;
   doctor: { crm: string; bio: string; user: { name: string }; specialty: { slug: string; name: string; icon: string } };
 }) {
   return {
@@ -77,8 +77,8 @@ function serialize(a: {
     resumoClinico: a.resumoClinico,
     condutas: a.condutas,
     receituarioEspecial: a.receituarioEspecial,
+    assinaturaIcpStatus: a.assinaturaIcpStatus,
     assinaturaIcpEm: a.assinaturaIcpEm?.toISOString() ?? null,
     assinaturaIcpTitular: a.assinaturaIcpTitular,
-    assinaturaIcpSerial: a.assinaturaIcpSerial,
   };
 }
