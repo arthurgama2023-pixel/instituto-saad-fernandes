@@ -4,7 +4,13 @@
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 
-const COOKIE = "sd_uid";
+export const COOKIE = "sd_uid";
+export const SESSION_COOKIE_OPTS = {
+  httpOnly: true,
+  sameSite: "lax" as const,
+  maxAge: 60 * 60 * 24 * 365,
+  path: "/",
+};
 
 export async function getDemoUser() {
   const jar = await cookies();

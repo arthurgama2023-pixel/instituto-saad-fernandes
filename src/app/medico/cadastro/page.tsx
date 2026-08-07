@@ -16,6 +16,7 @@ const MODALIDADES = [
 
 type Form = {
   nome: string;
+  email: string;
   whatsapp: string;
   crmNumero: string;
   uf: string;
@@ -27,7 +28,7 @@ type Form = {
 };
 
 const EMPTY: Form = {
-  nome: "", whatsapp: "", crmNumero: "", uf: "", especialidadeSlug: "",
+  nome: "", email: "", whatsapp: "", crmNumero: "", uf: "", especialidadeSlug: "",
   anosExperiencia: "", precoReais: "", modalidade: "VIDEO", bio: "",
 };
 
@@ -58,6 +59,7 @@ export default function CadastroMedico() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nome: form.nome,
+          email: form.email,
           whatsapp: form.whatsapp,
           crmNumero: form.crmNumero,
           uf: form.uf,
@@ -105,6 +107,10 @@ export default function CadastroMedico() {
         <div className="space-y-6">
           <Field label="Nome completo" htmlFor="nome">
             <TextInput id="nome" value={form.nome} onChange={set("nome")} placeholder="Dr(a). Nome Sobrenome" autoComplete="name" />
+          </Field>
+
+          <Field label="E-mail" htmlFor="email" hint="Onde você recebe as notificações de consulta (confirmação, cancelamento e lembrete).">
+            <TextInput id="email" value={form.email} onChange={set("email")} placeholder="voce@exemplo.com" inputMode="email" autoComplete="email" />
           </Field>
 
           <Field label="WhatsApp" htmlFor="wpp" hint="Usamos para avisar sobre consultas e chamados.">

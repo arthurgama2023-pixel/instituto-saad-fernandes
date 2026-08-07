@@ -14,6 +14,7 @@ export async function GET() {
 // (sanidade do banco) — sem mínimos, sem regra de formato. Tudo aceita vazio.
 const Body = z.object({
   nome: z.string().trim().max(120).optional().default(""),
+  email: z.string().trim().max(160).optional().default(""),
   whatsapp: z.string().trim().max(20).optional().default(""),
   crmNumero: z.string().trim().max(20).optional().default(""),
   uf: z.string().trim().max(2).optional().default(""),
@@ -49,8 +50,18 @@ export async function POST(req: NextRequest) {
   const uf = (d.uf.trim() || "—").toUpperCase();
   const crm = `CRM ${crmNumero}-${uf}`;
 
+  // E-mail é onde chegam as notificações de consulta. Guardamos só se preenchido
+  // e ainda livre (é @unique) — vazio/duplicado vira null pra não travar o cadastro.
+  const emailNorm = d.email.trim().toLowerCase() || null;
+  const emailLivre = emailNorm && !(await db.user.findUnique({ where: { email: emailNorm } })) ? emailNorm : null;
+
   const user = await db.user.create({
-    data: { name: nome, phone: d.whatsapp.replace(/\D/g, "") || null, role: "DOCTOR" },
+    data: {
+      name: nome,
+      email: emailLivre,
+      phone: d.whatsapp.replace(/\D/g, "") || null,
+      role: "DOCTOR",
+    },
   });
   await db.doctor.create({
     data: {

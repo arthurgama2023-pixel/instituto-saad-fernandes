@@ -14,10 +14,15 @@ model User {
   phone         String?          @unique // E.164 sem "+", ex.: 5521980828309
   name          String
   role          String           @default("PATIENT")
+  // Login social (Google). Nulos p/ usuários demo/seed e login por telefone.
+  email         String?          @unique
+  googleId      String?          @unique // "sub" do Google (id estável da conta)
+  image         String? // URL do avatar do Google
   createdAt     DateTime         @default(now())
   conversations Conversation[]
   appointments  Appointment[]    @relation("PatientAppointments")
   urgencies     UrgencyRequest[] @relation("PatientUrgencies")
+  documentos    Documento[]      @relation("PatientDocumentos")
   doctor        Doctor?
 }
 
@@ -48,6 +53,7 @@ model Doctor {
   availability AvailabilityRule[]
   appointments Appointment[]
   urgencies    UrgencyRequest[]
+  documentos   Documento[]
 }
 
 // Disponibilidade é REGRA, não tabela de slots (Etapa 6 §4):
@@ -80,6 +86,7 @@ model Appointment {
   holdUntil   DateTime?
   payment     Payment?
   urgency     UrgencyRequest?
+  documentos  Documento[]
   createdAt   DateTime  @default(now())
 
   // Prontuário eletrônico — versão manual/grátis (sem IA, sem certificação
@@ -88,6 +95,10 @@ model Appointment {
   resumoClinico  String?
   condutas       String?
   prontuarioEmAt DateTime?
+
+  // Lembretes já enviados, em minutos-antes (ex.: "1440,60,30"). Cada marco de
+  // lembrete (24h/1h/30min) sai uma vez só; o cron consulta e atualiza isto.
+  remindersSent String @default("")
 
   @@index([doctorId, startsAt])
   @@index([patientId, status])
@@ -171,4 +182,30 @@ model OtpCode {
   createdAt DateTime @default(now())
 
   @@index([phone, createdAt])
+}
+
+// Documento clínico enviado pelo médico ao paciente: receita, atestado, exame
+// ou outro. Canal genérico — o "tipo" define o rótulo. Pode ter texto
+// (médico digita) e/ou um arquivo anexado (PDF/imagem), guardado como bytes no
+// próprio banco para não depender de storage externo nem tocar a árvore do
+// projeto (o watcher do Turbopack). Amostra: sem assinatura digital ICP-Brasil.
+model Documento {
+  id            String       @id @default(cuid())
+  tipo          String // RECEITA | ATESTADO | EXAME | OUTRO
+  titulo        String
+  conteudo      String       @default("") // corpo em texto (pode ser vazio se só arquivo)
+  arquivo       Bytes? // PDF/imagem anexado (opcional)
+  arquivoNome   String?
+  arquivoMime   String?
+  patientId     String
+  patient       User         @relation("PatientDocumentos", fields: [patientId], references: [id])
+  doctorId      String
+  doctor        Doctor       @relation(fields: [doctorId], references: [id])
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  emitidoEm     DateTime     @default(now())
+  lidoEm        DateTime? // quando o paciente abriu (nulo = "novo")
+
+  @@index([patientId, emitidoEm])
+  @@index([doctorId, emitidoEm])
 }
