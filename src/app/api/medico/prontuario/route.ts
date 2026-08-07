@@ -52,6 +52,9 @@ export async function POST(req: NextRequest) {
     if (!appt.doctor.user.phone) {
       return NextResponse.json({ error: "Médico sem telefone cadastrado — o Clicksign precisa dele para notificar a assinatura." }, { status: 422 });
     }
+    if (!appt.doctor.cpf) {
+      return NextResponse.json({ error: "Médico sem CPF cadastrado — o Clicksign exige o CPF pra validar o certificado ICP-Brasil." }, { status: 422 });
+    }
     try {
       const pdf = await gerarReceituarioPdf({
         paciente: appt.patient.name,
@@ -63,7 +66,11 @@ export async function POST(req: NextRequest) {
 
       const envelopeId = await criarEnvelope(`Receituário especial — ${appt.patient.name} — ${new Date().toLocaleDateString("pt-BR")}`);
       const documentId = await enviarDocumento(envelopeId, "receituario-especial.pdf", paraBase64(pdf));
-      const signerId = await criarSignatario(envelopeId, { nome: appt.doctor.user.name, telefoneE164: appt.doctor.user.phone });
+      const signerId = await criarSignatario(envelopeId, {
+        nome: appt.doctor.user.name,
+        telefoneE164: appt.doctor.user.phone,
+        cpf: appt.doctor.cpf,
+      });
       await exigirAssinaturaIcp(envelopeId, documentId, signerId);
       await ativarEnvelope(envelopeId);
 

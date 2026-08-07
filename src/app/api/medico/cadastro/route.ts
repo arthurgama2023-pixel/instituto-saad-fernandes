@@ -17,6 +17,7 @@ const Body = z.object({
   whatsapp: z.string().trim().max(20).optional().default(""),
   crmNumero: z.string().trim().max(20).optional().default(""),
   uf: z.string().trim().max(2).optional().default(""),
+  cpf: z.string().trim().max(14).optional().default(""),
   especialidadeSlug: z.string().optional().default(""),
   anosExperiencia: z.number().int().min(0).max(70).optional().default(0),
   precoReais: z.number().min(0).max(100000).optional().default(0),
@@ -56,6 +57,7 @@ export async function POST(req: NextRequest) {
     data: {
       userId: user.id,
       crm,
+      cpf: d.cpf.trim() || null,
       bio: d.bio.trim() || "Sem apresentação informada.",
       yearsExp: d.anosExperiencia,
       priceCents: Math.round(d.precoReais * 100),

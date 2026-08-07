@@ -36,6 +36,7 @@ model Doctor {
   userId       String             @unique
   user         User               @relation(fields: [userId], references: [id])
   crm          String
+  cpf          String? // exigido pelo Clicksign pra assinatura ICP-Brasil (auth=icp_brasil)
   bio          String
   yearsExp     Int
   rating       Float              @default(4.8)

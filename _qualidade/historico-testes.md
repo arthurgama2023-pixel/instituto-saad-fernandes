@@ -8,6 +8,26 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-06 — CPF no cadastro do médico, fecha o gap do Clicksign
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Fecha a dívida registrada na entrega anterior: `Doctor.cpf` (opcional, mesma
+  filosofia "nada obrigatório" do resto do cadastro) + campo no formulário
+  + os 4 médicos do seed ganharam CPF de teste (dígito válido, não pertence a
+  ninguém). `criarSignatario` no Clicksign agora usa `appt.doctor.cpf` de
+  verdade — removi o `CPF_TESTE_SANDBOX` hardcoded.
+- Verificação end-to-end real: mandei um novo receituário especial pra
+  assinatura (paciente diferente do teste anterior) e confirmei DIRETO na
+  API do Clicksign (`GET /signers/{id}`) que o campo `documentation` do
+  signatário veio com o CPF do cadastro (`111.444.777-35`, do Dr. Saad
+  Fernandes), não mais o valor fixo do código.
+- Também gerei o PDF de exemplo do receituário (mesmo código, `pdf-lib`) e
+  entreguei pro dono — é o conteúdo que vai pro Clicksign antes da
+  assinatura; não tem assinatura ICP-Brasil aplicada (isso só existe de
+  verdade depois que o médico assina lá, fora do nosso app).
+- Regressões: nenhuma.
+- Branch: `feat/smart-doctor/assinatura-icp-receituario`
+
+---
 ## 2026-08-06 — Download do receituário assinado (Clicksign)
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Descoberta ao vivo: o link de download do documento assinado

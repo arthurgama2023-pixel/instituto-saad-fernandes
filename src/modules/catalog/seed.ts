@@ -27,11 +27,14 @@ const SPECIALTIES = [
   },
 ];
 
+// CPFs de dígito verificador válido, mas que não pertencem a ninguém — padrão
+// usado em ambientes de teste/homologação. Só pra popular o demo e permitir
+// exigir auth=icp_brasil no Clicksign sem travar por falta de CPF.
 const DOCTORS = [
-  { name: "Dr. Saad Fernandes", phone: "5511999990001", specialty: "tricologia", crm: "CRM 123.456-SP", bio: "Tricologista e responsável técnico da equipe. Diagnóstico por tricoscopia digital e protocolos individualizados para alopecia.", yearsExp: 18, rating: 4.9, priceCents: 45000, rules: [[1, 540, 720], [3, 840, 1140], [5, 540, 720]] },
-  { name: "Dra. Helena Prado", phone: "5511999990002", specialty: "tricologia", crm: "CRM 234.567-SP", bio: "Especialista em alopecia feminina e eflúvio telógeno. Acompanhamento fotográfico da evolução.", yearsExp: 11, rating: 4.8, priceCents: 38000, rules: [[2, 480, 720], [4, 840, 1200]] },
-  { name: "Dra. Paula Freitas", phone: "5511999990003", specialty: "dermatologia", crm: "CRM 345.678-SP", bio: "Dermatologista clínica e estética. Avaliação de lesões, acne e rejuvenescimento.", yearsExp: 14, rating: 4.8, priceCents: 35000, rules: [[2, 540, 780], [4, 540, 780]] },
-  { name: "Dr. Diego Santoro", phone: "5511999990004", specialty: "clinica-geral", crm: "CRM 456.789-SP", bio: "Clínico geral. Primeira avaliação, check-up laboratorial e orientação de exames.", yearsExp: 9, rating: 4.7, priceCents: 28000, rules: [[1, 840, 1140], [2, 840, 1140], [3, 480, 720], [5, 840, 1140]] },
+  { name: "Dr. Saad Fernandes", phone: "5511999990001", cpf: "111.444.777-35", specialty: "tricologia", crm: "CRM 123.456-SP", bio: "Tricologista e responsável técnico da equipe. Diagnóstico por tricoscopia digital e protocolos individualizados para alopecia.", yearsExp: 18, rating: 4.9, priceCents: 45000, rules: [[1, 540, 720], [3, 840, 1140], [5, 540, 720]] },
+  { name: "Dra. Helena Prado", phone: "5511999990002", cpf: "529.982.247-25", specialty: "tricologia", crm: "CRM 234.567-SP", bio: "Especialista em alopecia feminina e eflúvio telógeno. Acompanhamento fotográfico da evolução.", yearsExp: 11, rating: 4.8, priceCents: 38000, rules: [[2, 480, 720], [4, 840, 1200]] },
+  { name: "Dra. Paula Freitas", phone: "5511999990003", cpf: "168.995.350-09", specialty: "dermatologia", crm: "CRM 345.678-SP", bio: "Dermatologista clínica e estética. Avaliação de lesões, acne e rejuvenescimento.", yearsExp: 14, rating: 4.8, priceCents: 35000, rules: [[2, 540, 780], [4, 540, 780]] },
+  { name: "Dr. Diego Santoro", phone: "5511999990004", cpf: "720.115.940-08", specialty: "clinica-geral", crm: "CRM 456.789-SP", bio: "Clínico geral. Primeira avaliação, check-up laboratorial e orientação de exames.", yearsExp: 9, rating: 4.7, priceCents: 28000, rules: [[1, 840, 1140], [2, 840, 1140], [3, 480, 720], [5, 840, 1140]] },
 ];
 
 export async function ensureSeeded(): Promise<void> {
@@ -57,6 +60,7 @@ export async function ensureSeeded(): Promise<void> {
       data: {
         userId: user.id,
         crm: d.crm,
+        cpf: d.cpf,
         bio: d.bio,
         yearsExp: d.yearsExp,
         rating: d.rating,

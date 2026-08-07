@@ -19,6 +19,7 @@ type Form = {
   whatsapp: string;
   crmNumero: string;
   uf: string;
+  cpf: string;
   especialidadeSlug: string;
   anosExperiencia: string;
   precoReais: string;
@@ -27,7 +28,7 @@ type Form = {
 };
 
 const EMPTY: Form = {
-  nome: "", whatsapp: "", crmNumero: "", uf: "", especialidadeSlug: "",
+  nome: "", whatsapp: "", crmNumero: "", uf: "", cpf: "", especialidadeSlug: "",
   anosExperiencia: "", precoReais: "", modalidade: "VIDEO", bio: "",
 };
 
@@ -61,6 +62,7 @@ export default function CadastroMedico() {
           whatsapp: form.whatsapp,
           crmNumero: form.crmNumero,
           uf: form.uf,
+          cpf: form.cpf,
           especialidadeSlug: form.especialidadeSlug,
           anosExperiencia: Number(form.anosExperiencia),
           precoReais: Number(form.precoReais),
@@ -119,6 +121,10 @@ export default function CadastroMedico() {
               <Select id="uf" placeholder="—" value={form.uf} onChange={set("uf")} options={UFS.map((u) => ({ value: u, label: u }))} />
             </Field>
           </div>
+
+          <Field label="CPF" htmlFor="cpf" hint="Exigido pra assinar receituário especial com certificado ICP-Brasil.">
+            <TextInput id="cpf" value={form.cpf} onChange={set("cpf")} placeholder="000.000.000-00" inputMode="numeric" />
+          </Field>
 
           <Field label="Especialidade" htmlFor="esp">
             <Select

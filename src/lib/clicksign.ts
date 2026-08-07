@@ -66,17 +66,12 @@ export async function enviarDocumento(envelopeId: string, filename: string, cont
 // Sem e-mail cadastrado pro médico (só telefone) — a notificação vai por
 // WhatsApp, que já é o canal principal do app pra falar com o médico (OTP).
 //
-// GAP CONHECIDO: exigir auth "icp_brasil" exige has_documentation=true (CPF),
-// porque o Clicksign confere o certificado contra o CPF do titular — e o
-// cadastro do médico hoje não coleta CPF, só CRM. Até esse campo existir,
-// usamos um CPF de teste (dígito verificador válido, sem pertencer a
-// ninguém — padrão usado em ambientes de homologação) só pra provar o resto
-// do fluxo. Em produção isso PRECISA vir do cadastro real do médico.
-const CPF_TESTE_SANDBOX = "111.444.777-35";
-
+// CPF é obrigatório aqui: exigir auth "icp_brasil" exige has_documentation=true,
+// porque o Clicksign confere o certificado contra o CPF do titular. Vem do
+// cadastro do médico (campo adicionado — antes só existia CRM).
 export async function criarSignatario(
   envelopeId: string,
-  { nome, telefoneE164 }: { nome: string; telefoneE164: string }
+  { nome, telefoneE164, cpf }: { nome: string; telefoneE164: string; cpf: string }
 ): Promise<string> {
   // Clicksign espera DDD+número sem o "55" do país (10 ou 11 dígitos).
   const phoneNumber = telefoneE164.startsWith("55") ? telefoneE164.slice(2) : telefoneE164;
@@ -89,7 +84,7 @@ export async function criarSignatario(
         attributes: {
           name: nome,
           phone_number: phoneNumber,
-          documentation: CPF_TESTE_SANDBOX,
+          documentation: cpf,
           has_documentation: true,
           communicate_events: { signature_request: "whatsapp", signature_reminder: "none", document_signed: "whatsapp" },
         },
