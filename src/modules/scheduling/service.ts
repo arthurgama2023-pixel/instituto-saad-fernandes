@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { notifyAppointment } from "@/modules/notifications/appointments";
 
 const HOLD_TTL_MS = 15 * 60 * 1000; // reserva de 15 min (Etapa 3 §2.3)
 const OCCUPYING = ["CONFIRMADA", "AGUARDANDO_PAGAMENTO"];
@@ -216,6 +217,7 @@ export async function cancelAppointment(appointmentId: string, patientId: string
     await db.payment.update({ where: { id: appt.payment.id }, data: { status: "REFUNDED" } });
     refunded = true;
   }
+  await notifyAppointment(appt.id, "cancelamento");
   return { ok: true as const, refunded, appt };
 }
 

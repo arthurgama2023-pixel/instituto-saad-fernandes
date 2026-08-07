@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { confirmAppointment } from "@/modules/scheduling/service";
+import { notifyAppointment } from "@/modules/notifications/appointments";
 
 const TAKE_RATE_BPS = 1500; // 15% (Etapa 8)
 
@@ -31,5 +32,6 @@ export async function simulatePaymentConfirmed(paymentId: string) {
   if (!payment || payment.status !== "PENDING") return null;
   await db.payment.update({ where: { id: paymentId }, data: { status: "CONFIRMED" } });
   const ok = await confirmAppointment(payment.appointmentId);
+  if (ok) await notifyAppointment(payment.appointmentId, "confirmacao");
   return ok ? payment : null;
 }
