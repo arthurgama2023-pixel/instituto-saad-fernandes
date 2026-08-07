@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["better-sqlite3", "pg"],
+  serverExternalPackages: ["better-sqlite3", "pg", "nodemailer"],
   turbopack: { root: __dirname },
   // Esconde o badge "N" de dev do Next (canto inferior esquerdo) que tapava o
   // botão Início da bottom nav no celular. É só do modo dev — não existe em produção.
@@ -17,6 +17,9 @@ const nextConfig: NextConfig = {
     "192.168.0.*",
     "192.168.1.*",
     "192.168.15.*",
+    // Túnel Cloudflare (HTTPS) p/ testar videochamada no celular — o subdomínio
+    // muda a cada quick tunnel, então liberamos o domínio inteiro.
+    "*.trycloudflare.com",
   ],
 };
 
