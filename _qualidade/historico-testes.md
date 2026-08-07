@@ -8,6 +8,32 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-07 — Supabase Fase 0 + fundação de RLS (auth-supabase)
+- Testes: **sem suíte** · verificação por scripts diretos contra o Supabase.
+- Fase 0: criado projeto Supabase do cliente (org "Smart Doctor", região
+  sa-east-1, Postgres 17). `prisma db push` aplicou o schema → 11 tabelas.
+  Conexão direta (5432) e pooler (6543) testadas: ambas OK com o driver `pg`.
+  Credenciais no `.env.local` (gitignored). Dev local segue SQLite, git limpo.
+- **Pegadinha crítica confirmada e resolvida**: o papel `postgres` (que o
+  Prisma usa) tem `bypassrls = true` — conectar como ele NÃO isola nada. A
+  correção provada: por requisição, `SET LOCAL ROLE authenticated` +
+  `set_config('app.uid', <User.id>, true)`; o papel `authenticated` obedece
+  RLS. Testado através do POOLER (transaction mode): alice só vê alice, bob só
+  vê bob, sem identidade não vê nada.
+- **RLS aplicado na tabela real `Appointment`** (`prisma/rls.sql`, versionado e
+  idempotente). Prova com dados reais (2 pacientes + 1 médico, depois removidos):
+  - Paciente A → só a consulta dele (incl. o prontuário dele)
+  - Paciente B → só a dele
+  - Médico → ambas (é o médico das duas)
+  - Sem login → nada
+  Estado final: RLS ligado na Appointment, política `appointment_select`,
+  0 linhas de teste no banco.
+- Ainda NÃO ligado ao app: o app roda em SQLite/demo; a Fase 1 (login real +
+  helper `withUser` + wiring Supabase) é o próximo passo. `rls.sql` cobre só
+  Appointment/SELECT por enquanto (marcado no cabeçalho do arquivo).
+- Branch: `feat/smart-doctor/auth-supabase`
+
+---
 ## 2026-08-06 — Aba "Urgência" no painel do médico
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Toda a lógica já existia (schema `UrgencyRequest`, `modules/urgency/service.ts`,
