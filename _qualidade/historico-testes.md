@@ -8,6 +8,28 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-07 — Fundação do login (Supabase Auth telefone/OTP) provada
+- Decisão de arquitetura revista com o dono: virar pro **Supabase nativo**
+  (Supabase Auth + supabase-js + RLS via auth.uid) em vez de Prisma+withUser —
+  "seguro por padrão" pesa mais no longo prazo pra dado médico. A reescrita da
+  camada de dados espera a ICP do amigo ser mesclada (colisão alta); só as
+  partes de baixa colisão avançam agora.
+- Config do Supabase Auth (via Management API): `external_phone_enabled=true`,
+  `sms_autoconfirm=true`, e um número de TESTE com código fixo
+  (`5511988887777` = `123456`, válido até 2030) — sem provedor de SMS real,
+  sem custo. Provedor pago (Twilio/WhatsApp) fica pra produção.
+- Prova end-to-end do fluxo (POST /auth/v1/otp → /auth/v1/verify com a anon
+  key): login OK, sessão criada, JWT com `role=authenticated` e `sub`
+  (auth.uid) — exatamente o que o RLS nativo consome. Ficou 1 usuário de teste
+  em auth.users (o número de teste), útil pra construir a tela de login depois.
+- NOTA sobre o rls.sql já commitado: ele prova o mecanismo, mas keya em
+  `current_setting('app.uid')` (abordagem Prisma+withUser). Na virada nativa,
+  as políticas passam a keyar em `auth.uid()`. O mecanismo é o mesmo; muda a
+  fonte da identidade. Ajuste entra no wiring nativo (pós-ICP do amigo).
+- Sem mudança de código do app neste passo (config Supabase + verificação).
+- Branch: `feat/smart-doctor/auth-supabase`
+
+---
 ## 2026-08-07 — Supabase Fase 0 + fundação de RLS (auth-supabase)
 - Testes: **sem suíte** · verificação por scripts diretos contra o Supabase.
 - Fase 0: criado projeto Supabase do cliente (org "Smart Doctor", região
