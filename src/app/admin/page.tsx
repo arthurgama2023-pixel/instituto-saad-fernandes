@@ -1,8 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ensureDemoData } from "@/modules/demo/seed-demo";
 import { adminOverview, listDoctorsAdmin } from "@/modules/admin/service";
+import { isAdminAuthed } from "@/lib/admin-session";
 import { LogoMark } from "@/components/LogoMark";
 import { Icon } from "@/components/brand/Icon";
+import { ApproveRow } from "./ApproveRow";
+import { RealtimeMedicos } from "./RealtimeMedicos";
 
 const money = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const initials = (n: string) => n.replace(/^(dra?\.?)\s+/i, "").split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
@@ -17,6 +21,8 @@ const NAV: [string, string, string][] = [
 const card = "bg-surface-container-lowest rounded-xl border border-outline-variant/50 brand-shadow";
 
 export default async function AdminPanel({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  // Acesso restrito: sem sessão de admin, vai pro login.
+  if (!(await isAdminAuthed())) redirect("/admin/login");
   await ensureDemoData();
   const sp = await searchParams;
   const tab = sp.tab || "visao";
@@ -25,6 +31,7 @@ export default async function AdminPanel({ searchParams }: { searchParams: Promi
 
   return (
     <div className="brand-app min-h-screen flex bg-background text-on-background">
+      <RealtimeMedicos />
       <aside className="w-64 shrink-0 border-r border-outline-variant/50 bg-surface-container-lowest flex-col p-4 gap-1 sticky top-0 h-screen hidden md:flex">
         <Link href="/" className="flex items-center gap-3 px-2 py-2 mb-4">
           <LogoMark size={40} />
@@ -58,11 +65,13 @@ export default async function AdminPanel({ searchParams }: { searchParams: Promi
         })}
 
         <div className="mt-auto pt-4 border-t border-outline-variant/50">
-          <div className="text-label-lg font-label-lg text-primary">Paula Freitas</div>
-          <div className="text-body-sm font-body-sm text-on-surface-variant">Administradora</div>
-          <Link href="/" className="inline-flex items-center gap-1 mt-2 text-body-sm font-body-sm text-secondary font-semibold">
-            <Icon name="arrow_back" size={16} /> Trocar de perfil
-          </Link>
+          <div className="text-label-lg font-label-lg text-primary">Administração</div>
+          <div className="text-body-sm font-body-sm text-on-surface-variant">Acesso restrito</div>
+          <form action="/api/admin/logout" method="post" className="mt-2">
+            <button type="submit" className="inline-flex items-center gap-1 text-body-sm font-body-sm text-secondary font-semibold">
+              <Icon name="logout" size={16} /> Sair
+            </button>
+          </form>
         </div>
       </aside>
 
@@ -142,28 +151,6 @@ function Funil({ funil }: { funil: Overview["funil"] }) {
   );
 }
 
-function ApproveRow({ name, sub }: { name: string; sub: string }) {
-  return (
-    <div className="flex items-center gap-3 py-3 border-b border-outline-variant/40 last:border-0">
-      <span className="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center text-label-md font-label-md shrink-0">
-        {initials(name)}
-      </span>
-      <div className="flex-1 min-w-0">
-        <div className="text-label-lg font-label-lg text-primary truncate">{name}</div>
-        <div className="text-body-sm font-body-sm text-on-surface-variant truncate">{sub}</div>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <button className="sd-aurora h-9 px-4 rounded-full text-label-md font-label-md active:scale-95 transition-transform">
-          Aprovar
-        </button>
-        <button className="h-9 px-4 rounded-full border border-error/60 text-error text-label-md font-label-md hover:bg-error-container/40 transition-colors">
-          Recusar
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function Visao({ overview }: { overview: Overview }) {
   const { kpis, funil, especialidades, pendentes } = overview;
   const conv = funil.conversas > 0 ? Math.min(100, Math.round((funil.realizadas / funil.conversas) * 100)) : 0;
@@ -206,7 +193,7 @@ function Visao({ overview }: { overview: Overview }) {
             {pendentes.length === 0 ? (
               <p className="text-body-md font-body-md text-on-surface-variant py-4 text-center">Nenhum médico pendente 🎉</p>
             ) : (
-              pendentes.map((d) => <ApproveRow key={d.id} name={d.name} sub={`${d.specialty} · ${d.crm}`} />)
+              pendentes.map((d) => <ApproveRow key={d.id} id={d.id} name={d.name} sub={`${d.specialty} · ${d.crm}`} />)
             )}
           </SectionCard>
           <SectionCard title="⚠ Alertas">
@@ -245,7 +232,7 @@ function Medicos({ overview, doctors }: { overview: Overview; doctors: Doctors }
       {overview.pendentes.length > 0 && (
         <SectionCard title="Aprovação pendente" aside={String(overview.pendentes.length)}>
           {overview.pendentes.map((d) => (
-            <ApproveRow key={d.id} name={d.name} sub={`${d.specialty} · ${d.crm} · documentos enviados`} />
+            <ApproveRow key={d.id} id={d.id} name={d.name} sub={`${d.specialty} · ${d.crm} · documentos enviados`} />
           ))}
         </SectionCard>
       )}

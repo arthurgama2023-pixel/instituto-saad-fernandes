@@ -1,4 +1,6 @@
 import { db } from "@/lib/db";
+import { avisarMudancaMedicos } from "@/lib/realtime";
+import { gerarAtivacaoEnotificar } from "@/modules/notifications/doctor-onboarding";
 
 function monthStart(): Date {
   const d = new Date();
@@ -75,6 +77,30 @@ export async function adminOverview() {
     })),
     especialidades: [...bySpec.values()].sort((a, b) => b.count - a.count),
   };
+}
+
+export type DoctorStatus = "ACTIVE" | "SUSPENDED";
+
+export type SetStatusResult = { ok: boolean; ativacaoLink?: string };
+
+/**
+ * Aprova (ACTIVE) ou recusa/suspende (SUSPENDED) um médico. Ao aprovar, gera o
+ * token de ativação e dispara o e-mail pro médico criar login+senha (o link
+ * volta no retorno pra ser exposto em dev sem e-mail). Avisa a fila do admin
+ * via realtime nos dois casos.
+ */
+export async function setDoctorStatus(doctorId: string, status: DoctorStatus): Promise<SetStatusResult> {
+  const doctor = await db.doctor.findUnique({ where: { id: doctorId }, select: { id: true, userId: true } });
+  if (!doctor) return { ok: false };
+  await db.doctor.update({ where: { id: doctorId }, data: { status } });
+
+  let ativacaoLink: string | undefined;
+  if (status === "ACTIVE") {
+    ativacaoLink = (await gerarAtivacaoEnotificar(doctor.userId)) ?? undefined;
+  }
+
+  await avisarMudancaMedicos(); // realtime: fila do admin atualiza sozinha
+  return { ok: true, ativacaoLink };
 }
 
 export async function listDoctorsAdmin() {
