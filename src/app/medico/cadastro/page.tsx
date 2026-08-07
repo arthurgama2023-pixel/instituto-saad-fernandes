@@ -36,9 +36,11 @@ export default function CadastroMedico() {
   const [especialidades, setEspecialidades] = useState<{ slug: string; name: string }[] | null>(null);
   const [form, setForm] = useState<Form>(EMPTY);
   const [docName, setDocName] = useState<string>();
+  const [certFile, setCertFile] = useState<File | null>(null);
+  const [certSenha, setCertSenha] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
-  const [pronto, setPronto] = useState<{ nome: string; especialidade: string } | null>(null);
+  const [pronto, setPronto] = useState<{ nome: string; especialidade: string; certificadoAceito: boolean } | null>(null);
 
   useEffect(() => {
     fetch("/api/medico/cadastro")
@@ -54,28 +56,27 @@ export default function CadastroMedico() {
     setEnviando(true);
     setErro(null);
     try {
-      const r = await fetch("/api/medico/cadastro", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nome: form.nome,
-          email: form.email,
-          whatsapp: form.whatsapp,
-          crmNumero: form.crmNumero,
-          uf: form.uf,
-          especialidadeSlug: form.especialidadeSlug,
-          anosExperiencia: Number(form.anosExperiencia),
-          precoReais: Number(form.precoReais),
-          modalidade: form.modalidade,
-          bio: form.bio,
-        }),
-      });
+      const fd = new FormData();
+      fd.set("nome", form.nome);
+      fd.set("email", form.email);
+      fd.set("whatsapp", form.whatsapp);
+      fd.set("crmNumero", form.crmNumero);
+      fd.set("uf", form.uf);
+      fd.set("especialidadeSlug", form.especialidadeSlug);
+      fd.set("anosExperiencia", String(Number(form.anosExperiencia) || 0));
+      fd.set("precoReais", String(Number(form.precoReais) || 0));
+      fd.set("modalidade", form.modalidade);
+      fd.set("bio", form.bio);
+      if (certFile) fd.set("certArquivo", certFile);
+      if (certSenha) fd.set("certSenha", certSenha);
+
+      const r = await fetch("/api/medico/cadastro", { method: "POST", body: fd });
       const d = await r.json();
       if (!r.ok) {
         setErro(d.error ?? "Não consegui enviar o cadastro. Tente de novo.");
         return;
       }
-      setPronto({ nome: d.nome, especialidade: d.especialidade });
+      setPronto({ nome: d.nome, especialidade: d.especialidade, certificadoAceito: Boolean(d.certificadoAceito) });
     } catch {
       setErro("Não consegui enviar o cadastro. Verifique a conexão.");
     } finally {
@@ -83,7 +84,15 @@ export default function CadastroMedico() {
     }
   };
 
-  if (pronto) return <Enviado nome={pronto.nome} especialidade={pronto.especialidade} comDocumento={!!docName} />;
+  if (pronto)
+    return (
+      <Enviado
+        nome={pronto.nome}
+        especialidade={pronto.especialidade}
+        comDocumento={!!docName}
+        certificadoAceito={pronto.certificadoAceito}
+      />
+    );
   if (!especialidades) return <Loading />;
 
   return (
@@ -159,6 +168,38 @@ export default function CadastroMedico() {
             fileName={docName}
             onFile={(f) => setDocName(f?.name)}
           />
+
+          <div className="pt-2 border-t border-outline-variant/50" />
+
+          <section className="space-y-4">
+            <div>
+              <h3 className="text-label-lg font-label-lg text-primary">Certificado digital (ICP-Brasil)</h3>
+              <p className="text-body-sm font-body-sm text-on-surface-variant mt-1">
+                Opcional. Se você já tem um certificado A1 (.pfx), cadastre agora e suas receitas e atestados já
+                saem assinados digitalmente desde o primeiro dia. Pode fazer isso depois também, em Configurações.
+              </p>
+            </div>
+
+            <FileField
+              label="Arquivo do certificado (.pfx / .p12)"
+              fileName={certFile?.name}
+              onFile={setCertFile}
+              accept=".pfx,.p12,application/x-pkcs12"
+              placeholder="Enviar certificado A1"
+            />
+
+            {certFile && (
+              <Field label="Senha do certificado" htmlFor="cert-senha">
+                <TextInput
+                  id="cert-senha"
+                  type="password"
+                  value={certSenha}
+                  onChange={(e) => setCertSenha(e.target.value)}
+                  autoComplete="off"
+                />
+              </Field>
+            )}
+          </section>
         </div>
       </main>
 
@@ -182,7 +223,17 @@ function primeiroNome(nome: string): string {
   return partes[0] ?? nome;
 }
 
-function Enviado({ nome, especialidade, comDocumento }: { nome: string; especialidade: string; comDocumento: boolean }) {
+function Enviado({
+  nome,
+  especialidade,
+  comDocumento,
+  certificadoAceito,
+}: {
+  nome: string;
+  especialidade: string;
+  comDocumento: boolean;
+  certificadoAceito: boolean;
+}) {
   return (
     <main className="w-full max-w-[560px] mx-auto px-5 py-16 flex flex-col items-center text-center gap-4">
       <div className="w-20 h-20 rounded-full bg-secondary-container flex items-center justify-center">
@@ -194,6 +245,11 @@ function Enviado({ nome, especialidade, comDocumento }: { nome: string; especial
         {comDocumento ? " e seus documentos" : ""}. Em breve nosso time entra em contato pelo WhatsApp — a
         verificação do seu registro no CFM leva até 24h.
       </p>
+      {certificadoAceito && (
+        <p className="flex items-center gap-2 text-body-sm font-body-sm text-secondary">
+          <Icon name="verified_user" filled size={16} /> Certificado digital cadastrado — seus documentos já saem assinados.
+        </p>
+      )}
       <div className="w-full flex flex-col gap-3 mt-6">
         <Link href="/medico/login" className="h-14 bg-primary-container text-white rounded-xl text-label-lg font-label-lg flex items-center justify-center">
           IR PARA O LOGIN
