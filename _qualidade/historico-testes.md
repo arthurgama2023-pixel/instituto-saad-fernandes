@@ -8,6 +8,27 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-06 — Texto de validade jurídica (ICP-Brasil) na interface
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Só copy, dois pontos: (A) ao marcar "Receituário especial", frase nova com
+  ícone gavel explicando que a assinatura ICP-Brasil equivale a assinatura de
+  próprio punho (MP 2.200-2/2001) — antes de decidir; (B) no selo pós-assinatura
+  (médico e paciente), a citação formal completa da MP fecha o documento.
+- Verificação ao vivo (dev 3080):
+  - Momento A: marquei o checkbox → confirmei via read_page/JS que a frase de
+    validade jurídica + MP 2.200-2/2001 renderiza junto ao aviso de bloqueio,
+    e o botão vira "ENVIAR PARA ASSINATURA".
+  - Momento B: marquei manualmente 1 consulta como ASSINADO no banco (só pra
+    exercitar o render do selo verde — NÃO é assinatura real) e confirmei a
+    citação da MP no selo, tanto em /medico/pacientes/[id] quanto em
+    /paciente/consultas/[id].
+- Gotcha reconfirmado: o dev server entrou em loop de HMR quebrado (WebSocket
+  502/409) e a página não hidratava — o checkbox não respondia a clique. Um
+  restart do server + reload resolveu. Já documentado como padrão deste projeto.
+- Regressões: nenhuma.
+- Branch: `feat/smart-doctor/assinatura-icp-receituario`
+
+---
 ## 2026-08-06 — CPF no cadastro do médico, fecha o gap do Clicksign
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Fecha a dívida registrada na entrega anterior: `Doctor.cpf` (opcional, mesma

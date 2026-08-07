@@ -202,12 +202,20 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
             </label>
 
             {especial && (
-              <p className="flex items-start gap-2 rounded-lg bg-error-container/60 text-on-error-container p-3 text-body-sm font-body-sm">
-                <Icon name="lock" size={18} className="shrink-0 mt-0.5" />
-                Ao salvar, o documento vai pro Clicksign e o registro fica travado — você vai
-                precisar assinar com o SEU certificado ICP-Brasil (link chega por WhatsApp) pra
-                concluir. Depois de enviado, não dá mais para editar este registro.
-              </p>
+              <>
+                <p className="flex items-start gap-2 rounded-lg bg-secondary-container/40 text-on-secondary-container p-3 text-body-sm font-body-sm">
+                  <Icon name="gavel" size={18} className="shrink-0 mt-0.5" />
+                  A assinatura com certificado ICP-Brasil tem a mesma validade jurídica de uma
+                  assinatura de próprio punho (MP 2.200-2/2001) — é ela que dá valor legal à receita,
+                  não um clique.
+                </p>
+                <p className="flex items-start gap-2 rounded-lg bg-error-container/60 text-on-error-container p-3 text-body-sm font-body-sm">
+                  <Icon name="lock" size={18} className="shrink-0 mt-0.5" />
+                  Ao salvar, o documento vai pro Clicksign e o registro fica travado — você vai
+                  precisar assinar com o SEU certificado ICP-Brasil (link chega por WhatsApp) pra
+                  concluir. Depois de enviado, não dá mais para editar este registro.
+                </p>
+              </>
             )}
           </div>
         </>
@@ -269,7 +277,8 @@ function SeloAssinatura({ assinatura }: { assinatura: Assinatura }) {
         </div>
       </dl>
       <p className="text-[11px] font-body-sm text-on-surface-variant pt-1 border-t border-outline-variant/40">
-        Assinado via Clicksign com certificado digital ICP-Brasil do médico.
+        Assinado via Clicksign com certificado digital ICP-Brasil do médico. Tem validade jurídica
+        de assinatura de próprio punho, conforme MP 2.200-2/2001.
       </p>
     </section>
   );

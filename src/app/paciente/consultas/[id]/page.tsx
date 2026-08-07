@@ -127,7 +127,8 @@ export default function ProntuarioPage({ params }: { params: Promise<{ id: strin
                     <Icon name="download" size={18} /> Baixar receituário assinado (PDF)
                   </a>
                   <p className="text-[11px] font-body-sm text-on-surface-variant mt-3 pt-3 border-t border-outline-variant/40">
-                    Assinado via Clicksign com certificado digital ICP-Brasil do médico.
+                    Assinado via Clicksign com certificado digital ICP-Brasil do médico. Tem validade
+                    jurídica de assinatura de próprio punho, conforme MP 2.200-2/2001.
                   </p>
                 </section>
               )}
