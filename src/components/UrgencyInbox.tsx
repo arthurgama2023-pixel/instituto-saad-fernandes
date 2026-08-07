@@ -19,8 +19,12 @@ const esperando = (criadoEm: string) => {
   return `${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, "0")}`;
 };
 
-/** Fila de chamados de urgência do médico, na identidade Smart Doctor (brand-app). */
-export function UrgencyInbox({ doctorId }: { doctorId: string }) {
+/**
+ * Fila de chamados de urgência do médico, na identidade Smart Doctor (brand-app).
+ * Embutido no dashboard, fica invisível sem chamado (não quer virar ruído ali).
+ * Como aba própria (`standalone`), mostra um estado vazio em vez de sumir.
+ */
+export function UrgencyInbox({ doctorId, standalone = false }: { doctorId: string; standalone?: boolean }) {
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [aceitando, setAceitando] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -74,7 +78,18 @@ export function UrgencyInbox({ doctorId }: { doctorId: string }) {
     }
   };
 
-  if (chamados.length === 0 && !aviso) return null;
+  if (chamados.length === 0 && !aviso) {
+    if (!standalone) return null;
+    return (
+      <div className="rounded-xl border border-outline-variant/50 bg-surface-container-lowest flex flex-col items-center gap-2 py-12 text-center brand-shadow">
+        <Icon name="emergency" className="text-on-tertiary-container" size={32} />
+        <p className="text-body-md font-body-md text-on-surface-variant">Nenhum chamado de urgência no momento.</p>
+        <p className="text-body-sm font-body-sm text-on-surface-variant">
+          Assim que um paciente da sua especialidade pedir urgência, aparece aqui.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <section className="rounded-xl border border-error/40 bg-error-container/40 p-5 brand-shadow">

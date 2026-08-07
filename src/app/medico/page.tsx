@@ -15,6 +15,7 @@ const initials = (n: string) => n.replace(/^(dra?\.?)\s+/i, "").split(" ").map((
 const NAV: [string, string, string][] = [
   ["dashboard", "dashboard", "Dashboard"],
   ["agenda", "calendar_month", "Agenda"],
+  ["urgencia", "emergency", "Urgência"],
   ["pacientes", "group", "Pacientes"],
   ["financeiro", "account_balance_wallet", "Financeiro"],
   ["config", "settings", "Configurações"],
@@ -101,6 +102,7 @@ export default async function MedicoPanel({
           </div>
         )}
         {tab === "agenda" && <AgendaView data={data} />}
+        {tab === "urgencia" && <UrgencyInbox doctorId={doctorId} standalone />}
         {tab === "pacientes" && <Pacientes data={data} />}
         {tab === "financeiro" && <Financeiro data={data} />}
         {tab === "config" && <Config data={data} />}
@@ -110,7 +112,7 @@ export default async function MedicoPanel({
 }
 
 function tabTitle(t: string) {
-  return { dashboard: "Dashboard", agenda: "Agenda", pacientes: "Pacientes", financeiro: "Financeiro", config: "Configurações" }[t] ?? "Painel";
+  return { dashboard: "Dashboard", agenda: "Agenda", urgencia: "Urgência", pacientes: "Pacientes", financeiro: "Financeiro", config: "Configurações" }[t] ?? "Painel";
 }
 
 type Data = NonNullable<Awaited<ReturnType<typeof doctorPanel>>>;

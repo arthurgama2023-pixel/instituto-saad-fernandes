@@ -8,6 +8,32 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-06 — Aba "Urgência" no painel do médico
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Toda a lógica já existia (schema `UrgencyRequest`, `modules/urgency/service.ts`,
+  APIs `/api/urgencia/*` e `/api/medico/urgencias/*`, componente `UrgencyInbox`) —
+  só faltava expor como aba própria em `/medico`. `UrgencyInbox` só estava
+  embutido dentro da aba Dashboard, invisível quando a fila está vazia.
+- Mudança: +`["urgencia", "emergency", "Urgência"]` no `NAV` e no `tabTitle` de
+  `src/app/medico/page.tsx`; `UrgencyInbox` ganhou a prop `standalone` — quando
+  true, mostra estado vazio em vez de `return null` (fazia sentido ficar
+  invisível dentro do dashboard, mas não como aba dedicada em branco).
+  Mantive o inbox também no dashboard (alerta imediato) — a aba nova é pra
+  quando o médico for checar de propósito.
+- Verificação end-to-end real (não é mock, é o fluxo de produção completo):
+  1. `/medico?tab=urgencia` sem chamado → estado vazio correto.
+  2. Abri `/paciente/urgencia`, escolhi Tricologia, descrevi "queda de cabelo
+     intensa", cliquei "CHAMAR MÉDICO AGORA" → chamado criado, tela de
+     "Procurando médico…" com contagem regressiva.
+  3. Voltei pra `/medico?tab=urgencia` (mesmo médico, Tricologia) → o chamado
+     da Marina Costa apareceu, com descrição e tempo de espera.
+  4. Cliquei "Aceitar" → "Chamado aceito. O paciente está confirmando o
+     pagamento." — fila esvaziou.
+- Regressões: nenhuma (dashboard, agenda, pacientes, financeiro, config
+  continuam navegáveis).
+- Branch: `feat/smart-doctor/assinatura-icp-receituario`
+
+---
 ## 2026-08-06 — Texto de validade jurídica (ICP-Brasil) na interface
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Só copy, dois pontos: (A) ao marcar "Receituário especial", frase nova com
