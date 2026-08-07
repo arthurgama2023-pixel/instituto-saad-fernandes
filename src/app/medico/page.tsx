@@ -6,6 +6,7 @@ import { DoctorSwitcher } from "@/components/PanelSwitcher";
 import { LogoMark } from "@/components/LogoMark";
 import { UrgencyInbox } from "@/components/UrgencyInbox";
 import { Icon } from "@/components/brand/Icon";
+import { CertificadoUploader } from "./CertificadoUploader";
 
 const money = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const timeLabel = (iso: string) => new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
@@ -314,16 +315,20 @@ function Config({ data }: { data: Data }) {
     ["Valor da consulta", money(data.doctor.priceCents)],
   ];
   return (
-    <section className="space-y-3">
-      <h3 className="text-headline-sm font-headline-sm text-primary mb-1">Perfil público</h3>
-      <div className={`${card} divide-y divide-outline-variant/50`}>
-        {rows.map(([k, v]) => (
-          <div key={k} className="flex items-center justify-between gap-4 px-5 py-4">
-            <span className="text-body-md font-body-md text-on-surface-variant">{k}</span>
-            <span className="text-label-lg font-label-lg text-primary text-right">{v}</span>
-          </div>
-        ))}
-      </div>
-    </section>
+    <div className="space-y-8">
+      <section className="space-y-3">
+        <h3 className="text-headline-sm font-headline-sm text-primary mb-1">Perfil público</h3>
+        <div className={`${card} divide-y divide-outline-variant/50`}>
+          {rows.map(([k, v]) => (
+            <div key={k} className="flex items-center justify-between gap-4 px-5 py-4">
+              <span className="text-body-md font-body-md text-on-surface-variant">{k}</span>
+              <span className="text-label-lg font-label-lg text-primary text-right">{v}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <CertificadoUploader />
+    </div>
   );
 }
