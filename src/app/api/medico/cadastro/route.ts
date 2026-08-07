@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { ensureSeeded } from "@/modules/catalog/seed";
 import { validarCertificado } from "@/modules/signing/icp";
 import { cifrar, cifrarTexto, criptografiaHabilitada } from "@/modules/signing/cripto";
+import { avisarMudancaMedicos } from "@/lib/realtime";
 
 const MAX_CERT = 256 * 1024; // 256 KB (um A1 é pequeno)
 
@@ -145,6 +146,10 @@ export async function POST(req: NextRequest) {
       certEm: certPfxCifrado ? new Date() : null,
     },
   });
+
+  // Avisa a fila do admin em tempo real (Supabase Broadcast) — o painel aberto
+  // atualiza sozinho e o novo médico aparece na fila de aprovação.
+  await avisarMudancaMedicos();
 
   return NextResponse.json({ ok: true, nome, especialidade: specialty.name, certificadoAceito: Boolean(certPfxCifrado) });
 }

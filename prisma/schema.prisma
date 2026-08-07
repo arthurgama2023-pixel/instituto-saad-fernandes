@@ -19,6 +19,12 @@ model User {
   email         String?          @unique
   googleId      String?          @unique // "sub" do Google (id estável da conta)
   image         String? // URL do avatar do Google
+  // Login por senha do MÉDICO. A senha é criada pelo próprio médico na tela de
+  // ativação (link do e-mail de aprovação), não no cadastro. Guardada só como
+  // hash (scrypt, ver lib/senha.ts). Token de ativação de uso único, com prazo.
+  senhaHash      String?
+  ativacaoToken  String?         @unique
+  ativacaoExpira DateTime?
   createdAt     DateTime         @default(now())
   conversations Conversation[]
   appointments  Appointment[]    @relation("PatientAppointments")

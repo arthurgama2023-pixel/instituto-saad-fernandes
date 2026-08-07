@@ -25,14 +25,31 @@ export default function LoginMedico() {
     else if (e) setErro("Não foi possível entrar com o Google. Tente novamente.");
   }, []);
 
-  const pode = identificador.trim().length > 2 && senha.length > 0;
+  const pode = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(identificador.trim()) && senha.length > 0;
 
-  const entrar = (e: React.FormEvent) => {
+  const entrar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pode) return;
+    setErro(null);
     setEntrando(true);
-    // Demo: ainda não há verificação de senha — leva ao painel.
-    router.push("/medico");
+    try {
+      const res = await fetch("/api/medico/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: identificador.trim(), senha }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setErro(body.error ?? "Não foi possível entrar.");
+        return;
+      }
+      router.push("/medico");
+      router.refresh();
+    } catch {
+      setErro("Não consegui entrar. Verifique a conexão.");
+    } finally {
+      setEntrando(false);
+    }
   };
 
   return (
@@ -72,9 +89,9 @@ export default function LoginMedico() {
               className={inputEl}
               value={identificador}
               onChange={(e) => setIdentificador(e.target.value)}
-              placeholder="CRM ou E-mail"
+              placeholder="E-mail"
               autoComplete="username"
-              aria-label="CRM ou E-mail"
+              aria-label="E-mail"
             />
           </div>
 

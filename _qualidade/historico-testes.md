@@ -8,6 +8,118 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-07 — Onboarding do médico: realtime + e-mail de aprovação + login/senha
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ · `DATABASE_URL="" npm run build` ✅.
+- Fecha o ciclo do médico: cadastro→PENDING→admin aprova→e-mail→cria senha→loga.
+- O quê:
+  - **Realtime (Supabase Broadcast)**: `lib/realtime.ts` publica no canal
+    `admin-medicos` (HTTP broadcast do Supabase) após cadastro e após aprovar/
+    recusar; `admin/RealtimeMedicos.tsx` (client) escuta e faz router.refresh().
+    Escolhido Broadcast (não postgres_changes) porque o dev grava no SQLite e
+    postgres_changes exporia certPfx/certSenha do Doctor pro anon.
+  - **E-mail de aprovação**: `notifications/doctor-onboarding.ts` gera token de
+    ativação (7 dias) e manda o link via `sendMail` (no-op sem GMAIL). A API de
+    aprovação devolve `ativacaoLink` — o ApproveRow mostra pro admin copiar.
+  - **Ativação**: `/medico/ativar?token=` + `/api/medico/ativar` (GET valida/
+    prefill, POST grava e-mail+senha, queima o token). Senha via scrypt
+    (`lib/senha.ts`, sem dep nova). Campos novos no User: senhaHash,
+    ativacaoToken, ativacaoExpira (db push no SQLite).
+  - **Login real do médico**: reescreve `/medico/login` (mata a demo falsa) +
+    `/api/medico/login` — e-mail+senha (scrypt) E gate `status===ACTIVE`.
+- Prova ao vivo (SQLite): cadastro→aprovar (retorna link)→GET valida→POST cria
+  senha→token vira 404 (uso único)→login senha errada 401→senha certa 200+sessão
+  →suspender→login 403 (gate). Realtime: painel /admin aberto no browser,
+  cadastro via curl, "Dr. Realtime AoVivo" apareceu na fila **sem F5** (screenshot).
+- Segurança: zero senha/token/segredo no diff (scrypt salt+hash, timing-safe).
+- Pendência do dono: `GMAIL_USER`+`GMAIL_APP_PASSWORD` no `.env.local` p/ envio
+  real (hoje no-op; link exposto p/ testar). Dados de demo limpos (meus testes
+  removidos, seed-demo devolvido a PENDING).
+
+---
+## 2026-08-07 — Login do admin + aprovação real de médicos
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ · `DATABASE_URL="" npm run build` ✅.
+- Contexto: `/admin` estava aberto pra qualquer um e os botões Aprovar/Recusar
+  eram stubs mortos (sem onClick, sem API, sem mutação de status no código).
+- O quê:
+  - `src/lib/admin-session.ts`: sessão do admin por cookie `sd_admin` = token
+    HMAC-SHA256 derivado de `ADMIN_PASSWORD` (env). Credencial no ambiente
+    (`ADMIN_USER`/`ADMIN_PASSWORD`), nunca hardcoded. `conferirCredenciais`
+    timing-safe.
+  - `/admin/login` (página) + `/api/admin/{login,logout}` + gate no topo de
+    `admin/page.tsx` (redirect pra /admin/login sem sessão) + botão Sair.
+  - Aprovação real: `setDoctorStatus` (admin/service.ts) + `/api/admin/medicos/
+    [id]` (POST, gated) + `ApproveRow` virou client component (fetch +
+    router.refresh). Aprovar→ACTIVE, Recusar→SUSPENDED.
+  - `.env.example`: ADMIN_USER/ADMIN_PASSWORD (placeholders). `.env.local`
+    (gitignored) recebeu credencial de dev.
+- Prova ao vivo: /admin sem sessão → 307 /admin/login; senha errada → 401;
+  senha certa → cookie + 200 no painel (login via UI caiu em "Visão geral");
+  aprovar sem sessão → 401, com sessão → 200 ACTIVE (confirmado no banco);
+  logout → 303 e /admin bloqueia de novo. Médico de teste revertido a PENDING.
+- Segurança: senha não aparece em nenhum arquivo rastreado; só process.env.
+- DEFERIDO (decisão do dono): login OTP real do médico + gate por status ACTIVE
+  no login do médico (a peça de aprovação já fica pronta pra quando vier).
+
+---
+## 2026-08-07 — Unifica login do paciente no /entrar (mata /login demo inseguro)
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ · `DATABASE_URL="" npm run build` ✅.
+- BUG relatado pelo dono: `/login` deixava QUALQUER credencial entrar
+  (`login/page.tsx` só fazia `router.push("/paciente")`, comentário "Demo: ainda
+  não há verificação de senha"). E a home (`page.tsx`) mandava o paciente pra
+  essa tela insegura. Causa: o merge de integração juntou o `/login` demo do
+  amigo com o `/entrar` real (Supabase) nosso e nunca escolheu um — `/entrar`
+  ficou órfão.
+- Correção (unificar no /entrar, Supabase real):
+  - `page.tsx`: card Paciente → `/entrar` (era `/login`).
+  - `login/page.tsx`: vira redirect server-side pra `/entrar` (preserva ?erro).
+  - `entrar/page.tsx`: remove link "voltar ao acesso antigo" + trata ?erro do
+    Google (mensagem não se perde no redirect).
+  - `google/{login,callback}/route.ts`: retorno de erro do paciente → `/entrar`.
+  - `entrar/layout.tsx`: comentário atualizado (era "não substitui /login ainda").
+- Prova ao vivo: `/login` → 302 pra `/entrar` ✅; `/entrar` com senha errada →
+  fica na tela com "E-mail/telefone ou senha incorretos", NÃO entra ✅; home
+  card Paciente → `/entrar` ✅; registro em `/entrar/registrar` cria conta no
+  Supabase ✅.
+- Nota: durante o diagnóstico criei conta de teste `teste-diag-0807@example.com`
+  no Supabase Auth do dono — pode apagar no painel.
+
+---
+## 2026-08-07 — RLS nativo ligado ao app (Supabase Postgres)
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros) · `DATABASE_URL="" npm run build` ✅ (43 rotas) · **0 regressões**.
+- O quê: ligou o mecanismo de RLS de verdade. Antes as políticas existiam mas
+  nenhuma request passava por elas (papel `postgres` = bypassrls). Agora:
+  - `src/lib/db.ts`: wrapper `runAsUser(userId, fn)` — abre transação, roda
+    `SET LOCAL ROLE authenticated` + `set_config('app.uid', ...)`, e via
+    `AsyncLocalStorage`+`Proxy` faz o `db` de nível de módulo (usado nos
+    services) resolver pra essa transação. No SQLite é passthrough (dev local
+    intacto).
+  - `prisma/rls.sql`: +5 políticas SELECT (Payment, UrgencyRequest,
+    Conversation, Message, Documento) no mesmo estilo da de Appointment, +grant
+    Specialty. Aplicadas no Supabase (schema já empurrado via db:push direto).
+  - `getAuthedDoctorUserId()` (ponte Doctor.id→User.id) em doctor-session.ts.
+  - Rotas ligadas ao runAsUser: **só leitura pura** — `paciente/documentos`
+    (lista) e `[id]` (detalhe; `marcarLido` fica FORA, no client normal),
+    `medico/certificado` GET.
+- Prova ao vivo:
+  - (a) Isolamento no banco (script pg contra o pooler): paciente A só vê docs
+    de A, B só de B, médico dono vê os dois, sem `app.uid` não vê nada. ✅
+  - (b) Ponta a ponta pela rota real `/api/paciente/documentos` contra o
+    Supabase: sd_uid=A → só "Doc do X"; sd_uid=B → só "Doc do Y". ✅
+  - SQLite dev pós-reversão: documentos list 200, certificado sem auth 401. ✅
+- Escopo deferido (consciente, NÃO é regressão): políticas de INSERT/UPDATE e
+  o wiring das rotas que escrevem no caminho de leitura (paciente GET →
+  expireStaleHolds, urgencia GET → expireStaleRequests, chat GET →
+  getOrCreateConversation/welcome). Essas rotas ficaram COMO ESTAVAM (sem
+  runAsUser) pra não quebrar contra o Postgres — esperam as políticas de
+  escrita. RLS na tabela Doctor também deferido (só GRANT).
+- Bug PRÉ-EXISTENTE achado (fora do escopo, virou spawn_task): `seed.ts` grava
+  `cpf` no Doctor, campo que não existe no schema — quebra seed em banco novo
+  (produção). Latente só porque o SQLite local já estava semeado.
+- Supabase: schema empurrado (12 tabelas) + políticas aplicadas; dados de teste
+  limpos ao final (tabelas voltaram a vazias).
+- Branch: `feat/smart-doctor/integracao`. NÃO empurrado.
+
+---
 ## 2026-08-07 — Integração com o trabalho do amigo (origin/main) + drop Clicksign
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros) · app roda sem erro no
   servidor.
