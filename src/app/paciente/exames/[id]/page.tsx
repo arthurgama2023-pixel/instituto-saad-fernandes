@@ -12,6 +12,9 @@ type Doc = {
   conteudo: string;
   temArquivo: boolean;
   arquivoNome: string | null;
+  assinado: boolean;
+  assinanteNome: string | null;
+  assinadoEm: string | null;
   paciente: string;
   medico: string;
   crm: string;
@@ -65,9 +68,16 @@ export default function DocumentoPage({ params }: { params: Promise<{ id: string
           </div>
 
           <h2 className="text-headline-sm font-headline-sm text-primary mb-1">{doc.titulo}</h2>
-          <p className="text-body-sm font-body-sm text-on-surface-variant mb-6">
+          <p className="text-body-sm font-body-sm text-on-surface-variant mb-3">
             Emitido em {new Date(doc.emitidoEm).toLocaleString("pt-BR")}
           </p>
+
+          {doc.assinado && (
+            <div className="mb-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary-container/60 text-on-secondary-container text-body-sm font-body-sm">
+              <Icon name="verified" filled size={16} className="text-secondary" />
+              Assinado digitalmente{doc.assinanteNome ? ` por ${doc.assinanteNome}` : ""}
+            </div>
+          )}
 
           {doc.conteudo && (
             <div className="whitespace-pre-wrap text-body-md font-body-md text-on-surface leading-relaxed">
@@ -91,7 +101,9 @@ export default function DocumentoPage({ params }: { params: Promise<{ id: string
             <p className="mt-3"><strong className="text-on-surface">{doc.medico}</strong></p>
             <p>{doc.especialidade} · {doc.crm}</p>
             <p className="mt-4 text-[11px] text-on-surface-variant/70">
-              Documento emitido pelo app Smart Doctor (versão amostra, sem assinatura digital ICP-Brasil).
+              {doc.assinado
+                ? "Documento assinado digitalmente (PAdES). Amostra com certificado de teste — validade legal apenas com um certificado A1 real da ICP-Brasil."
+                : "Documento emitido pelo app Smart Doctor (versão amostra, sem assinatura digital)."}
             </p>
           </div>
         </article>

@@ -13,6 +13,7 @@ export async function GET() {
       titulo: d.titulo,
       temTexto: d.conteudo.length > 0,
       arquivoNome: d.arquivoNome,
+      assinado: d.assinado,
       medico: d.doctor.user.name,
       emitidoEm: d.emitidoEm.toISOString(),
       novo: d.lidoEm === null,

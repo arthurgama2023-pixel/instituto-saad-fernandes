@@ -1,7 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["better-sqlite3", "pg", "nodemailer"],
+  serverExternalPackages: [
+    "better-sqlite3",
+    "pg",
+    "nodemailer",
+    "node-forge",
+    // pdf-lib externo junto do @signpdf: senão o Turbopack empacota uma cópia
+    // do pdf-lib pro nosso código e o @signpdf usa outra — o placeholder some
+    // (duas instâncias, o doc não é o mesmo) e a assinatura falha ("No ByteRange").
+    "pdf-lib",
+    "@signpdf/signpdf",
+    "@signpdf/signer-p12",
+    "@signpdf/placeholder-pdf-lib",
+  ],
   turbopack: { root: __dirname },
   // Esconde o badge "N" de dev do Next (canto inferior esquerdo) que tapava o
   // botão Início da bottom nav no celular. É só do modo dev — não existe em produção.

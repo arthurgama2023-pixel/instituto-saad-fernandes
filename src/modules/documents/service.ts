@@ -20,6 +20,9 @@ export type NovoDocumento = {
   arquivo?: Uint8Array<ArrayBuffer> | null;
   arquivoNome?: string | null;
   arquivoMime?: string | null;
+  assinado?: boolean;
+  assinanteNome?: string | null;
+  assinadoEm?: Date | null;
 };
 
 /** Cria um documento. Valida que o médico e o paciente existem. */
@@ -39,6 +42,9 @@ export async function criarDocumento(d: NovoDocumento) {
       arquivo: d.arquivo ?? null,
       arquivoNome: d.arquivoNome ?? null,
       arquivoMime: d.arquivoMime ?? null,
+      assinado: d.assinado ?? false,
+      assinanteNome: d.assinanteNome ?? null,
+      assinadoEm: d.assinadoEm ?? null,
     },
   });
 }
@@ -57,6 +63,7 @@ export async function listarDocumentosPaciente(patientId: string) {
       arquivoMime: true,
       emitidoEm: true,
       lidoEm: true,
+      assinado: true,
       doctor: { include: { user: true } },
     },
   });
@@ -90,6 +97,9 @@ export async function getDocumento(id: string) {
       arquivoNome: true,
       arquivoMime: true,
       emitidoEm: true,
+      assinado: true,
+      assinanteNome: true,
+      assinadoEm: true,
       patientId: true,
       doctorId: true,
       patient: { select: { name: true } },

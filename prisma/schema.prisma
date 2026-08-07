@@ -54,6 +54,14 @@ model Doctor {
   appointments Appointment[]
   urgencies    UrgencyRequest[]
   documentos   Documento[]
+
+  // Certificado digital A1 (ICP-Brasil) do médico, para assinar seus documentos.
+  // Guardado CRIPTOGRAFADO (AES-256-GCM, ver modules/signing/cripto.ts): certPfx
+  // são os bytes cifrados do .pfx; certSenha é a senha cifrada (base64).
+  certPfx   Bytes?
+  certSenha String?
+  certNome  String? // nome do arquivo, só p/ exibição
+  certEm    DateTime?
 }
 
 // Disponibilidade é REGRA, não tabela de slots (Etapa 6 §4):
@@ -205,6 +213,11 @@ model Documento {
   appointment   Appointment? @relation(fields: [appointmentId], references: [id])
   emitidoEm     DateTime     @default(now())
   lidoEm        DateTime? // quando o paciente abriu (nulo = "novo")
+
+  // Assinatura digital (ICP-Brasil / PAdES). O arquivo é o PDF assinado.
+  assinado      Boolean   @default(false)
+  assinanteNome String?
+  assinadoEm    DateTime?
 
   @@index([patientId, emitidoEm])
   @@index([doctorId, emitidoEm])

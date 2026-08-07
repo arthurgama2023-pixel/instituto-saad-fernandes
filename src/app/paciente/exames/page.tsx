@@ -11,6 +11,7 @@ type DocItem = {
   titulo: string;
   temTexto: boolean;
   arquivoNome: string | null;
+  assinado: boolean;
   medico: string;
   emitidoEm: string;
   novo: boolean;
@@ -67,13 +68,14 @@ export default function ExamesPage() {
                     </span>
                   )}
                 </p>
-                <p className="text-body-sm font-body-sm text-on-surface-variant truncate">
+                <p className="text-body-sm font-body-sm text-on-surface-variant truncate flex items-center gap-1">
+                  {d.assinado && <Icon name="verified" filled size={14} className="text-secondary shrink-0" />}
                   {d.medico} · {new Date(d.emitidoEm).toLocaleDateString("pt-BR")}
                 </p>
               </div>
               {d.arquivoNome && (
                 <span className="px-3 py-1 rounded-full border border-outline-variant text-[11px] font-bold text-on-surface-variant shrink-0">
-                  ANEXO
+                  PDF
                 </span>
               )}
               <Icon name="chevron_right" className="text-on-surface-variant shrink-0" />
