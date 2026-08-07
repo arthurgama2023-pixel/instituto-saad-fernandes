@@ -4,7 +4,7 @@ import { Icon } from "@/components/brand/Icon";
 
 const PROFILES = [
   {
-    href: "/login",
+    href: "/entrar",
     icon: "person",
     title: "Paciente",
     desc: "Converse com a Clara pelo app, marque consultas, veja sua agenda, saúde e receitas.",
@@ -21,8 +21,8 @@ const PROFILES = [
     href: "/admin",
     icon: "shield_person",
     title: "Administrador",
-    desc: "Visão geral, funil da Clara, GMV, fila de aprovação de médicos e financeiro.",
-    cta: "Entrar como admin",
+    desc: "Visão geral, funil da Clara, GMV, fila de aprovação de médicos e financeiro. Requer login.",
+    cta: "Acessar (requer senha)",
   },
 ];
 

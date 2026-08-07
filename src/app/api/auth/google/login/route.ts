@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     authUrl = buildAuthUrl(state);
   } catch {
     // Sem credenciais configuradas: volta pro login com aviso em vez de estourar.
-    const back = area === "medico" ? "/medico/login" : "/login";
+    const back = area === "medico" ? "/medico/login" : "/entrar";
     return NextResponse.redirect(new URL(`${back}?erro=config`, req.nextUrl.origin));
   }
 

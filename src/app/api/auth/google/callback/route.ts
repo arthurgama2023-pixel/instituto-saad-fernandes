@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const state = url.searchParams.get("state");
   const cookieState = req.cookies.get("g_state")?.value;
   const area: Area = req.cookies.get("g_area")?.value === "medico" ? "medico" : "paciente";
-  const back = area === "medico" ? "/medico/login" : "/login";
+  const back = area === "medico" ? "/medico/login" : "/entrar";
 
   // state ausente/divergente = possível CSRF ou o usuário cancelou no Google.
   if (!code || !state || !cookieState || state !== cookieState) {

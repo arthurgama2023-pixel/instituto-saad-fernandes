@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/brand/Icon";
@@ -25,6 +25,14 @@ export default function EntrarReal() {
 
   const credencial = parseIdentificador(identificador);
   const pode = !!credencial && senha.length > 0;
+
+  // Mensagem quando o login social (Google) volta com erro (?erro=... — pode
+  // chegar via redirect de /login ou direto do callback do Google).
+  useEffect(() => {
+    const e = new URLSearchParams(window.location.search).get("erro");
+    if (e === "config") setErro("Login com Google ainda não configurado neste ambiente.");
+    else if (e) setErro("Não foi possível entrar com o Google. Tente novamente.");
+  }, []);
 
   const entrar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,16 +126,11 @@ export default function EntrarReal() {
           {carregando ? "ENTRANDO…" : "ENTRAR"}
         </button>
 
-        <div className="text-center py-6 mt-auto space-y-2">
+        <div className="text-center py-6 mt-auto">
           <p className="text-body-sm font-body-sm text-on-surface-variant">
             Ainda não tem conta?{" "}
             <Link href="/entrar/registrar" className="text-secondary font-semibold">
               Criar conta
-            </Link>
-          </p>
-          <p className="text-body-sm font-body-sm text-on-surface-variant/70">
-            <Link href="/login" className="text-secondary font-semibold">
-              Voltar ao acesso antigo
             </Link>
           </p>
         </div>
