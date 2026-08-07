@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/brand/Icon";
@@ -17,6 +17,13 @@ export default function LoginMedico() {
   const [senha, setSenha] = useState("");
   const [verSenha, setVerSenha] = useState(false);
   const [entrando, setEntrando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+
+  useEffect(() => {
+    const e = new URLSearchParams(window.location.search).get("erro");
+    if (e === "config") setErro("Login com Google ainda não configurado neste ambiente.");
+    else if (e) setErro("Não foi possível entrar com o Google. Tente novamente.");
+  }, []);
 
   const pode = identificador.trim().length > 2 && senha.length > 0;
 
@@ -50,6 +57,13 @@ export default function LoginMedico() {
             Informe suas credenciais para gerenciar sua agenda e pacientes.
           </p>
         </div>
+
+        {erro && (
+          <div className="mb-4 flex items-start gap-2 rounded-2xl border border-error/40 bg-error-container/40 px-4 py-3 text-body-sm font-body-sm text-on-error-container">
+            <Icon name="error" size={18} className="mt-0.5 shrink-0" />
+            <span>{erro}</span>
+          </div>
+        )}
 
         <div className="space-y-4">
           <div className={inputWrap}>
@@ -100,6 +114,23 @@ export default function LoginMedico() {
           className="w-full h-14 bg-primary-container text-white text-label-lg font-label-lg rounded-2xl hover:bg-primary transition-all active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 shadow-lg"
         >
           {entrando ? "ENTRANDO…" : "ENTRAR"}
+        </button>
+
+        <div className="flex items-center gap-3 my-6">
+          <span className="flex-1 h-px bg-outline-variant/60" />
+          <span className="text-body-sm font-body-sm text-on-surface-variant">ou continue com</span>
+          <span className="flex-1 h-px bg-outline-variant/60" />
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            window.location.href = "/api/auth/google/login?area=medico";
+          }}
+          className="flex items-center justify-center gap-2 h-12 w-full rounded-2xl border border-outline-variant/60 bg-surface-container-lowest text-label-lg font-label-lg text-primary hover:border-secondary transition-colors active:scale-[0.98]"
+        >
+          <Icon name="mail" size={20} className="text-on-surface-variant" />
+          Entrar com Google
         </button>
 
         <div className="text-center py-6 space-y-2">

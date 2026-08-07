@@ -8,6 +8,32 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-07 — Integração com o trabalho do amigo (origin/main) + drop Clicksign
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros) · app roda sem erro no
+  servidor.
+- Reconciliação de duas linhas divergentes da base 7779d13:
+  - Amigo (origin/main, +2637 linhas): Jitsi (vídeo real), login Google, e-mail
+    de consulta + cron, canal de documentos, **ICP-Brasil A1/PAdES** (assinatura
+    self-hosted, certificado por médico), prontuário editável na chamada.
+  - Nós: ICP via Clicksign, aba Urgência, fundação RLS, auth Supabase.
+- Decisões do dono: **ficar só com o A1** (descartar Clicksign) e **só o Supabase**
+  (Google fica pra depois, mas o código dele veio no merge e convive via cookie).
+- Como resolvi: para ICP/prontuário/exames/cadastro peguei a versão do amigo
+  (`git checkout origin/main -- ...`), apaguei os arquivos só-Clicksign
+  (clicksign.ts, receituario-pdf.ts, webhook, rota de download), removi os campos
+  Clicksign do schema, e re-adicionei o que é nosso (authId no User, skip-demo em
+  conta real). package.json = união das deps (@supabase + @signpdf + nodemailer).
+- Pegadinha: durante a resolução, o package.json ficou momentaneamente com
+  marcadores de conflito; o Tailwind/Turbopack cacheou o erro "JSON position 944".
+  Resolvido reescrevendo o package.json com LF (sem CRLF/BOM) + `rm -rf .next`.
+- Verificação ao vivo (código mesclado): nosso login Supabase → "Olá, Pedro" ✅;
+  cadastro do médico do amigo (E-mail + uploader A1) renderiza ✅; aba Urgência
+  preservada ✅; sem erro no servidor ✅.
+- Branch: `feat/smart-doctor/integracao` (merge de origin/main). NÃO empurrado.
+- Pendências: testar A FUNDO os fluxos do amigo (assinar A1, vídeo Jitsi, e-mail);
+  RLS nativo ainda pendente; Google login não unificado com Supabase.
+
+---
 ## 2026-08-07 — Correção: login mostrava o paciente demo (Marina) — middleware
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros).
 - BUG relatado pelo dono: logava e a plataforma mostrava "Marina" (paciente

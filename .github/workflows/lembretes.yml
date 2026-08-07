@@ -1,0 +1,28 @@
+name: Lembretes de consulta
+
+# Cron externo (gratuito) que dispara os lembretes de consulta.
+# O endpoint decide quais marcos (24h / 1h / 30min) já venceram — este job só
+# precisa "cutucar" o endpoint com frequência suficiente.
+#
+# Configuração necessária (Settings → Secrets and variables → Actions):
+#   - CRON_TARGET_URL : base pública do app, ex.: https://app.seudominio.com
+#                       (NÃO use localhost — o runner do GitHub não alcança sua máquina)
+#   - CRON_SECRET     : o mesmo valor do CRON_SECRET do .env do app
+#
+# Observações:
+#   - O agendamento do GitHub Actions é em UTC e pode atrasar alguns minutos.
+#   - O workflow roda na branch padrão do repositório.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *" # a cada 10 minutos
+  workflow_dispatch: {} # permite rodar manualmente pelo painel do GitHub
+
+jobs:
+  disparar-lembretes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamar endpoint de lembretes
+        run: |
+          curl -fsS --max-time 60 \
+            "${{ secrets.CRON_TARGET_URL }}/api/cron/lembretes?secret=${{ secrets.CRON_SECRET }}"

@@ -11,10 +11,6 @@ type Registro = {
   resumoClinico: string | null;
   condutas: string | null;
   prontuarioEmAt: string | null;
-  receituarioEspecial: boolean;
-  assinaturaIcpStatus: string | null;
-  assinaturaIcpEm: string | null;
-  assinaturaIcpTitular: string | null;
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -47,20 +43,10 @@ export function ProntuarioEditor({ doctorId, registros }: { doctorId: string; re
           >
             <div className="text-label-md font-label-md">{r.startsAtLabel}</div>
             <div className="text-[11px] font-body-sm">{STATUS_LABEL[r.status] ?? r.status}</div>
-            {r.assinaturaIcpStatus === "ASSINADO" ? (
+            {r.resumoClinico && (
               <div className="text-[11px] font-body-sm text-secondary mt-0.5 flex items-center gap-1">
-                <Icon name="verified" filled size={12} /> assinado ICP
+                <Icon name="check_circle" filled size={12} /> preenchido
               </div>
-            ) : r.assinaturaIcpStatus === "AGUARDANDO_ASSINATURA" ? (
-              <div className="text-[11px] font-body-sm text-amber-600 mt-0.5 flex items-center gap-1">
-                <Icon name="hourglass_top" size={12} /> aguardando ICP
-              </div>
-            ) : (
-              r.resumoClinico && (
-                <div className="text-[11px] font-body-sm text-secondary mt-0.5 flex items-center gap-1">
-                  <Icon name="check_circle" filled size={12} /> preenchido
-                </div>
-              )
             )}
           </button>
         ))}
@@ -71,25 +57,12 @@ export function ProntuarioEditor({ doctorId, registros }: { doctorId: string; re
   );
 }
 
-type Assinatura = { status: string; em: string | null; titular: string | null };
-
 function Formulario({ doctorId, registro }: { doctorId: string; registro: Registro }) {
   const [resumo, setResumo] = useState(registro.resumoClinico ?? "");
   const [condutas, setCondutas] = useState(registro.condutas ?? "");
-  const [especial, setEspecial] = useState(registro.receituarioEspecial);
   const [salvando, setSalvando] = useState(false);
   const [salvo, setSalvo] = useState<string | null>(registro.prontuarioEmAt);
   const [erro, setErro] = useState<string | null>(null);
-  const [assinatura, setAssinatura] = useState<Assinatura | null>(
-    registro.assinaturaIcpStatus
-      ? { status: registro.assinaturaIcpStatus, em: registro.assinaturaIcpEm, titular: registro.assinaturaIcpTitular }
-      : null
-  );
-
-  // Enviado pro Clicksign (aguardando ou já assinado) = documento travado.
-  // A diferença entre os dois estados é só o selo que aparece.
-  const travado = assinatura !== null;
-  const jaAssinado = assinatura?.status === "ASSINADO";
 
   const salvar = async () => {
     setSalvando(true);
@@ -98,13 +71,7 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
       const r = await fetch("/api/medico/prontuario", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          appointmentId: registro.id,
-          doctorId,
-          resumoClinico: resumo,
-          condutas,
-          receituarioEspecial: especial,
-        }),
+        body: JSON.stringify({ appointmentId: registro.id, doctorId, resumoClinico: resumo, condutas }),
       });
       const d = await r.json();
       if (!r.ok) {
@@ -112,9 +79,6 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
         return;
       }
       setSalvo(d.prontuarioEmAt);
-      if (d.assinaturaIcpStatus) {
-        setAssinatura({ status: d.assinaturaIcpStatus, em: d.assinaturaIcpEm, titular: d.assinaturaIcpTitular });
-      }
     } catch {
       setErro("Não consegui salvar. Verifique a conexão.");
     } finally {
@@ -122,16 +86,13 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
     }
   };
 
-  const campoClasse =
-    "w-full min-h-[140px] p-4 rounded-xl border border-outline-variant bg-surface-container text-body-md font-body-md text-on-surface placeholder:text-on-tertiary-container resize-y focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-colors disabled:opacity-70 disabled:cursor-not-allowed";
-
   return (
     <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/50 brand-shadow p-6 space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-headline-sm font-headline-sm text-primary">
           {registro.especialidade} · {registro.startsAtLabel}
         </h2>
-        {salvo && !travado && (
+        {salvo && (
           <span className="text-body-sm font-body-sm text-secondary flex items-center gap-1">
             <Icon name="check_circle" filled size={16} /> salvo em {new Date(salvo).toLocaleString("pt-BR")}
           </span>
@@ -144,8 +105,6 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
         </p>
       )}
 
-      {assinatura && <SeloAssinatura assinatura={assinatura} />}
-
       <div className="space-y-2">
         <label htmlFor="resumo" className="text-label-lg font-label-lg text-primary">
           Resumo clínico
@@ -154,10 +113,9 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
           id="resumo"
           value={resumo}
           onChange={(e) => setResumo(e.target.value)}
-          disabled={travado}
           placeholder="Queixa, histórico, exame, hipótese diagnóstica…"
           maxLength={4000}
-          className={campoClasse}
+          className="w-full min-h-[140px] p-4 rounded-xl border border-outline-variant bg-surface-container text-body-md font-body-md text-on-surface placeholder:text-on-tertiary-container resize-y focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-colors"
         />
       </div>
 
@@ -169,117 +127,24 @@ function Formulario({ doctorId, registro }: { doctorId: string; registro: Regist
           id="condutas"
           value={condutas}
           onChange={(e) => setCondutas(e.target.value)}
-          disabled={travado}
           placeholder="Prescrição, exames solicitados, orientações, retorno…"
           maxLength={4000}
-          className={campoClasse}
+          className="w-full min-h-[140px] p-4 rounded-xl border border-outline-variant bg-surface-container text-body-md font-body-md text-on-surface placeholder:text-on-tertiary-container resize-y focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-colors"
         />
       </div>
 
-      {!travado && (
-        <>
-          {/* Receituário especial é o único caso em que a assinatura ICP-Brasil
-              faz falta: a receita comum já sai assinada pela própria prescrição
-              digital. Por isso a opção fica desmarcada por padrão. */}
-          <div className="rounded-xl border border-outline-variant bg-surface-container p-4 space-y-3">
-            <label htmlFor="especial" className="flex items-start gap-3 cursor-pointer">
-              <input
-                id="especial"
-                type="checkbox"
-                checked={especial}
-                onChange={(e) => setEspecial(e.target.checked)}
-                className="mt-1 w-5 h-5 shrink-0 accent-secondary cursor-pointer"
-              />
-              <span>
-                <span className="block text-label-lg font-label-lg text-primary">
-                  Receituário especial (substância controlada)
-                </span>
-                <span className="block text-body-sm font-body-sm text-on-surface-variant mt-0.5">
-                  Exige assinatura digital ICP-Brasil. Marque só quando prescrever medicamento de
-                  controle especial — a receita comum não precisa disso.
-                </span>
-              </span>
-            </label>
-
-            {especial && (
-              <>
-                <p className="flex items-start gap-2 rounded-lg bg-secondary-container/40 text-on-secondary-container p-3 text-body-sm font-body-sm">
-                  <Icon name="gavel" size={18} className="shrink-0 mt-0.5" />
-                  A assinatura com certificado ICP-Brasil tem a mesma validade jurídica de uma
-                  assinatura de próprio punho (MP 2.200-2/2001) — é ela que dá valor legal à receita,
-                  não um clique.
-                </p>
-                <p className="flex items-start gap-2 rounded-lg bg-error-container/60 text-on-error-container p-3 text-body-sm font-body-sm">
-                  <Icon name="lock" size={18} className="shrink-0 mt-0.5" />
-                  Ao salvar, o documento vai pro Clicksign e o registro fica travado — você vai
-                  precisar assinar com o SEU certificado ICP-Brasil (link chega por WhatsApp) pra
-                  concluir. Depois de enviado, não dá mais para editar este registro.
-                </p>
-              </>
-            )}
-          </div>
-        </>
-      )}
-
       <p className="text-body-sm font-body-sm text-on-surface-variant">
-        {jaAssinado
-          ? "Documento assinado. O paciente vê o registro e o selo de assinatura na tela desta consulta."
-          : travado
-            ? "Enviado para assinatura. Confira o WhatsApp cadastrado para concluir com seu certificado ICP-Brasil."
-            : "Isso aparece para o paciente na tela desta consulta assim que você salvar."}
+        Isso aparece para o paciente na tela desta consulta assim que você salvar.
       </p>
 
-      {!travado && (
-        <button
-          onClick={salvar}
-          disabled={salvando}
-          className="sd-aurora h-12 px-6 rounded-xl text-label-lg font-label-lg active:scale-95 transition-transform disabled:opacity-50 flex items-center gap-2"
-        >
-          {salvando ? (especial ? "ENVIANDO PARA ASSINATURA…" : "SALVANDO…") : especial ? "ENVIAR PARA ASSINATURA (ICP-BRASIL)" : "SALVAR PRONTUÁRIO"}
-          {!salvando && <Icon name={especial ? "verified" : "save"} size={18} />}
-        </button>
-      )}
+      <button
+        onClick={salvar}
+        disabled={salvando}
+        className="sd-aurora h-12 px-6 rounded-xl text-label-lg font-label-lg active:scale-95 transition-transform disabled:opacity-50 flex items-center gap-2"
+      >
+        {salvando ? "SALVANDO…" : "SALVAR PRONTUÁRIO"}
+        {!salvando && <Icon name="save" size={18} />}
+      </button>
     </div>
-  );
-}
-
-function SeloAssinatura({ assinatura }: { assinatura: Assinatura }) {
-  if (assinatura.status === "AGUARDANDO_ASSINATURA") {
-    return (
-      <section className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 space-y-2">
-        <h3 className="flex items-center gap-2 text-label-lg font-label-lg text-on-secondary-container">
-          <Icon name="hourglass_top" size={20} className="text-amber-600" />
-          Aguardando assinatura digital
-        </h3>
-        <p className="text-body-sm font-body-sm text-on-surface-variant">
-          Enviado para <b>{assinatura.titular ?? "o médico"}</b> assinar com o certificado ICP-Brasil
-          dele. O Clicksign mandou o link de assinatura por WhatsApp — o registro fica travado até a
-          assinatura ser concluída.
-        </p>
-      </section>
-    );
-  }
-
-  return (
-    <section className="rounded-xl border border-secondary-fixed/40 bg-secondary-container/30 p-4 space-y-2">
-      <h3 className="flex items-center gap-2 text-label-lg font-label-lg text-on-secondary-container">
-        <Icon name="verified" filled size={20} className="text-secondary" />
-        Receituário especial assinado digitalmente
-      </h3>
-      <dl className="text-body-sm font-body-sm text-on-surface-variant space-y-1">
-        <div className="flex flex-wrap gap-x-2">
-          <dt className="font-semibold">Titular:</dt>
-          <dd>{assinatura.titular ?? "—"}</dd>
-        </div>
-        <div className="flex flex-wrap gap-x-2">
-          <dt className="font-semibold">Assinado em:</dt>
-          <dd>{assinatura.em ? new Date(assinatura.em).toLocaleString("pt-BR") : "—"}</dd>
-        </div>
-      </dl>
-      <p className="text-[11px] font-body-sm text-on-surface-variant pt-1 border-t border-outline-variant/40">
-        Assinado via Clicksign com certificado digital ICP-Brasil do médico. Tem validade jurídica
-        de assinatura de próprio punho, conforme MP 2.200-2/2001.
-      </p>
-    </section>
   );
 }

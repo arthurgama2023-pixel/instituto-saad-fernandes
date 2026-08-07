@@ -97,55 +97,6 @@ export default function ProntuarioPage({ params }: { params: Promise<{ id: strin
               <p className="text-body-md font-body-md text-on-surface-variant whitespace-pre-line">
                 {appt.condutas || "Nenhuma conduta registrada para esta consulta."}
               </p>
-
-              {/* Receituário especial: o paciente precisa saber que este documento
-                  vale na farmácia — quem assinou, quando. Enquanto o médico ainda
-                  não completou a assinatura (ICP-Brasil é assíncrona), mostra que
-                  está a caminho em vez de fingir que já valeu. */}
-              {appt.assinaturaIcpStatus === "ASSINADO" && (
-                <section className="mt-6 rounded-xl border border-outline-variant/40 bg-surface-container p-5">
-                  <h4 className="flex items-center gap-2 text-label-lg font-label-lg text-primary mb-3">
-                    <Icon name="verified" filled size={20} className="text-secondary" />
-                    Receituário especial assinado digitalmente
-                  </h4>
-                  <dl className="text-body-sm font-body-sm text-on-surface-variant space-y-1">
-                    <div className="flex flex-wrap gap-x-2">
-                      <dt className="font-semibold">Assinado por:</dt>
-                      <dd>
-                        {appt.assinaturaIcpTitular ?? appt.medico} · {appt.medicoCrm}
-                      </dd>
-                    </div>
-                    <div className="flex flex-wrap gap-x-2">
-                      <dt className="font-semibold">Data da assinatura:</dt>
-                      <dd>{appt.assinaturaIcpEm ? new Date(appt.assinaturaIcpEm).toLocaleString("pt-BR") : "—"}</dd>
-                    </div>
-                  </dl>
-                  <a
-                    href={`/api/paciente/receituario/${appt.id}`}
-                    className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-on-secondary text-label-md font-label-md active:scale-95 transition-transform"
-                  >
-                    <Icon name="download" size={18} /> Baixar receituário assinado (PDF)
-                  </a>
-                  <p className="text-[11px] font-body-sm text-on-surface-variant mt-3 pt-3 border-t border-outline-variant/40">
-                    Assinado via Clicksign com certificado digital ICP-Brasil do médico. Tem validade
-                    jurídica de assinatura de próprio punho, conforme MP 2.200-2/2001.
-                  </p>
-                </section>
-              )}
-
-              {appt.assinaturaIcpStatus === "AGUARDANDO_ASSINATURA" && (
-                <section className="mt-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-5">
-                  <h4 className="flex items-center gap-2 text-label-lg font-label-lg text-primary mb-2">
-                    <Icon name="hourglass_top" size={20} className="text-amber-600" />
-                    Receituário especial — aguardando assinatura do médico
-                  </h4>
-                  <p className="text-body-sm font-body-sm text-on-surface-variant">
-                    {appt.assinaturaIcpTitular ?? appt.medico} ainda está assinando este documento com
-                    o certificado digital. Assim que concluir, ele aparece aqui pronto para uso na
-                    farmácia.
-                  </p>
-                </section>
-              )}
             </article>
           </div>
 

@@ -71,22 +71,26 @@ export function FileField({
   hint,
   fileName,
   onFile,
+  accept = "image/*,application/pdf",
+  placeholder = "Enviar foto do documento",
 }: {
   label: string;
   hint?: string;
   fileName?: string;
   onFile: (file: File | null) => void;
+  accept?: string;
+  placeholder?: string;
 }) {
   return (
     <Field label={label} hint={hint}>
       <label className="flex items-center gap-3 h-12 px-4 rounded-xl border border-dashed border-outline-variant bg-surface-container-low cursor-pointer hover:border-secondary transition-colors">
         <Icon name="upload_file" className="text-secondary" />
         <span className={`text-body-md font-body-md truncate ${fileName ? "text-on-surface" : "text-on-tertiary-container"}`}>
-          {fileName ?? "Enviar foto do documento"}
+          {fileName ?? placeholder}
         </span>
         <input
           type="file"
-          accept="image/*,application/pdf"
+          accept={accept}
           className="hidden"
           onChange={(e) => onFile(e.target.files?.[0] ?? null)}
         />

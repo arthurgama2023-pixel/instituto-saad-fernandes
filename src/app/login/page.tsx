@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/brand/Icon";
@@ -17,6 +17,14 @@ export default function LoginPaciente() {
   const [senha, setSenha] = useState("");
   const [verSenha, setVerSenha] = useState(false);
   const [entrando, setEntrando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+
+  // Mensagem quando o login social volta com erro (?erro=... no callback).
+  useEffect(() => {
+    const e = new URLSearchParams(window.location.search).get("erro");
+    if (e === "config") setErro("Login com Google ainda não configurado neste ambiente.");
+    else if (e) setErro("Não foi possível entrar com o Google. Tente novamente.");
+  }, []);
 
   const pode = identificador.trim().length > 2 && senha.length > 0;
 
@@ -46,6 +54,13 @@ export default function LoginPaciente() {
             Acesse sua conta para agendar consultas e falar com a Clara.
           </p>
         </div>
+
+        {erro && (
+          <div className="mb-4 flex items-start gap-2 rounded-2xl border border-error/40 bg-error-container/40 px-4 py-3 text-body-sm font-body-sm text-on-error-container">
+            <Icon name="error" size={18} className="mt-0.5 shrink-0" />
+            <span>{erro}</span>
+          </div>
+        )}
 
         <div className="space-y-4">
           <div className={inputWrap}>
@@ -103,8 +118,14 @@ export default function LoginPaciente() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <SocialBtn label="Google" icon="mail" onClick={() => router.push("/paciente")} />
-          <SocialBtn label="Apple" icon="phone_iphone" onClick={() => router.push("/paciente")} />
+          <SocialBtn
+            label="Google"
+            icon="mail"
+            onClick={() => {
+              window.location.href = "/api/auth/google/login?area=paciente";
+            }}
+          />
+          <SocialBtn label="Apple" icon="phone_iphone" emBreve />
         </div>
 
         <div className="text-center py-6 mt-auto">
@@ -126,15 +147,32 @@ export default function LoginPaciente() {
   );
 }
 
-function SocialBtn({ label, icon, onClick }: { label: string; icon: string; onClick: () => void }) {
+function SocialBtn({
+  label,
+  icon,
+  onClick,
+  emBreve,
+}: {
+  label: string;
+  icon: string;
+  onClick?: () => void;
+  emBreve?: boolean;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center justify-center gap-2 h-12 rounded-2xl border border-outline-variant/60 bg-surface-container-lowest text-label-lg font-label-lg text-primary hover:border-secondary transition-colors active:scale-[0.98]"
+      disabled={emBreve}
+      title={emBreve ? "Em breve" : undefined}
+      className="relative flex items-center justify-center gap-2 h-12 rounded-2xl border border-outline-variant/60 bg-surface-container-lowest text-label-lg font-label-lg text-primary hover:border-secondary transition-colors active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 disabled:hover:border-outline-variant/60"
     >
       <Icon name={icon} size={20} className="text-on-surface-variant" />
       {label}
+      {emBreve && (
+        <span className="absolute -top-2 -right-1 text-[9px] leading-none px-1.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant border border-outline-variant/60">
+          em breve
+        </span>
+      )}
     </button>
   );
 }

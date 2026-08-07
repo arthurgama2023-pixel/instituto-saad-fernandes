@@ -4,6 +4,7 @@ import { getDoctorSession } from "@/lib/doctor-session";
 import { getDefaultDoctorId } from "@/modules/doctor/service";
 import { Icon } from "@/components/brand/Icon";
 import { ProntuarioEditor } from "./ProntuarioEditor";
+import { DocumentosEditor } from "./DocumentosEditor";
 
 const dateLabel = (d: Date) => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
 const initials = (n: string) => n.replace(/^(dra?\.?)\s+/i, "").split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
@@ -46,10 +47,6 @@ export default async function ProntuarioPaciente({
     resumoClinico: a.resumoClinico,
     condutas: a.condutas,
     prontuarioEmAt: a.prontuarioEmAt?.toISOString() ?? null,
-    receituarioEspecial: a.receituarioEspecial,
-    assinaturaIcpStatus: a.assinaturaIcpStatus,
-    assinaturaIcpEm: a.assinaturaIcpEm?.toISOString() ?? null,
-    assinaturaIcpTitular: a.assinaturaIcpTitular,
   }));
 
   return (
@@ -82,6 +79,8 @@ export default async function ProntuarioPaciente({
         </div>
 
         <ProntuarioEditor doctorId={doctorId} registros={registros} />
+
+        <DocumentosEditor doctorId={doctorId} patientId={patientId} />
       </main>
     </div>
   );
