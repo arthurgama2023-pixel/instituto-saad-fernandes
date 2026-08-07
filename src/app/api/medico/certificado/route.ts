@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { getAuthedDoctorId } from "@/lib/doctor-session";
+import { db, runAsUser } from "@/lib/db";
+import { getAuthedDoctorId, getAuthedDoctorUserId } from "@/lib/doctor-session";
 import { validarCertificado } from "@/modules/signing/icp";
 import { cifrar, cifrarTexto, criptografiaHabilitada } from "@/modules/signing/cripto";
 
@@ -11,12 +11,15 @@ const NAO_AUTENTICADO = { error: "Entre como médico para gerenciar seu certific
 /** Status do certificado do MÉDICO AUTENTICADO (nunca de um doctorId do cliente). */
 export async function GET() {
   const doctorId = await getAuthedDoctorId();
-  if (!doctorId) return NextResponse.json({ ...NAO_AUTENTICADO, configurado: false }, { status: 401 });
+  const doctorUserId = await getAuthedDoctorUserId();
+  if (!doctorId || !doctorUserId) return NextResponse.json({ ...NAO_AUTENTICADO, configurado: false }, { status: 401 });
 
-  const doctor = await db.doctor.findUnique({
-    where: { id: doctorId },
-    select: { certNome: true, certEm: true, certPfx: true },
-  });
+  const doctor = await runAsUser(doctorUserId, (tx) =>
+    tx.doctor.findUnique({
+      where: { id: doctorId },
+      select: { certNome: true, certEm: true, certPfx: true },
+    }),
+  );
   return NextResponse.json({
     configurado: Boolean(doctor?.certPfx),
     nome: doctor?.certNome ?? null,

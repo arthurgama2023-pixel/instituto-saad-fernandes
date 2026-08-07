@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDemoUser } from "@/lib/session";
 import { getDocumento, marcarLido, TIPO_LABEL } from "@/modules/documents/service";
+import { runAsUser } from "@/lib/db";
 
 /** Documento completo do paciente da sessão. Marca como lido ao abrir. */
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = await getDemoUser();
-  const doc = await getDocumento(id);
+  // Leitura sob RLS: se o documento for de outro paciente, a política
+  // documento_select devolve null → 404. marcarLido (escrita) fica FORA do
+  // runAsUser — o papel `authenticated` só tem política de SELECT por enquanto
+  // (INSERT/UPDATE ainda não), então a marcação roda no client normal.
+  const doc = await runAsUser(user.id, () => getDocumento(id));
   if (!doc || doc.patientId !== user.id) {
     return NextResponse.json({ error: "documento não encontrado" }, { status: 404 });
   }
-
   await marcarLido(id, user.id);
 
   return NextResponse.json({
