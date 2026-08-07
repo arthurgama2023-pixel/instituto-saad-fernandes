@@ -37,9 +37,13 @@ export default function ExamesPage() {
                   </p>
                 </div>
                 {a.assinaturaIcpStatus === "ASSINADO" ? (
-                  <span className="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold flex items-center gap-1 shrink-0">
-                    <Icon name="verified" filled size={13} /> ASSINADA
-                  </span>
+                  <a
+                    href={`/api/paciente/receituario/${a.id}`}
+                    className="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold flex items-center gap-1 shrink-0"
+                    title="Baixar PDF assinado"
+                  >
+                    <Icon name="download" size={13} /> ASSINADA
+                  </a>
                 ) : a.assinaturaIcpStatus === "AGUARDANDO_ASSINATURA" ? (
                   <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-700 text-[11px] font-bold flex items-center gap-1 shrink-0">
                     <Icon name="hourglass_top" size={13} /> AGUARDANDO

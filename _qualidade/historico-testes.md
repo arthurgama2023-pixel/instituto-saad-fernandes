@@ -8,6 +8,28 @@ Regra: teste ✅ numa entrada e ❌ na seguinte = REGRESSÃO (algo antigo quebro
 > em vez de contagem de testes. Ver `mapa-cobertura.md`.
 
 ---
+## 2026-08-06 — Download do receituário assinado (Clicksign)
+- Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
+- Descoberta ao vivo: o link de download do documento assinado
+  (`data.links.files.signed`, no GET de um documento) é uma URL pré-assinada
+  da AWS S3 que expira em ~5 minutos — por isso NÃO fica salva no banco.
+  `src/lib/clicksign.ts#buscarArquivoAssinado` busca fresca a cada pedido.
+- GET /api/paciente/receituario/[appointmentId]: valida que a consulta é do
+  paciente logado e que `assinaturaIcpStatus === "ASSINADO"` antes de buscar
+  o link e redirecionar (307). Sem isso, 409 com mensagem clara.
+- Botão de download aparece em duas telas do paciente, só quando assinado:
+  `/paciente/consultas/[id]` (botão) e `/paciente/exames` (badge ASSINADA
+  virou link).
+- Verificação ao vivo: acessei a rota direto pra uma consulta ainda
+  "AGUARDANDO_ASSINATURA" → bloqueou corretamente com 409 e mensagem
+  ("Este receituário ainda não foi assinado"). Não deu pra testar o caminho
+  feliz (download de verdade) pelo mesmo motivo já registrado: ninguém tem
+  certificado ICP-Brasil real pra completar uma assinatura no sandbox.
+- Regressões: nenhuma (páginas do paciente renderizam normal, sem crash, com
+  o registro ainda "aguardando").
+- Branch: `feat/smart-doctor/assinatura-icp-receituario`
+
+---
 ## 2026-08-06 — Assinatura digital ICP-Brasil no receituário especial (REAL, via Clicksign)
 - Testes: **sem suíte** · `npx tsc --noEmit` ✅ (0 erros)
 - Substitui a versão simulada (entrada anterior) por integração real com a API

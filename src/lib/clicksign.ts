@@ -9,7 +9,14 @@
 const BASE_URL = process.env.CLICKSIGN_API_BASE_URL ?? "https://sandbox.clicksign.com";
 const TOKEN = process.env.CLICKSIGN_API_TOKEN;
 
-type JsonApiDoc = { data: { id: string; type: string; attributes?: Record<string, unknown> } };
+type JsonApiDoc = {
+  data: {
+    id: string;
+    type: string;
+    attributes?: Record<string, unknown>;
+    links?: { files?: { original?: string; signed?: string } };
+  };
+};
 
 async function clicksignFetch(path: string, init?: RequestInit): Promise<JsonApiDoc> {
   if (!TOKEN) throw new Error("CLICKSIGN_API_TOKEN não configurado.");
@@ -130,4 +137,13 @@ export async function ativarEnvelope(envelopeId: string): Promise<void> {
       data: { id: envelopeId, type: "envelopes", attributes: { status: "running" } },
     }),
   });
+}
+
+// O link de download NÃO dá pra guardar no banco: é uma URL pré-assinada da
+// AWS que expira em ~5 minutos (confirmado testando ao vivo). Por isso busca
+// sempre na hora, nunca persiste — se não tiver terminado de assinar ainda,
+// só existe o arquivo original, sem a versão "signed".
+export async function buscarArquivoAssinado(envelopeId: string, documentId: string): Promise<string | null> {
+  const r = await clicksignFetch(`/api/v3/envelopes/${envelopeId}/documents/${documentId}`);
+  return r.data.links?.files?.signed ?? null;
 }

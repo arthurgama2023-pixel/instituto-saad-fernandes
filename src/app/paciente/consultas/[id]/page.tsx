@@ -120,6 +120,12 @@ export default function ProntuarioPage({ params }: { params: Promise<{ id: strin
                       <dd>{appt.assinaturaIcpEm ? new Date(appt.assinaturaIcpEm).toLocaleString("pt-BR") : "—"}</dd>
                     </div>
                   </dl>
+                  <a
+                    href={`/api/paciente/receituario/${appt.id}`}
+                    className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-on-secondary text-label-md font-label-md active:scale-95 transition-transform"
+                  >
+                    <Icon name="download" size={18} /> Baixar receituário assinado (PDF)
+                  </a>
                   <p className="text-[11px] font-body-sm text-on-surface-variant mt-3 pt-3 border-t border-outline-variant/40">
                     Assinado via Clicksign com certificado digital ICP-Brasil do médico.
                   </p>
