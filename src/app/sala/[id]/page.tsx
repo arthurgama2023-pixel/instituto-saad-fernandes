@@ -4,6 +4,7 @@ import { use, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@/components/brand/Icon";
 import { usePatient } from "@/lib/patient-data";
+import { ProntuarioDrawer } from "./ProntuarioDrawer";
 
 // Servidor Jitsi público — grátis, sem conta/token. Trocável por um Jitsi
 // self-hosted no futuro mudando só esta constante.
@@ -68,6 +69,7 @@ export default function SalaPage({ params }: { params: Promise<{ id: string }> }
   // Separado de callState: o iframe do Jitsi já fica VISÍVEL antes disso, pra
   // mostrar a própria tela dele (permissão de câmera, "entrar na sala" etc.).
   const [entrou, setEntrou] = useState(false);
+  const [prontuarioAberto, setProntuarioAberto] = useState(false);
 
   const appt = data ? [...data.upcoming, ...data.past].find((a) => a.id === id) : undefined;
   const remotoSub = comoMedico ? "Paciente" : (appt?.especialidade ?? "Consulta");
@@ -206,6 +208,26 @@ export default function SalaPage({ params }: { params: Promise<{ id: string }> }
             Consulta em andamento · {cronometro} · {remotoSub}
           </span>
         </div>
+      )}
+
+      {comoMedico && callState === "ativa" && doctorId && !prontuarioAberto && (
+        <button
+          onClick={() => setProntuarioAberto(true)}
+          aria-label="Abrir prontuário"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1 px-3 py-3 rounded-2xl bg-black/40 text-white active:scale-95 transition-transform"
+        >
+          <Icon name="clinical_notes" size={22} />
+          <span className="text-[10px] font-label-md">Prontuário</span>
+        </button>
+      )}
+
+      {comoMedico && doctorId && (
+        <ProntuarioDrawer
+          appointmentId={id}
+          doctorId={doctorId}
+          aberto={prontuarioAberto}
+          onClose={() => setProntuarioAberto(false)}
+        />
       )}
     </main>
   );

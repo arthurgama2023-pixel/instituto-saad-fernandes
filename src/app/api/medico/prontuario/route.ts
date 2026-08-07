@@ -11,6 +11,26 @@ const Body = z.object({
   condutas: z.string().trim().max(4000).optional().default(""),
 });
 
+/** Carrega o prontuário atual da consulta (para abrir o painel já preenchido). */
+export async function GET(req: NextRequest) {
+  const appointmentId = req.nextUrl.searchParams.get("appointmentId") ?? "";
+  const doctorId = req.nextUrl.searchParams.get("doctorId") ?? "";
+  if (!appointmentId || !doctorId) {
+    return NextResponse.json({ error: "parâmetros ausentes" }, { status: 400 });
+  }
+
+  const appt = await db.appointment.findUnique({ where: { id: appointmentId } });
+  if (!appt || appt.doctorId !== doctorId) {
+    return NextResponse.json({ error: "Consulta não encontrada para este médico." }, { status: 404 });
+  }
+
+  return NextResponse.json({
+    resumoClinico: appt.resumoClinico ?? "",
+    condutas: appt.condutas ?? "",
+    prontuarioEmAt: appt.prontuarioEmAt?.toISOString() ?? null,
+  });
+}
+
 export async function POST(req: NextRequest) {
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
