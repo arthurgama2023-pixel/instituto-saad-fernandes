@@ -29,6 +29,7 @@ model User {
   documentos    Documento[]      @relation("PatientDocumentos")
   addresses     Address[]
   paymentCards  PaymentCard[]
+  authTokens    AuthToken[]
   doctor        Doctor?
 }
 
@@ -259,6 +260,23 @@ model PatientEmailLoginToken {
   createdAt DateTime @default(now())
 
   @@index([token])
+}
+
+// Token de sessão para clientes que não têm cookie jar (app mobile React
+// Native / Expo). O login por OTP emite um token opaco aqui; o app o guarda no
+// secure-store e envia em "Authorization: Bearer <token>". A web continua
+// usando o cookie httpOnly (sd_uid) — os dois caminhos convivem em getPatientUser().
+model AuthToken {
+  id        String   @id @default(cuid())
+  token     String   @unique // opaco, aleatório (não é o userId em claro)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 // Documento clínico enviado pelo médico ao paciente: receita, atestado, exame

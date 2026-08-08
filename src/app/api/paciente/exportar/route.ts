@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { db } from "@/lib/db";
 
 /** Exporta os dados do paciente (LGPD — direito de portabilidade) como JSON. */
 export async function GET() {
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return new Response("nao_autenticado", { status: 401 });
 
   const [appointments, documentos, addresses, paymentCards] = await Promise.all([
     db.appointment.findMany({

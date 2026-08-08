@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { getDocumento, marcarLido, TIPO_LABEL } from "@/modules/documents/service";
 
 /** Documento completo do paciente da sessão. Marca como lido ao abrir. */
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
   const doc = await getDocumento(id);
   if (!doc || doc.patientId !== user.id) {
     return NextResponse.json({ error: "documento não encontrado" }, { status: 404 });

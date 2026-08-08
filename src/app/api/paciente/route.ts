@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { ensureSeeded } from "@/modules/catalog/seed";
 import { ensurePatientDemo } from "@/modules/demo/seed-demo";
 import { listSpecialties } from "@/modules/catalog/service";
@@ -8,7 +8,8 @@ import { db } from "@/lib/db";
 
 export async function GET() {
   await ensureSeeded();
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
   await ensurePatientDemo(user.id);
 
   const appts = await myAppointments(user.id);

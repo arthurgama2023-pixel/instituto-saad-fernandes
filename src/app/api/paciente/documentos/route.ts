@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { listarDocumentosPaciente } from "@/modules/documents/service";
 
 /** Lista os documentos do paciente da sessão atual. */
 export async function GET() {
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
   const docs = await listarDocumentosPaciente(user.id);
   return NextResponse.json({
     documentos: docs.map((d) => ({

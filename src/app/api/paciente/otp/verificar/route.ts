@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyPatientOtp } from "@/modules/auth/patient-otp";
 import { setPatientSession } from "@/lib/session";
+import { issueAuthToken } from "@/lib/auth-token";
 
 const Body = z.object({
   whatsapp: z.string().trim().min(8).max(20),
@@ -19,5 +20,7 @@ export async function POST(req: NextRequest) {
   }
 
   await setPatientSession(res.userId);
-  return NextResponse.json({ ok: true, userId: res.userId, nome: res.nome });
+  // Token Bearer para o app mobile (a web ignora e usa o cookie acima).
+  const token = await issueAuthToken(res.userId);
+  return NextResponse.json({ ok: true, userId: res.userId, nome: res.nome, token });
 }

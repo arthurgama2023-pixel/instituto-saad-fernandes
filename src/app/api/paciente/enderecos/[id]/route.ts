@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { db } from "@/lib/db";
 
 /** Remove um endereço do paciente logado (só se for dele). */
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
 
   const endereco = await db.address.findUnique({ where: { id } });
   if (!endereco || endereco.userId !== user.id) {
@@ -26,7 +27,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
 /** Define este endereço como principal. */
 export async function PATCH(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
 
   const endereco = await db.address.findUnique({ where: { id } });
   if (!endereco || endereco.userId !== user.id) {

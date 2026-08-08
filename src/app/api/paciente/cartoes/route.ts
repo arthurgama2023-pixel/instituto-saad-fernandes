@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { db } from "@/lib/db";
 
 export async function GET() {
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
   const cartoes = await db.paymentCard.findMany({
     where: { userId: user.id },
     orderBy: [{ principal: "desc" }, { createdAt: "asc" }],
@@ -37,7 +38,8 @@ export async function POST(req: NextRequest) {
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Confira os dados do cartão." }, { status: 400 });
 
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
   const d = parsed.data;
   const digits = d.numero.replace(/\D/g, "");
 

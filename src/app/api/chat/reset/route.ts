@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { db } from "@/lib/db";
 import { getOrCreateConversation, listMessages } from "@/modules/conversation/service";
 import { WELCOME, WELCOME_CHIPS } from "@/modules/conversation/welcome";
@@ -8,7 +8,8 @@ import { aiMode } from "@/modules/ai";
 // Reinicia a conversa do paciente demo: apaga as mensagens, zera o estado da
 // máquina do parser local e recria a saudação. NÃO mexe nas consultas.
 export async function POST() {
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
   const conv = await getOrCreateConversation(user.id);
 
   await db.$transaction(async (tx) => {

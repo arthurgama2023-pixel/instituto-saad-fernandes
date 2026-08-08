@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { db } from "@/lib/db";
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
 
   const cartao = await db.paymentCard.findUnique({ where: { id } });
   if (!cartao || cartao.userId !== user.id) {
@@ -23,7 +24,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
 
 export async function PATCH(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
 
   const cartao = await db.paymentCard.findUnique({ where: { id } });
   if (!cartao || cartao.userId !== user.id) {

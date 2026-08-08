@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { normalizePhone } from "@/modules/auth/otp";
 import { db } from "@/lib/db";
 
 /** Dados pessoais do paciente logado. */
 export async function GET() {
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
   return NextResponse.json({
     name: user.name,
     email: user.email ?? "",
@@ -24,7 +25,8 @@ export async function PUT(req: NextRequest) {
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Confira os campos e tente de novo." }, { status: 400 });
 
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
   const d = parsed.data;
 
   // email e phone são @unique — checa se o novo valor já é de outra conta.

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { normalizePhone } from "@/modules/auth/otp";
 import { setPatientSession } from "@/lib/session";
+import { issueAuthToken } from "@/lib/auth-token";
 import { enviarEmailConfirmacaoPaciente } from "@/modules/auth/email-confirmacao-paciente";
 
 const Body = z.object({
@@ -37,5 +38,7 @@ export async function POST(req: NextRequest) {
   await setPatientSession(user.id);
   await enviarEmailConfirmacaoPaciente(user.id);
 
-  return NextResponse.json({ ok: true, nome: user.name });
+  // Token Bearer para o app mobile (a web ignora e usa o cookie).
+  const token = await issueAuthToken(user.id);
+  return NextResponse.json({ ok: true, nome: user.name, token });
 }

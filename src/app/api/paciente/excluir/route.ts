@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDemoUser } from "@/lib/session";
-import { COOKIE } from "@/lib/session";
+import { getPatientUser, COOKIE } from "@/lib/session";
 import { db } from "@/lib/db";
 
 /**
@@ -10,7 +9,8 @@ import { db } from "@/lib/db";
  * registro clínico permanece — por isso não usamos cascade no User inteiro.
  */
 export async function POST() {
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
 
   // Apaga o que é puramente do paciente e não é registro clínico.
   await db.address.deleteMany({ where: { userId: user.id } });

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { simulatePaymentConfirmed } from "@/modules/payments/service";
 import { appointmentSummary } from "@/modules/ai/tools";
 import { addMessage, getOrCreateConversation, listMessages, setState } from "@/modules/conversation/service";
@@ -13,7 +13,8 @@ export async function POST(req: NextRequest) {
   const paymentId = typeof body?.paymentId === "string" ? body.paymentId : "";
   if (!paymentId) return NextResponse.json({ error: "missing paymentId" }, { status: 400 });
 
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
   const conv = await getOrCreateConversation(user.id);
 
   const payment = await simulatePaymentConfirmed(paymentId);

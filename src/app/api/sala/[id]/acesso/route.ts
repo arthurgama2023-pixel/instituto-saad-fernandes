@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { db } from "@/lib/db";
 import { getRoomAccess } from "@/modules/video/service";
 
@@ -23,7 +23,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!doctor) return NextResponse.json({ error: "médico não encontrado" }, { status: 404 });
     userName = doctor.user.name;
   } else {
-    const user = await getDemoUser();
+    const user = await getPatientUser();
+    if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
     userName = user.name;
   }
 

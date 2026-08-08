@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { ensureSeeded } from "@/modules/catalog/seed";
 import { getOrCreateConversation, listMessages } from "@/modules/conversation/service";
 import { WELCOME, WELCOME_CHIPS } from "@/modules/conversation/welcome";
@@ -18,7 +18,8 @@ async function serialize(conversationId: string) {
 
 export async function GET() {
   await ensureSeeded();
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
   const conv = await getOrCreateConversation(user.id);
   // Transação: re-checa dentro do lock p/ não duplicar a boas-vindas em GETs
   // concorrentes (React StrictMode dispara o efeito 2x em dev).
@@ -48,7 +49,8 @@ export async function POST(req: NextRequest) {
   const text = typeof body?.text === "string" ? body.text.trim().slice(0, 2000) : "";
   if (!text) return NextResponse.json({ error: "empty" }, { status: 400 });
 
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
   const convId = await handleIncoming(user.id, text);
   return NextResponse.json({
     userName: user.name,

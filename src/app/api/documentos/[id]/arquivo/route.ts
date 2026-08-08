@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { getArquivo } from "@/modules/documents/service";
 
 /**
@@ -16,7 +16,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   if (comoMedico && comoMedico === doc.doctorId) {
     autorizado = true;
   } else {
-    const user = await getDemoUser();
+    const user = await getPatientUser();
+    if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
     autorizado = user.id === doc.patientId;
   }
   if (!autorizado) return NextResponse.json({ error: "não autorizado" }, { status: 403 });

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getDemoUser } from "@/lib/session";
+import { getPatientUser } from "@/lib/session";
 import { simulatePaymentConfirmed } from "@/modules/payments/service";
 import { currentRequest, markRequestPaid, serializeRequest } from "@/modules/urgency/service";
 
@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
 
   await markRequestPaid(payment.appointmentId);
 
-  const user = await getDemoUser();
+  const user = await getPatientUser();
+  if (!user) return NextResponse.json({ error: "nao_autenticado" }, { status: 401 });
   return NextResponse.json({ chamado: serializeRequest(await currentRequest(user.id)) });
 }
