@@ -12,6 +12,12 @@ export const SESSION_COOKIE_OPTS = {
   path: "/",
 };
 
+/** Grava a sessão de um paciente já autenticado (cadastro ou login por OTP). */
+export async function setPatientSession(userId: string) {
+  const jar = await cookies();
+  jar.set(COOKIE, userId, SESSION_COOKIE_OPTS);
+}
+
 export async function getDemoUser() {
   const jar = await cookies();
   const uid = jar.get(COOKIE)?.value;

@@ -13,27 +13,71 @@ const inputEl =
 
 export default function LoginPaciente() {
   const router = useRouter();
-  const [identificador, setIdentificador] = useState("");
-  const [senha, setSenha] = useState("");
-  const [verSenha, setVerSenha] = useState(false);
-  const [entrando, setEntrando] = useState(false);
+  const [etapa, setEtapa] = useState<"whatsapp" | "codigo">("whatsapp");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [codigo, setCodigo] = useState("");
+  const [nome, setNome] = useState<string | null>(null);
+  const [devCode, setDevCode] = useState<string | null>(null);
+  const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
   // Mensagem quando o login social volta com erro (?erro=... no callback).
   useEffect(() => {
     const e = new URLSearchParams(window.location.search).get("erro");
     if (e === "config") setErro("Login com Google ainda não configurado neste ambiente.");
+    else if (e === "token") setErro("Esse link de confirmação já foi usado ou expirou. Entre com o WhatsApp abaixo.");
     else if (e) setErro("Não foi possível entrar com o Google. Tente novamente.");
   }, []);
 
-  const pode = identificador.trim().length > 2 && senha.length > 0;
-
-  const entrar = (e: React.FormEvent) => {
+  const enviarCodigo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pode) return;
-    setEntrando(true);
-    // Demo: ainda não há verificação de senha — o app usa a sessão por cookie.
-    router.push("/paciente");
+    if (whatsapp.trim().length < 8) return;
+    setCarregando(true);
+    setErro(null);
+    try {
+      const res = await fetch("/api/paciente/otp/enviar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ whatsapp }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setErro(data.error ?? "Não consegui enviar o código.");
+        return;
+      }
+      setNome(data.nome);
+      // MVP sem WhatsApp real conectado: o código vem na resposta pra exibir na tela.
+      setDevCode(data.devCode ?? null);
+      setEtapa("codigo");
+    } catch {
+      setErro("Não consegui enviar o código. Verifique a conexão.");
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const confirmarCodigo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (codigo.trim().length !== 6) return;
+    setCarregando(true);
+    setErro(null);
+    try {
+      const res = await fetch("/api/paciente/otp/verificar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ whatsapp, codigo }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setErro(data.error ?? "Código incorreto ou expirado.");
+        return;
+      }
+      router.push("/paciente");
+    } catch {
+      setErro("Não consegui confirmar o código. Verifique a conexão.");
+    } finally {
+      setCarregando(false);
+    }
   };
 
   return (
@@ -44,14 +88,18 @@ export default function LoginPaciente() {
         </Link>
       </header>
 
-      <form onSubmit={entrar} className="flex-1 flex flex-col px-6">
+      <form onSubmit={etapa === "whatsapp" ? enviarCodigo : confirmarCodigo} className="flex-1 flex flex-col px-6">
         <div className="flex flex-col items-center text-center mt-6 mb-8">
           <div className="mb-8">
             <LogoMark size={72} />
           </div>
-          <h1 className="text-headline-lg font-headline-lg text-primary mb-2">Bem-vindo(a)</h1>
+          <h1 className="text-headline-lg font-headline-lg text-primary mb-2">
+            {etapa === "whatsapp" ? "Bem-vindo(a)" : `Olá, ${nome?.split(" ")[0] ?? ""}`}
+          </h1>
           <p className="text-body-md font-body-md text-on-surface-variant max-w-[300px]">
-            Acesse sua conta para agendar consultas e falar com a Clara.
+            {etapa === "whatsapp"
+              ? "Informe o WhatsApp cadastrado para receber um código de acesso."
+              : `Enviamos um código de 6 dígitos para ${whatsapp}.`}
           </p>
         </div>
 
@@ -62,53 +110,63 @@ export default function LoginPaciente() {
           </div>
         )}
 
-        <div className="space-y-4">
-          <div className={inputWrap}>
-            <Icon name="person" className="text-on-surface-variant" size={22} />
-            <input
-              className={inputEl}
-              value={identificador}
-              onChange={(e) => setIdentificador(e.target.value)}
-              placeholder="E-mail ou CPF"
-              autoComplete="username"
-              aria-label="E-mail ou CPF"
-            />
+        {devCode && etapa === "codigo" && (
+          <div className="mb-4 flex items-start gap-2 rounded-2xl border border-secondary/40 bg-secondary-container/40 px-4 py-3 text-body-sm font-body-sm text-on-secondary-container">
+            <Icon name="info" size={18} className="mt-0.5 shrink-0" />
+            <span>
+              WhatsApp ainda não conectado neste ambiente — seu código de teste é <strong>{devCode}</strong>.
+            </span>
           </div>
+        )}
 
-          <div className={inputWrap}>
-            <Icon name="lock" className="text-on-surface-variant" size={22} />
-            <input
-              className={inputEl}
-              type={verSenha ? "text" : "password"}
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              placeholder="Senha"
-              autoComplete="current-password"
-              aria-label="Senha"
-            />
+        {etapa === "whatsapp" ? (
+          <div className="space-y-4">
+            <div className={inputWrap}>
+              <Icon name="call" className="text-on-surface-variant" size={22} />
+              <input
+                className={inputEl}
+                value={whatsapp}
+                onChange={(e) => setWhatsapp(e.target.value)}
+                placeholder="(11) 99999-9999"
+                autoComplete="tel"
+                inputMode="tel"
+                aria-label="WhatsApp"
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className={inputWrap}>
+              <Icon name="password" className="text-on-surface-variant" size={22} />
+              <input
+                className={`${inputEl} tracking-[0.3em] text-center`}
+                value={codigo}
+                onChange={(e) => setCodigo(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="000000"
+                inputMode="numeric"
+                aria-label="Código de 6 dígitos"
+              />
+            </div>
             <button
               type="button"
-              onClick={() => setVerSenha((v) => !v)}
-              aria-label={verSenha ? "Ocultar senha" : "Mostrar senha"}
-              className="text-on-surface-variant hover:text-primary"
+              onClick={() => {
+                setEtapa("whatsapp");
+                setCodigo("");
+                setErro(null);
+              }}
+              className="text-body-sm font-body-sm text-secondary font-semibold"
             >
-              <Icon name={verSenha ? "visibility_off" : "visibility"} size={22} />
+              Trocar número
             </button>
           </div>
-
-          <div className="flex justify-end">
-            <button type="button" className="text-body-sm font-body-sm text-secondary font-semibold">
-              Esqueci minha senha
-            </button>
-          </div>
-        </div>
+        )}
 
         <button
           type="submit"
-          disabled={!pode || entrando}
+          disabled={carregando || (etapa === "whatsapp" ? whatsapp.trim().length < 8 : codigo.length !== 6)}
           className="sd-aurora w-full h-14 rounded-2xl text-label-lg font-label-lg mt-6 active:scale-[0.98] transition-transform disabled:opacity-40 disabled:active:scale-100 shadow-lg"
         >
-          {entrando ? "ENTRANDO…" : "ENTRAR"}
+          {carregando ? "AGUARDE…" : etapa === "whatsapp" ? "ENVIAR CÓDIGO" : "ENTRAR"}
         </button>
 
         <div className="flex items-center gap-3 my-6">
@@ -131,7 +189,7 @@ export default function LoginPaciente() {
         <div className="text-center py-6 mt-auto">
           <p className="text-body-sm font-body-sm text-on-surface-variant">
             Ainda não tem conta?{" "}
-            <Link href="/paciente" className="text-secondary font-semibold">
+            <Link href="/cadastro" className="text-secondary font-semibold">
               Cadastre-se
             </Link>
           </p>

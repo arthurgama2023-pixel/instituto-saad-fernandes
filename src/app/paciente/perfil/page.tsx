@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Icon } from "@/components/brand/Icon";
 import { Avatar } from "@/components/brand/Avatar";
 import { InstallApp } from "@/components/brand/InstallApp";
@@ -7,11 +8,12 @@ import { ErrorState, Loading } from "@/components/brand/ui";
 import { usePatient } from "@/lib/patient-data";
 
 const MENU = [
-  { icon: "person", label: "Dados pessoais" },
-  { icon: "location_on", label: "Endereços" },
-  { icon: "credit_card", label: "Cartões de pagamento" },
-  { icon: "lock", label: "Segurança" },
-  { icon: "visibility_off", label: "Privacidade" },
+  { icon: "monitor_heart", label: "Doenças crônicas e alergias", href: "/paciente/perfil/saude" },
+  { icon: "person", label: "Dados pessoais", href: "/paciente/perfil/dados" },
+  { icon: "location_on", label: "Endereços", href: "/paciente/perfil/enderecos" },
+  { icon: "credit_card", label: "Cartões de pagamento", href: "/paciente/perfil/cartoes" },
+  { icon: "lock", label: "Segurança", href: "/paciente/perfil/seguranca" },
+  { icon: "visibility_off", label: "Privacidade", href: "/paciente/perfil/privacidade" },
 ];
 
 export default function PerfilPage() {
@@ -39,18 +41,31 @@ export default function PerfilPage() {
         <InstallApp />
 
         <nav className="bg-surface-container-lowest rounded-xl brand-shadow overflow-hidden border border-outline-variant/30 flex flex-col">
-          {MENU.map((item, i) => (
-            <div key={item.label}>
-              {i > 0 && <div className="h-px bg-outline-variant/30 mx-4" />}
-              <button className="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+          {MENU.map((item, i) => {
+            const content = (
+              <>
                 <span className="flex items-center gap-4">
                   <Icon name={item.icon} className="text-on-surface-variant group-hover:text-primary" />
                   <span className="text-label-lg font-label-lg text-on-surface">{item.label}</span>
                 </span>
                 <Icon name="chevron_right" className="text-outline-variant" />
-              </button>
-            </div>
-          ))}
+              </>
+            );
+            return (
+              <div key={item.label}>
+                {i > 0 && <div className="h-px bg-outline-variant/30 mx-4" />}
+                {item.href ? (
+                  <Link href={item.href} className="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+                    {content}
+                  </Link>
+                ) : (
+                  <button className="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+                    {content}
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </nav>
 
         <p className="text-body-sm font-body-sm text-on-surface-variant text-center px-2">
@@ -58,10 +73,13 @@ export default function PerfilPage() {
           do CFM, mesmo após a exclusão da conta.
         </p>
 
-        <button className="w-full py-4 px-6 border border-error text-error text-label-lg font-label-lg rounded-xl hover:bg-error-container transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+        <Link
+          href="/api/auth/logout"
+          className="w-full py-4 px-6 border border-error text-error text-label-lg font-label-lg rounded-xl hover:bg-error-container transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+        >
           <Icon name="logout" size={20} />
           SAIR DA CONTA
-        </button>
+        </Link>
       </main>
     </>
   );

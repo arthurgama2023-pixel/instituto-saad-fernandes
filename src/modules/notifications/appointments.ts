@@ -14,7 +14,7 @@ function lembreteLabel(offsetMin?: number): { curto: string; frase: string } {
 
 const APP_NAME = "Smart Doctor";
 
-function layout(titulo: string, corpo: string): string {
+export function layout(titulo: string, corpo: string): string {
   return `
   <div style="font-family:Arial,Helvetica,sans-serif;max-width:520px;margin:0 auto;color:#0a1420">
     <div style="background:#07845a;color:#fff;padding:20px 24px;border-radius:12px 12px 0 0">
@@ -30,7 +30,7 @@ function layout(titulo: string, corpo: string): string {
   </div>`;
 }
 
-function linha(label: string, valor: string): string {
+export function linha(label: string, valor: string): string {
   return `<p style="margin:6px 0;font-size:14px"><strong>${label}:</strong> ${valor}</p>`;
 }
 

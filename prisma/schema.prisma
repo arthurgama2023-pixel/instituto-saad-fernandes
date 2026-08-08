@@ -19,11 +19,54 @@ model User {
   googleId      String?          @unique // "sub" do Google (id estável da conta)
   image         String? // URL do avatar do Google
   createdAt     DateTime         @default(now())
+  // Preenchido pelo próprio paciente em Perfil → Saúde. Texto livre, visível
+  // para o médico antes/durante a consulta (prontuário e sala de vídeo).
+  condicoesCronicas String?
+  alergias          String?
   conversations Conversation[]
   appointments  Appointment[]    @relation("PatientAppointments")
   urgencies     UrgencyRequest[] @relation("PatientUrgencies")
   documentos    Documento[]      @relation("PatientDocumentos")
+  addresses     Address[]
+  paymentCards  PaymentCard[]
   doctor        Doctor?
+}
+
+// Endereço do paciente (entrega de receita física, atendimento presencial).
+model Address {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label      String   @default("Casa") // rótulo livre: Casa, Trabalho…
+  cep        String
+  logradouro String
+  numero     String
+  complemento String?
+  bairro     String
+  cidade     String
+  uf         String
+  principal  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Cartão de pagamento — DEMO. Guarda só o que é seguro exibir (bandeira +
+// últimos 4 dígitos + validade + nome). NUNCA o número completo nem o CVV:
+// num app real isso vai para o gateway (tokenização), nunca para o nosso banco.
+model PaymentCard {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brand     String // Visa, Mastercard, Elo…
+  last4     String // últimos 4 dígitos
+  holder    String // nome impresso
+  expMonth  Int
+  expYear   Int
+  principal Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Specialty {
@@ -190,6 +233,32 @@ model OtpCode {
   createdAt DateTime @default(now())
 
   @@index([phone, createdAt])
+}
+
+// Token do e-mail de confirmação enviado no cadastro do médico. Clicar no link
+// loga direto (sem precisar do OTP por WhatsApp) — vale uma vez, expira em 24h.
+model EmailLoginToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  doctorId  String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([token])
+}
+
+// Token do e-mail de confirmação enviado no cadastro do paciente. Clicar no
+// link loga direto (sem precisar do OTP por WhatsApp) — vale uma vez, expira em 24h.
+model PatientEmailLoginToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([token])
 }
 
 // Documento clínico enviado pelo médico ao paciente: receita, atestado, exame

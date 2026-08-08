@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "parâmetros ausentes" }, { status: 400 });
   }
 
-  const appt = await db.appointment.findUnique({ where: { id: appointmentId } });
+  const appt = await db.appointment.findUnique({ where: { id: appointmentId }, include: { patient: true } });
   if (!appt || appt.doctorId !== doctorId) {
     return NextResponse.json({ error: "Consulta não encontrada para este médico." }, { status: 404 });
   }
@@ -28,6 +28,8 @@ export async function GET(req: NextRequest) {
     resumoClinico: appt.resumoClinico ?? "",
     condutas: appt.condutas ?? "",
     prontuarioEmAt: appt.prontuarioEmAt?.toISOString() ?? null,
+    condicoesCronicas: appt.patient.condicoesCronicas ?? "",
+    alergias: appt.patient.alergias ?? "",
   });
 }
 

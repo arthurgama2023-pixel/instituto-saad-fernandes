@@ -7,6 +7,7 @@ import { LogoMark } from "@/components/LogoMark";
 import { UrgencyInbox } from "@/components/UrgencyInbox";
 import { Icon } from "@/components/brand/Icon";
 import { CertificadoUploader } from "./CertificadoUploader";
+import { PerfilEditor } from "./PerfilEditor";
 
 const money = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const timeLabel = (iso: string) => new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
@@ -18,7 +19,7 @@ const NAV: [string, string, string][] = [
   ["agenda", "calendar_month", "Agenda"],
   ["pacientes", "group", "Pacientes"],
   ["financeiro", "account_balance_wallet", "Financeiro"],
-  ["config", "settings", "Configurações"],
+  ["config", "person", "Meu perfil"],
 ];
 
 const card = "bg-surface-container-lowest rounded-xl border border-outline-variant/50 brand-shadow";
@@ -104,14 +105,14 @@ export default async function MedicoPanel({
         {tab === "agenda" && <AgendaView data={data} />}
         {tab === "pacientes" && <Pacientes data={data} />}
         {tab === "financeiro" && <Financeiro data={data} />}
-        {tab === "config" && <Config data={data} />}
+        {tab === "config" && <Config />}
       </main>
     </div>
   );
 }
 
 function tabTitle(t: string) {
-  return { dashboard: "Dashboard", agenda: "Agenda", pacientes: "Pacientes", financeiro: "Financeiro", config: "Configurações" }[t] ?? "Painel";
+  return { dashboard: "Dashboard", agenda: "Agenda", pacientes: "Pacientes", financeiro: "Financeiro", config: "Meu perfil" }[t] ?? "Painel";
 }
 
 type Data = NonNullable<Awaited<ReturnType<typeof doctorPanel>>>;
@@ -307,27 +308,10 @@ function Financeiro({ data }: { data: Data }) {
   );
 }
 
-function Config({ data }: { data: Data }) {
-  const rows: [string, React.ReactNode][] = [
-    ["Nome", data.doctor.name],
-    ["Especialidade", `${data.doctor.specialtyIcon} ${data.doctor.specialty}`],
-    ["CRM", data.doctor.crm],
-    ["Valor da consulta", money(data.doctor.priceCents)],
-  ];
+function Config() {
   return (
     <div className="space-y-8">
-      <section className="space-y-3">
-        <h3 className="text-headline-sm font-headline-sm text-primary mb-1">Perfil público</h3>
-        <div className={`${card} divide-y divide-outline-variant/50`}>
-          {rows.map(([k, v]) => (
-            <div key={k} className="flex items-center justify-between gap-4 px-5 py-4">
-              <span className="text-body-md font-body-md text-on-surface-variant">{k}</span>
-              <span className="text-label-lg font-label-lg text-primary text-right">{v}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
+      <PerfilEditor />
       <CertificadoUploader />
     </div>
   );

@@ -37,6 +37,8 @@ export async function GET() {
     upcoming,
     past,
     specialties: specialties.map((s) => ({ slug: s.slug, name: s.name, icon: s.icon })),
+    condicoesCronicas: user.condicoesCronicas ?? "",
+    alergias: user.alergias ?? "",
     healthSummary:
       past.length > 0
         ? `${past.length + upcoming.length} consulta(s) no seu histórico. ${

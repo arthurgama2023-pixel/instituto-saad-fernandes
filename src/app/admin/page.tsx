@@ -3,6 +3,7 @@ import { ensureDemoData } from "@/modules/demo/seed-demo";
 import { adminOverview, listDoctorsAdmin } from "@/modules/admin/service";
 import { LogoMark } from "@/components/LogoMark";
 import { Icon } from "@/components/brand/Icon";
+import { ApproveRow } from "./ApproveRow";
 
 const money = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const initials = (n: string) => n.replace(/^(dra?\.?)\s+/i, "").split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
@@ -142,28 +143,6 @@ function Funil({ funil }: { funil: Overview["funil"] }) {
   );
 }
 
-function ApproveRow({ name, sub }: { name: string; sub: string }) {
-  return (
-    <div className="flex items-center gap-3 py-3 border-b border-outline-variant/40 last:border-0">
-      <span className="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center text-label-md font-label-md shrink-0">
-        {initials(name)}
-      </span>
-      <div className="flex-1 min-w-0">
-        <div className="text-label-lg font-label-lg text-primary truncate">{name}</div>
-        <div className="text-body-sm font-body-sm text-on-surface-variant truncate">{sub}</div>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <button className="sd-aurora h-9 px-4 rounded-full text-label-md font-label-md active:scale-95 transition-transform">
-          Aprovar
-        </button>
-        <button className="h-9 px-4 rounded-full border border-error/60 text-error text-label-md font-label-md hover:bg-error-container/40 transition-colors">
-          Recusar
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function Visao({ overview }: { overview: Overview }) {
   const { kpis, funil, especialidades, pendentes } = overview;
   const conv = funil.conversas > 0 ? Math.min(100, Math.round((funil.realizadas / funil.conversas) * 100)) : 0;
@@ -206,7 +185,7 @@ function Visao({ overview }: { overview: Overview }) {
             {pendentes.length === 0 ? (
               <p className="text-body-md font-body-md text-on-surface-variant py-4 text-center">Nenhum médico pendente 🎉</p>
             ) : (
-              pendentes.map((d) => <ApproveRow key={d.id} name={d.name} sub={`${d.specialty} · ${d.crm}`} />)
+              pendentes.map((d) => <ApproveRow key={d.id} id={d.id} name={d.name} sub={`${d.specialty} · ${d.crm}`} />)
             )}
           </SectionCard>
           <SectionCard title="⚠ Alertas">
@@ -245,7 +224,7 @@ function Medicos({ overview, doctors }: { overview: Overview; doctors: Doctors }
       {overview.pendentes.length > 0 && (
         <SectionCard title="Aprovação pendente" aside={String(overview.pendentes.length)}>
           {overview.pendentes.map((d) => (
-            <ApproveRow key={d.id} name={d.name} sub={`${d.specialty} · ${d.crm} · documentos enviados`} />
+            <ApproveRow key={d.id} id={d.id} name={d.name} sub={`${d.specialty} · ${d.crm} · documentos enviados`} />
           ))}
         </SectionCard>
       )}

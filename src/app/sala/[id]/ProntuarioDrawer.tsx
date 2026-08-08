@@ -26,6 +26,8 @@ export function ProntuarioDrawer({
   const [carregando, setCarregando] = useState(true);
   const [resumo, setResumo] = useState("");
   const [condutas, setCondutas] = useState("");
+  const [condicoesCronicas, setCondicoesCronicas] = useState("");
+  const [alergias, setAlergias] = useState("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const carregouRef = useRef(false);
@@ -39,6 +41,8 @@ export function ProntuarioDrawer({
       .then((d) => {
         setResumo(d.resumoClinico ?? "");
         setCondutas(d.condutas ?? "");
+        setCondicoesCronicas(d.condicoesCronicas ?? "");
+        setAlergias(d.alergias ?? "");
       })
       .catch(() => {})
       .finally(() => setCarregando(false));
@@ -110,6 +114,27 @@ export function ProntuarioDrawer({
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+            {(alergias || condicoesCronicas) && (
+              <div className="rounded-xl border border-error/40 bg-error/10 p-4 space-y-2">
+                {alergias && (
+                  <p className="text-white text-body-sm font-body-sm flex items-start gap-2">
+                    <Icon name="warning" size={16} className="shrink-0 mt-0.5 text-error" />
+                    <span>
+                      <strong>Alergias:</strong> {alergias}
+                    </span>
+                  </p>
+                )}
+                {condicoesCronicas && (
+                  <p className="text-white text-body-sm font-body-sm flex items-start gap-2">
+                    <Icon name="monitor_heart" size={16} className="shrink-0 mt-0.5 text-error" />
+                    <span>
+                      <strong>Doenças crônicas:</strong> {condicoesCronicas}
+                    </span>
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="space-y-2">
               <label htmlFor="drawer-resumo" className="text-white text-label-lg font-label-lg">Resumo clínico</label>
               <textarea

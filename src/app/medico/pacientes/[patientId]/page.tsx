@@ -78,6 +78,27 @@ export default async function ProntuarioPaciente({
           para o paciente na tela da consulta.
         </div>
 
+        {(patient.condicoesCronicas || patient.alergias) && (
+          <div className="rounded-lg border border-error/40 bg-error-container/20 p-4 mb-6 space-y-2">
+            {patient.alergias && (
+              <p className="text-body-sm font-body-sm text-on-error-container flex items-start gap-2">
+                <Icon name="warning" size={18} className="shrink-0 mt-0.5 text-error" />
+                <span>
+                  <strong>Alergias:</strong> {patient.alergias}
+                </span>
+              </p>
+            )}
+            {patient.condicoesCronicas && (
+              <p className="text-body-sm font-body-sm text-on-error-container flex items-start gap-2">
+                <Icon name="monitor_heart" size={18} className="shrink-0 mt-0.5 text-error" />
+                <span>
+                  <strong>Doenças crônicas:</strong> {patient.condicoesCronicas}
+                </span>
+              </p>
+            )}
+          </div>
+        )}
+
         <ProntuarioEditor doctorId={doctorId} registros={registros} />
 
         <DocumentosEditor doctorId={doctorId} patientId={patientId} />

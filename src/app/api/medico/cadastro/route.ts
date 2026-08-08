@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { ensureSeeded } from "@/modules/catalog/seed";
+import { normalizePhone } from "@/modules/auth/otp";
+import { enviarEmailConfirmacaoMedico } from "@/modules/auth/email-confirmacao";
 import { validarCertificado } from "@/modules/signing/icp";
 import { cifrar, cifrarTexto, criptografiaHabilitada } from "@/modules/signing/cripto";
 
@@ -118,7 +120,7 @@ export async function POST(req: NextRequest) {
 
   // Mesma proteção do e-mail: telefone é @unique no schema — duplicado vira
   // null em vez de derrubar o cadastro com um erro de banco.
-  const phoneNorm = d.whatsapp.replace(/\D/g, "") || null;
+  const phoneNorm = d.whatsapp.trim() ? normalizePhone(d.whatsapp) : null;
   const phoneLivre = phoneNorm && !(await db.user.findUnique({ where: { phone: phoneNorm } })) ? phoneNorm : null;
 
   const user = await db.user.create({
@@ -129,7 +131,7 @@ export async function POST(req: NextRequest) {
       role: "DOCTOR",
     },
   });
-  await db.doctor.create({
+  const doctor = await db.doctor.create({
     data: {
       userId: user.id,
       crm,
@@ -145,6 +147,8 @@ export async function POST(req: NextRequest) {
       certEm: certPfxCifrado ? new Date() : null,
     },
   });
+
+  await enviarEmailConfirmacaoMedico(doctor.id);
 
   return NextResponse.json({ ok: true, nome, especialidade: specialty.name, certificadoAceito: Boolean(certPfxCifrado) });
 }

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 
-const COOKIE = "sd_doctor";
+export const COOKIE = "sd_doctor";
 
 /** Grava o médico logado (via OTP) num cookie httpOnly. */
 export async function setDoctorSession(doctorId: string) {

@@ -134,10 +134,26 @@ export default function ProntuarioPage({ params }: { params: Promise<{ id: strin
 
             <section className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/20">
               <h4 className="text-label-lg font-label-lg text-primary uppercase tracking-wider mb-4">Alergias</h4>
-              <div className="flex items-center gap-2">
-                <Icon name="error" className="text-error" size={20} />
-                <p className="text-body-md font-body-md text-on-surface-variant">Não informado</p>
-              </div>
+              {data.alergias ? (
+                <p className="text-body-md font-body-md text-on-surface whitespace-pre-line">{data.alergias}</p>
+              ) : (
+                <Link href="/paciente/perfil/saude" className="flex items-center gap-2 text-secondary hover:underline">
+                  <Icon name="error" className="text-error" size={20} />
+                  <span className="text-body-md font-body-md">Não informado — toque para adicionar</span>
+                </Link>
+              )}
+            </section>
+
+            <section className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/20">
+              <h4 className="text-label-lg font-label-lg text-primary uppercase tracking-wider mb-4">Doenças crônicas</h4>
+              {data.condicoesCronicas ? (
+                <p className="text-body-md font-body-md text-on-surface whitespace-pre-line">{data.condicoesCronicas}</p>
+              ) : (
+                <Link href="/paciente/perfil/saude" className="flex items-center gap-2 text-secondary hover:underline">
+                  <Icon name="error" className="text-error" size={20} />
+                  <span className="text-body-md font-body-md">Não informado — toque para adicionar</span>
+                </Link>
+              )}
             </section>
           </div>
         </div>

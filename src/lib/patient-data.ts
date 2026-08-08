@@ -29,6 +29,8 @@ export type PatientData = {
   past: Appt[];
   specialties: Specialty[];
   healthSummary: string;
+  condicoesCronicas: string;
+  alergias: string;
 };
 
 export function usePatient() {
