@@ -8,6 +8,7 @@ import { UrgencyInbox } from "@/components/UrgencyInbox";
 import { Icon } from "@/components/brand/Icon";
 import { CertificadoUploader } from "./CertificadoUploader";
 import { PerfilEditor } from "./PerfilEditor";
+import { AgendaEditor } from "./AgendaEditor";
 
 const money = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const timeLabel = (iso: string) => new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
@@ -219,15 +220,121 @@ function TimelineList({ data }: { data: Data }) {
 }
 
 function AgendaView({ data }: { data: Data }) {
+  const { week } = data;
+  const rangeLabel = `${new Date(week.inicio).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })} – ${new Date(new Date(week.fim).getTime() - 86400000).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}`;
+
+  return (
+    <div className="space-y-10">
+      {/* Informações do médico + resumo da semana */}
+      <section className="space-y-4">
+        <div className={`${card} p-5 flex items-center gap-4 flex-wrap`}>
+          <span className="w-14 h-14 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center text-headline-sm font-headline-sm shrink-0">
+            {initials(data.doctor.name)}
+          </span>
+          <div className="flex-1 min-w-0">
+            <div className="text-headline-sm font-headline-sm text-primary truncate">{data.doctor.name}</div>
+            <div className="text-body-sm font-body-sm text-on-surface-variant">
+              {data.doctor.specialtyIcon} {data.doctor.specialty} · {data.doctor.crm}
+            </div>
+            <div className="flex items-center gap-1 text-body-sm font-body-sm text-secondary mt-0.5">
+              <Icon name="star" filled size={15} className="text-amber-500" /> {data.doctor.rating.toFixed(1)} ·{" "}
+              {money(data.doctor.priceCents)} / consulta
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Kpi icon="event" label="Consultas na semana" value={String(week.total)} hint={rangeLabel} />
+          <Kpi icon="pending_actions" label="A realizar" value={String(week.aRealizar)} />
+          <Kpi icon="task_alt" label="Concluídas" value={String(week.concluidas)} />
+          <Kpi icon="account_balance_wallet" label="Previsto (semana)" value={money(week.faturamentoCents)} hint="bruto" />
+        </div>
+      </section>
+
+      {/* Todas as consultas da semana, agrupadas por dia */}
+      <WeekAppointments data={data} />
+
+      {/* Disponibilidade editável */}
+      <AgendaEditor />
+    </div>
+  );
+}
+
+// Data local YYYY-MM-DD (não UTC): senão consultas à noite no fuso BR caem no
+// dia seguinte ao fatiar o ISO (que é UTC).
+function chaveDiaLocal(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function WeekAppointments({ data }: { data: Data }) {
+  const { week } = data;
+
+  // Agrupa por dia local preservando a ordem cronológica.
+  const grupos = new Map<string, Data["week"]["appts"]>();
+  for (const a of week.appts) {
+    const chave = chaveDiaLocal(a.startsAt);
+    const lista = grupos.get(chave) ?? [];
+    lista.push(a);
+    grupos.set(chave, lista);
+  }
+
+  const hojeChave = chaveDiaLocal(new Date().toISOString());
+
   return (
     <section className="space-y-4">
-      <div className="flex items-baseline justify-between">
-        <h3 className="text-headline-sm font-headline-sm text-primary">Hoje</h3>
-        <span className="text-body-sm font-body-sm text-on-surface-variant capitalize">
-          {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}
-        </span>
-      </div>
-      <TimelineList data={data} />
+      <h3 className="text-headline-sm font-headline-sm text-primary">Consultas da semana</h3>
+
+      {week.appts.length === 0 ? (
+        <div className={`${card} flex flex-col items-center gap-2 py-12 text-center`}>
+          <Icon name="event_available" className="text-on-tertiary-container" size={32} />
+          <p className="text-body-md font-body-md text-on-surface-variant">Nenhuma consulta agendada nesta semana.</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {[...grupos.entries()].map(([chave, appts]) => {
+            const d = new Date(`${chave}T12:00:00`);
+            const ehHoje = chave === hojeChave;
+            return (
+              <div key={chave} className="space-y-2">
+                <div className="flex items-baseline gap-2">
+                  <h4 className="text-label-lg font-label-lg text-primary capitalize">
+                    {d.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}
+                  </h4>
+                  {ehHoje && (
+                    <span className="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold">
+                      hoje
+                    </span>
+                  )}
+                  <span className="text-body-sm font-body-sm text-on-surface-variant">· {appts.length}</span>
+                </div>
+                <div className="space-y-3">
+                  {appts.map((a) => (
+                    <div
+                      key={a.id}
+                      className={`${card} flex items-center gap-4 p-4 ${a.status === "CONCLUIDA" ? "opacity-70" : ""}`}
+                    >
+                      <div className="flex flex-col items-center justify-center w-16 shrink-0">
+                        <span className="text-label-lg font-label-lg text-primary">{timeLabel(a.startsAt)}</span>
+                        <span className="text-[11px] text-on-surface-variant">{a.durationMin} min</span>
+                      </div>
+                      <span className="w-1 self-stretch rounded-full sd-aurora shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-label-lg font-label-lg text-primary truncate">{a.patient}</div>
+                        <div className="flex items-center gap-1 text-body-sm font-body-sm text-on-surface-variant">
+                          <Icon name={a.mode === "VIDEO" ? "videocam" : "person"} size={16} />
+                          {a.mode === "VIDEO" ? "Teleconsulta" : "Presencial"} · {money(a.priceCents)}
+                        </div>
+                      </div>
+                      <ApptStatusPill status={a.status} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }

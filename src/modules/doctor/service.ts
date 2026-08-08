@@ -12,6 +12,15 @@ function dayBounds(base = new Date()) {
   end.setDate(end.getDate() + 1);
   return { start, end };
 }
+// Semana começando na segunda-feira (padrão BR). getDay(): 0=dom..6=sáb.
+function weekBounds(base = new Date()) {
+  const diaSemana = base.getDay();
+  const desdeSegunda = (diaSemana + 6) % 7; // dom→6, seg→0, ter→1…
+  const start = new Date(base.getFullYear(), base.getMonth(), base.getDate() - desdeSegunda);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 7);
+  return { start, end };
+}
 
 export async function listDoctors() {
   const docs = await db.doctor.findMany({
@@ -43,6 +52,19 @@ export async function doctorPanel(doctorId: string) {
   });
 
   const consultasHoje = todayAppts.length;
+
+  // Semana corrente (segunda 00:00 → segunda seguinte 00:00). Inclui CONCLUIDA
+  // pra o médico ver o que já atendeu e o que falta na semana.
+  const { start: weekStart, end: weekEnd } = weekBounds();
+  const weekApptsRaw = await db.appointment.findMany({
+    where: {
+      doctorId,
+      startsAt: { gte: weekStart, lt: weekEnd },
+      status: { in: [...OCCUPYING, "CONCLUIDA"] },
+    },
+    include: { patient: true },
+    orderBy: { startsAt: "asc" },
+  });
 
   // faturamento líquido do mês (bruto − take)
   const monthPayments = await db.payment.findMany({
@@ -129,6 +151,24 @@ export async function doctorPanel(doctorId: string) {
       status: a.status,
       priceCents: a.priceCents,
     })),
+    week: {
+      inicio: weekStart.toISOString(),
+      fim: weekEnd.toISOString(),
+      total: weekApptsRaw.length,
+      concluidas: weekApptsRaw.filter((a) => a.status === "CONCLUIDA").length,
+      aRealizar: weekApptsRaw.filter((a) => a.status !== "CONCLUIDA").length,
+      // Query já traz só CONFIRMADA/AGUARDANDO_PAGAMENTO/CONCLUIDA — soma direta.
+      faturamentoCents: weekApptsRaw.reduce((s, a) => s + a.priceCents, 0),
+      appts: weekApptsRaw.map((a) => ({
+        id: a.id,
+        patient: a.patient.name,
+        startsAt: a.startsAt.toISOString(),
+        durationMin: a.durationMin,
+        status: a.status,
+        mode: a.mode,
+        priceCents: a.priceCents,
+      })),
+    },
     patients: [...patientMap.values()]
       .sort((a, b) => (b.last?.getTime() ?? 0) - (a.last?.getTime() ?? 0))
       .map((p) => ({ id: p.id, name: p.name, last: p.last?.toISOString() ?? null, total: p.total })),
