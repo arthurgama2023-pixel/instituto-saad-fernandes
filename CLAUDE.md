@@ -1,7 +1,9 @@
 # Smart Doctor — notas do projeto
 
 App Next 16 + Prisma 7 (SQLite em dev). Porta **3080** (`npm run dev`).
-Três interfaces: `/paciente` (app do paciente), `/medico`, `/admin`.
+Três interfaces web: `/paciente` (app do paciente), `/medico`, `/admin` — e um
+app mobile Expo em `/mobile` (paciente), que consome esta API (ver seções
+**Sessão** e **App mobile**).
 
 ## Duas camadas de estilo convivendo
 
@@ -100,3 +102,34 @@ painel admin ainda mede o funil da Clara. A tela antiga foi para `_archive/mensa
 `lib/session.ts` cria o paciente demo por cookie e **escreve o cookie**, o que só é
 permitido em route handler. Por isso as telas do paciente são client components que
 consomem `/api/paciente` (hook `lib/patient-data.ts`), em vez de server components.
+
+**Web (cookie) e mobile (Bearer) convivem.** As rotas do paciente usam
+`getPatientUser()` (não mais `getDemoUser` direto): ela tenta primeiro um
+`Authorization: Bearer <token>` e, se não houver, cai no cookie httpOnly de sempre.
+O único caso de `null` é Bearer **presente e inválido** → a rota responde `401`
+(a web nunca vê `null`, porque o cookie auto-cria o demo). Os tokens são opacos,
+guardados no model `AuthToken` (`lib/auth-token.ts`: `issue`/`resolve`/`revoke`,
+TTL 60d, revogáveis); o login (`otp/verificar`, `cadastro`) devolve `token` no JSON
+e `POST /api/paciente/logout` revoga. **Ao criar rota nova do paciente, use
+`getPatientUser()` + guard `401`, nunca `getDemoUser()`** (que ignora o Bearer).
+
+`src/middleware.ts` adiciona CORS **só em dev** (`NODE_ENV !== production`), escopo
+`/api/*`, para o alvo *web* do Expo (localhost:8081) chamar a API. Em produção é
+inerte — o app mobile é nativo e não passa por CORS.
+
+## App mobile (Expo) — `/mobile`
+
+App nativo React Native/Expo (SDK 57, Expo Router), **paciente primeiro**, na pasta
+`/mobile` do monorepo com `node_modules` **próprio** (NÃO usa npm workspaces — quebra
+o Metro por hoisting). Consome a API do Next via Bearer token (ver Sessão).
+
+- `mobile/src/lib/`: `config` (URL da API via `EXPO_PUBLIC_API_URL`, em `mobile/.env`
+  — o celular não enxerga `localhost`, precisa do IP da LAN; ver `.env.example`),
+  `storage` (token: SecureStore no device, localStorage no web), `auth`
+  (`SessionProvider`/`useSession`), `api` (client tipado).
+- Auth do Expo Router = **`Stack.Protected guard={!!token}`** no `src/app/_layout.tsx`.
+- Rodar: `npm run dev` na raiz (3080) + `npx expo start` em `/mobile` (`--web` p/ testar
+  no navegador; Expo Go no celular via QR).
+- **`mobile` está no `exclude` do `tsconfig.json` da raiz** — senão o `next build`
+  tentaria typechecar o app Expo com o alias `@/*` errado e falharia (cada lado tem
+  seu tsconfig e seu `@/*`).
